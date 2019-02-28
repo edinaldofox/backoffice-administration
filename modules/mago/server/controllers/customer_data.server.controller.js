@@ -156,6 +156,8 @@ exports.list = function(req, res) {
   final_where.include = [];
   //end build final where
 
+    if(query.email) qwhere.email = query.email;
+
   DBModel.findAndCountAll(
 
       final_where
