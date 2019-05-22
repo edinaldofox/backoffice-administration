@@ -5,7 +5,9 @@ module.exports = function(sequelize, DataTypes) {
         id: {
             type: DataTypes.INTEGER(11),
             allowNull: false,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true,
+            unique: true
         },
         locale: {
             type: DataTypes.STRING,
@@ -20,6 +22,11 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: false,
             defaultValue: '/files/settings/smallbkg.png'
+        },
+        portrait_background_url: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: '/files/settings/portrait_background.png'
         },
         mobile_logo_url: {
             type: DataTypes.STRING,
@@ -169,6 +176,17 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.STRING,
             defaultValue: "flussonic_token_key",
             allowNull: false
+        },
+        asset_limitations:{
+            type: DataTypes.STRING,
+            defaultValue: '{"client_limit":5,"channel_limit":20,"vod_limit":20}',
+            allowNull: false,
+            get: function () {
+                if(this.getDataValue('asset_limitations')) return JSON.parse(this.getDataValue('asset_limitations'));
+            },
+            set: function (value) {
+                return this.setDataValue('asset_limitations', JSON.stringify(value));
+            }
         }
     }, {
         tableName: 'settings',

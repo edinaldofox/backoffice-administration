@@ -115,7 +115,7 @@ exports.update_user_data = function(req, res) {
 
             models.email_templates.findOne({
                 attributes:['title','content'],
-                where: {template_id: 'new-email' }
+                where: {template_id: 'new-email' , company_id: req.thisuser.company_id}
             }).then(function(template_result) {
 
                 if(!template_result){
@@ -127,20 +127,17 @@ exports.update_user_data = function(req, res) {
 
                 if(result && customer_data.email !== req.body.email){
                     var smtpConfig = {
-                        host: (req.app.locals.settings.smtp_host) ? req.app.locals.settings.smtp_host.split(':')[0] : 'smtp.gmail.com',
-                        port: (req.app.locals.settings.smtp_host) ? Number(req.app.locals.settings.smtp_host.split(':')[1]) : 465,
-                        secure: (req.app.locals.settings.smtp_secure === false) ? req.app.locals.settings.smtp_secure : true,
+                        host: (req.app.locals.backendsettings[req.thisuser.company_id].smtp_host) ? req.app.locals.backendsettings[req.thisuser.company_id].smtp_host.split(':')[0] : 'smtp.gmail.com',
+                        port: (req.app.locals.backendsettings[req.thisuser.company_id].smtp_host) ? Number(req.app.locals.backendsettings[req.thisuser.company_id].smtp_host.split(':')[1]) : 465,
+                        secure: (req.app.locals.backendsettings[req.thisuser.company_id].smtp_secure === false) ? req.app.locals.backendsettings[req.thisuser.company_id].smtp_secure : true,
                         auth: {
-                            user: req.app.locals.settings.email_username,
-                            pass: req.app.locals.settings.email_password
-                        },
-							tls: {
-								rejectUnauthorized: false
-							}	
-						}
+                            user: req.app.locals.backendsettings[req.thisuser.company_id].email_username,
+                            pass: req.app.locals.backendsettings[req.thisuser.company_id].email_password
+                        }
+                    };
                     var smtpTransport = nodemailer.createTransport(smtpConfig);
                     var mailOptions = {
-                        from: req.app.locals.settings.email_address,
+                        from: req.app.locals.backendsettings[req.thisuser.company_id].email_address,
                         to: customer_data.email,
                         subject: 'Email changed', // Subject line
                         // text: email_body, // plaintext body
@@ -213,7 +210,7 @@ exports.update_user_settings = function(req, res) {
  *
  */
 exports.change_password = function(req, res) {
-    var key = req.app.locals.settings.new_encryption_key;
+    var key = req.app.locals.backendsettings[req.thisuser.company_id].new_encryption_key;
     var plaintext_password = (req.auth_obj.appid === '3') ? authentication.decryptPassword(decodeURIComponent(req.body.password), key) : decodeURIComponent(req.body.password);
     var salt = authentication.makesalt();
     var encrypted_password = authentication.encryptPassword(plaintext_password, salt);
@@ -242,7 +239,7 @@ exports.reset_pin = function(req, res) {
 
         models.email_templates.findOne({
             attributes:['title','content'],
-            where: {template_id: 'code-pin-email' }
+            where: {template_id: 'code-pin-email' , company_id: req.thisuser.company_id}
         }).then(function(template_result) {
             var email_body;
             if(!template_result){
@@ -252,17 +249,17 @@ exports.reset_pin = function(req, res) {
                 email_body = content_from_ui.replace(new RegExp('{{result.firstname}}', 'gi'), result.firstname).replace(new RegExp('{{result.lastname}}', 'gi'), result.lastname).replace(new RegExp('{{req.thisuser.pin}}', 'gi'), req.thisuser.pin);
             }
             var smtpConfig = {
-                host: (req.app.locals.settings.smtp_host) ? req.app.locals.settings.smtp_host.split(':')[0] : 'smtp.gmail.com',
-                port: (req.app.locals.settings.smtp_host) ? Number(req.app.locals.settings.smtp_host.split(':')[1]) : 465,
-                secure: (req.app.locals.settings.smtp_secure === false) ? req.app.locals.settings.smtp_secure : true,
+                host: (req.app.locals.backendsettings[req.thisuser.company_id].smtp_host) ? req.app.locals.backendsettings[req.thisuser.company_id].smtp_host.split(':')[0] : 'smtp.gmail.com',
+                port: (req.app.locals.backendsettings[req.thisuser.company_id].smtp_host) ? Number(req.app.locals.backendsettings[req.thisuser.company_id].smtp_host.split(':')[1]) : 465,
+                secure: (req.app.locals.backendsettings[req.thisuser.company_id].smtp_secure === false) ? req.app.locals.backendsettings[req.thisuser.company_id].smtp_secure : true,
                 auth: {
-                    user: req.app.locals.settings.email_username,
-                    pass: req.app.locals.settings.email_password
+                    user: req.app.locals.backendsettings[req.thisuser.company_id].email_username,
+                    pass: req.app.locals.backendsettings[req.thisuser.company_id].email_password
                 }
             };
             var smtpTransport = nodemailer.createTransport(smtpConfig);
             var mailOptions = {
-                from: req.app.locals.settings.email_address,
+                from: req.app.locals.backendsettings[req.thisuser.company_id].email_address,
                 to: result.email,
                 subject: 'Pin information', // Subject line
                 // text: email_body, // plaintext body
@@ -525,8 +522,8 @@ exports.salereport_get = function(req, res) {
 // returns list of genres
 exports.genre = function(req, res) {
     models.genre.findAll({
-        attributes: ['id',['description', 'name'], [sequelize.fn('concat', req.app.locals.settings.assets_url, sequelize.col('icon_url')), 'icon'] ],
-        where: {is_available: true}
+        attributes: ['id',['description', 'name'], [sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, sequelize.col('icon_url')), 'icon'] ],
+        where: {is_available: true, company_id: req.thisuser.company_id}
     }).then(function (result) {
         response.send_res(req, res, result, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
     }).catch(function(error) {
@@ -538,8 +535,8 @@ exports.genre = function(req, res) {
 // returns list of genres GET METHOD
 exports.genre_get = function(req, res) {
     models.genre.findAll({
-        attributes: ['id',['description', 'name'], [sequelize.fn('concat', req.app.locals.settings.assets_url, sequelize.col('icon_url')), 'icon'] ],
-        where: {is_available: true}
+        attributes: ['id',['description', 'name'], [sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, sequelize.col('icon_url')), 'icon'] ],
+        where: {is_available: true, company_id: req.thisuser.company_id}
     }).then(function (result) {
         response.send_res_get(req, res, result, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
     }).catch(function(error) {
@@ -563,7 +560,8 @@ exports.add_channel = function(req, res) {
         description: req.body.description,
         icon_url: '/images/do_not_delete/mago_logo.png',  //TODO: delete
         stream_url: req.body.stream ,
-        isavailable: 1
+        isavailable: 1,
+        company_id: req.thisuser.company_id
     }).then(function (result) {
         var new_channel_number = result.id + 999; //smallest channel number will be 1000 (for id 0). This way conflicts are avoided with normal channel numbers, which are <= 999
         models.my_channels.update(
@@ -596,7 +594,7 @@ exports.channel_list = function(req, res) {
         raw: true
     }).then(function (result) {
         for (var i = 0; i < result.length; i++) {
-            result[i].icon_url = req.app.locals.settings.assets_url + result[i]["genre.icon_url"];
+            result[i].icon_url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url + result[i]["genre.icon_url"];
             delete result[i]["genre.icon_url"];
         }
         response.send_res(req, res, result, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
@@ -615,7 +613,7 @@ exports.channel_list_get = function(req, res) {
         raw: true
     }).then(function (result) {
         for (var i = 0; i < result.length; i++) {
-            result[i].icon_url = req.app.locals.settings.assets_url + result[i]["genre.icon_url"];
+            result[i].icon_url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url + result[i]["genre.icon_url"];
             delete result[i]["genre.icon_url"];
         }
         response.send_res_get(req, res, result, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
@@ -629,7 +627,7 @@ exports.channel_list_get = function(req, res) {
 //DELETE QUERY. PUT METHOD. channel_number as parameter
 exports.delete_channel = function(req, res) {
     models.my_channels.destroy({
-        where: {channel_number: req.body.channel_number}
+        where: {channel_number: req.body.channel_number, company_id: req.thisuser.company_id}
     }).then(function (result) {
         response.send_res(req, res, [], 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'no-store');
     }).catch(function(error) {
@@ -644,7 +642,8 @@ exports.edit_channel = function(req, res) {
             title: req.body.title,
             description: req.body.description,
             stream_url: req.body.stream_url,
-            genre_id: (req.body.genre_id) ? req.body.genre_id : 1
+            genre_id: (req.body.genre_id) ? req.body.genre_id : 1,
+            company_id: req.thisuser.company_id
         },
         {where: {channel_number: req.body.channel_number}}
     ).then(function (result) {

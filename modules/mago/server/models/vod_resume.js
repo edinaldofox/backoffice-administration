@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         login_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false
@@ -39,6 +44,7 @@ module.exports = function(sequelize, DataTypes) {
             if (models.vod){
                 vod_resume.belongsTo(models.vod, {foreignKey: 'vod_id'});
             }
+            vod_resume.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return vod_resume;

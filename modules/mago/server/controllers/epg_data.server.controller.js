@@ -27,9 +27,10 @@ var download = require('download-file')
 exports.create = function(req, res) {
 
     db.channels.findOne({
-        attributes: ['id'], where: {channel_number: req.body.channel_number}
+        attributes: ['id'], where: {channel_number: req.body.channel_number, company_id: req.token.company_id}
     }).then(function(result) {
         req.body.channels_id = result.id;
+        req.body.company_id = req.token.company_id; //save record for this company
         DBModel.create(req.body).then(function(result) {
             if (!result) {
                 return res.status(400).send({message: 'fail create data'});
@@ -83,6 +84,7 @@ exports.epg_import = function(req, res) {
     final_where.include = [];
     //end build final where
 
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(
         final_where
@@ -107,7 +109,8 @@ exports.epg_import = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.epgData);
+    if(req.epgData.company_id === req.token.company_id) res.json(req.epgData);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -116,14 +119,19 @@ exports.read = function(req, res) {
 exports.update = function(req, res) {
     var updateData = req.epgData;
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        res.json(result);
-    }).catch(function(err) {
-        winston.error("Updating event failed with error: ", err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
+    if(req.epgData.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            res.json(result);
+        }).catch(function(err) {
+            winston.error("Updating event failed with error: ", err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 /**
@@ -134,14 +142,20 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Deleting event failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Deleting event failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -189,6 +203,8 @@ exports.list = function(req, res) {
     final_where.include = [];
     //end build final where
 
+    final_where.where.company_id = req.token.company_id; //return only records for this company
+
     DBModel.findAndCountAll(
         final_where
     ).then(function(results) {
@@ -216,13 +232,12 @@ exports.list_chart_epg = function(req, res) {
 
     DBChannels.findAll({
         attributes: ['id', ['channel_number', 'group'],['title','content']],
-        //limit: 100,
-        //where: {program_start: {gte: d}}
+        where: {company_id: req.token.company_id}
     }).then(function(channels){
         DBModel.findAll({
                 attributes: ['id', ['channels_id', 'group'],['program_start','start'],['program_end','end'],['title','content']],
                 //limit: 100,
-                where: {program_start: {gte: past}, program_end :{lte: future}}
+                where: {program_start: {gte: past}, program_end :{lte: future}, company_id: req.token.company_id}
             }
         ).then(function(results) {
             if (!results) {
@@ -311,7 +326,7 @@ exports.save_epg_records = function(req, res){
     function start_epg_import(){
         if(req.body.delete_existing === true){
             DBModel.destroy({
-                where: {id: {gt: -1}}
+                where: {company_id: req.token.company_id}
             }).then(function (result) {
                 read_and_write_epg(current_time);
                 return null;
@@ -404,7 +419,7 @@ function import_csv(req, res, current_time, epg_file, import_log, callback){
             }
             else{
                 DBModel.destroy({
-                    where: {program_start: {gte: current_time}, channel_number: {in: channel_number_list}}
+                    where: {program_start: {gte: current_time}, channel_number: {in: channel_number_list}, company_id: req.token.company_id}
                 }).then(function (result) {
                     callback(null); // future epg was deleted for channels on our list. pass control to next function
                 }).catch(function(error) {
@@ -434,7 +449,8 @@ function import_csv(req, res, current_time, epg_file, import_log, callback){
                         program_start: moment(data.program_start, 'MM/DD/YYYY HH:mm:ss').subtract(req.body.timezone, 'hour'),
                         program_end: moment(data.program_end, 'MM/DD/YYYY HH:mm:ss').subtract(req.body.timezone, 'hour'),
                         long_description: (data.long_description) ? data.long_description : "Program summary",
-                        duration_seconds: data.duration
+                        duration_seconds: data.duration,
+                        company_id: req.token.company_id
                     }).then(function (result) {
                         import_file_log.saved_records++;
                     }).catch(function(error) {
@@ -508,12 +524,12 @@ function import_xml_dga(req, res, current_time, epg_file, import_log, callback){
                 //find channel id and number for this channel
                 db.channels.findOne({
                     attributes: ['channel_number', 'id'],
-                    where: {epg_map_id: channel_name, channel_number: filtered_channel_number}
+                    where: {epg_map_id: channel_name, channel_number: filtered_channel_number, company_id: req.token.company_id}
                 }).then(function (channel_data) {
                     if(channel_data){
                         //destroys future epg for filtered channels
                         db.epg_data.destroy({
-                            where: {channel_number: channel_data.channel_number, program_start: {gte: current_time}}
+                            where: {channel_number: channel_data.channel_number, program_start: {gte: current_time}, company_id: req.token.company_id}
                         }).then(function (result) {
                             //iterate over all events of this channel
                             async.forEach(channels.event, function(events, callback){
@@ -531,7 +547,8 @@ function import_xml_dga(req, res, current_time, epg_file, import_log, callback){
                                         program_start: moment(events.$.start_time).subtract(req.body.timezone, 'hour'),
                                         program_end: moment.unix(parseInt(moment(events.$.start_time).format('X')) + parseInt(events.$.duration) - req.body.timezone*3600  ).format('YYYY-MM-DD HH:mm:ss'),
                                         long_description: (long_event_descriptor) ? long_event_descriptor : "Program summary",
-                                        duration_seconds: events.$.duration //is in seconds
+                                        duration_seconds: events.$.duration, //is in seconds
+                                        company_id: req.token.company_id
                                     }).then(function(saved_events) {
                                         import_file_log.saved_records++;
                                         callback(null);
@@ -602,7 +619,7 @@ function import_xmltv(req, res, current_time, epg_file, import_log, callback){
 
     //read channels and map channel epg name with names on the epg file
     DBChannels.findAll({
-        where: {isavailable: true}
+        where: {isavailable: true, company_id: req.token.company_id}
     }).then(function(result) {
         for(var i=0; i < result.length; i++) {
             if(result[i].epg_map_id != '') {
@@ -637,6 +654,7 @@ function import_xmltv(req, res, current_time, epg_file, import_log, callback){
             formdata.long_description = programme.desc[0] || '';
             formdata.duration_seconds = timeDiff / 1000;
             formdata.channels_id = channellist[programme.channel].channels_id;
+            formdata.company_id = req.token.company_id;
             epgdata.push(formdata);
         }
     });
@@ -676,11 +694,11 @@ function import_xml_standard(req, res, current_time){
                                     var filtered_channel_number = (req.body.channel_number) ? req.body.channel_number : {gte: -1};
                                     var channel_name = (channel["display-name"][0]._) ? channel["display-name"][0]._ : channel["display-name"]
                                     db.channels.findOne({
-                                        attributes: ['channel_number'], where: {title: channel_name, channel_number: filtered_channel_number}
+                                        attributes: ['channel_number'], where: {title: channel_name, channel_number: filtered_channel_number, company_id: req.token.company_id}
                                     }).then(function (ch_result) {
                                         if(ch_result){
                                             db.epg_data.destroy({
-                                                where: {channel_number: filtered_channel_number, program_start: {gte: current_time}}
+                                                where: {channel_number: filtered_channel_number, program_start: {gte: current_time}, company_id: req.token.company_id}
                                             }).then(function (result) {
                                                 channel_list[''+channel.$.id+''] = ({title: channel_name});
                                                 callback(null, channel_list); //move control to next foreach iteration
@@ -710,7 +728,7 @@ function import_xml_standard(req, res, current_time){
                                         try{
                                             db.channels.findOne({
                                                 attributes: ['id', 'channel_number', 'title'],
-                                                where: {title: channel_list[''+program.$.channel+''].title}
+                                                where: {title: channel_list[''+program.$.channel+''].title, company_id: req.token.company_id}
                                             }).then(function (result) {
                                                 //if channel info found, let's save the epg record
                                                 if( result && ((req.body.channel_number === null) || (req.body.channel_number == result.channel_number)) ){
@@ -727,7 +745,8 @@ function import_xml_standard(req, res, current_time){
                                                             program_start: moment(stringtodate(program.$.start)).subtract(req.body.timezone, 'hour'),
                                                             program_end: moment(stringtodate(program.$.stop)).subtract(req.body.timezone, 'hour'),
                                                             long_description: (program_desc) ? program_desc : "Program summary",
-                                                            duration_seconds: datetimediff_seconds(stringtodate(program.$.start), stringtodate(program.$.stop)) //is in seconds
+                                                            duration_seconds: datetimediff_seconds(stringtodate(program.$.start), stringtodate(program.$.stop)), //is in seconds
+                                                            company_id: req.token.company_id
                                                         }).then(function (result) {
                                                             //on each write, do nothing. we wait for the saving process to finish
                                                         }).catch(function(error) {

@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
                 autoIncrement: true,
                 unique: true
             },
+            company_id: {
+                type: DataTypes.INTEGER(11),
+                allowNull: false,
+                defaultValue: 1
+            },
             login_id: {
                 type: DataTypes.INTEGER(11),
                 allowNull: false,
@@ -28,6 +33,7 @@ module.exports = function(sequelize, DataTypes) {
                 if(models.epg_data){
                     programSchedule.belongsTo(models.epg_data, {foreignKey: 'program_id'});
                 }
+                programSchedule.belongsTo(models.settings, {foreignKey: 'company_id'});
             }
         }
 

@@ -5,7 +5,10 @@ var path = require('path'),
 module.exports = function(app) {
     app.route('/apiv2/account-kit/login')
         .get(accountKit.handleRenderLoginForm)
-    
+
     app.route('/apiv2/account-kit/callback')
         .get(accountKit.handleLoginSuccess)
+
+    app.route('/apiv2/test')
+        .get(accountKit.encrypt)
 }

@@ -26,10 +26,7 @@ export default function (nga, admin) {
                 .label('Available'),
             nga.field('createdAt','date')
                 .cssClasses('hidden-xs')
-                .label('Created at'),
-            nga.field('pin_protected','boolean')
-                .cssClasses('hidden-xs')
-                .label('Pin Protected'),
+                .label('Created at')
         ])
         .sortDir("DESC")
         .sortField("createdAt")
@@ -38,13 +35,6 @@ export default function (nga, admin) {
                 .label('Expiration Time'),
             nga.field('title')
                 .label('Title'),
-            nga.field('pin_protected','choice')
-                .choices([
-                    { value: 0, label: 'False' },
-                    { value: 1, label: 'True' }
-                ])
-                .attributes({ placeholder: 'Pin Protected' })
-                .label('Pin Protected'),
             nga.field('added_before', 'datetime')
                 .label('Added before'),
             nga.field('added_after', 'datetime')
@@ -109,9 +99,9 @@ export default function (nga, admin) {
             nga.field('rate', 'number')
                 .attributes({ placeholder: 'Season rated. Must be greater than 0, smaller or equal to 10' })
                 .validation({ required: true, validator: function(value){
-                        if(value<=0) throw  new Error ('Rate must be greater than 0');
-                        if(value>10) throw  new Error ('Rate cannot be greater than 10');
-                    }})
+                    if(value<=0) throw  new Error ('Rate must be greater than 0');
+                    if(value>10) throw  new Error ('Rate cannot be greater than 10');
+                }})
                 .label('Rate'),
             nga.field('description', 'text')
                 .transform(function lineBreaks(value, entry) {
@@ -175,10 +165,6 @@ export default function (nga, admin) {
                     }
                 })
                 .label('Image *'),
-            nga.field('pin_protected','boolean')
-                .attributes({ placeholder: 'Pin Protected' })
-                .validation({ required: true })
-                .label('Pin Protected'),
             nga.field('is_available','boolean')
                 .attributes({ placeholder: 'Is Available' })
                 .validation({ required: true })
@@ -243,9 +229,9 @@ export default function (nga, admin) {
             nga.field('rate', 'number')
                 .attributes({ placeholder: 'Season rated. Must be greater than 0, smaller or equal to 10' })
                 .validation({ required: true, validator: function(value){
-                        if(value<=0) throw  new Error ('Rate must be greater than 0');
-                        if(value>10) throw  new Error ('Rate cannot be greater than 10');
-                    }})
+                    if(value<=0) throw  new Error ('Rate must be greater than 0');
+                    if(value>10) throw  new Error ('Rate cannot be greater than 10');
+                }})
                 .label('Rate'),
             nga.field('description', 'text')
                 .transform(function lineBreaks(value, entry) {
@@ -309,10 +295,6 @@ export default function (nga, admin) {
                     }
                 })
                 .label('Image *'),
-            nga.field('pin_protected','boolean')
-                .attributes({ placeholder: 'Pin Protected' })
-                .validation({ required: true })
-                .label('Pin Protected'),
             nga.field('is_available','boolean')
                 .attributes({ placeholder: 'Is Available' })
                 .validation({ required: true })
@@ -340,3 +322,4 @@ export default function (nga, admin) {
     return Season;
 
 }
+

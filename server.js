@@ -9,6 +9,10 @@ var dbfile = path.resolve("./config/env/db.connection.js");
 process.env.NODE_ENV = 'development'; //this value should be set to production to enable https
 process.env.DB_SYNC = true;
 
+if (!process.env.NODE_APP_INSTANCE) {
+    process.env.NODE_APP_INSTANCE = 0;
+}
+
 async.waterfall([
 
     function(callback){

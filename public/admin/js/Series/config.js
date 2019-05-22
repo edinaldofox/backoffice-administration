@@ -1,5 +1,4 @@
 import edit_button from '../edit_button.html';
-//import foto from '../foto.html';
 
 export default function (nga, admin) {
     var Series = admin.getEntity('Series');
@@ -88,7 +87,7 @@ export default function (nga, admin) {
                 .label('Last updated before'),
             nga.field('updated_after', 'date')
                 .label('Last updated after'),
-            nga.field('isavailable', 'boolean')
+            nga.field('is_available', 'boolean')
                 .filterChoices([
                     { value: true, label: 'Available' },
                     { value: false, label: 'Not Available' }
@@ -127,14 +126,14 @@ export default function (nga, admin) {
                     '<small id="emailHelp" class="form-text text-muted">*This Id should either be left empty, or match exactly the Imdb Id</small>'
                 )
                 .label('Movie Imdb Id'),
-             nga.field('tv_series_categories','reference_many')
-             .targetEntity(admin.getEntity('VodCategories'))
-             .targetField(nga.field('name'))
-             .label('Genres')
-             .attributes({ placeholder: 'Select genre' })
-             .singleApiCall(function (category_id) {
-             return { 'category_id[]': category_id };
-             }),
+            nga.field('tv_series_categories','reference_many')
+                .targetEntity(admin.getEntity('VodCategories'))
+                .targetField(nga.field('name'))
+                .label('Genres')
+                .attributes({ placeholder: 'Select genre' })
+                .singleApiCall(function (category_id) {
+                    return { 'category_id[]': category_id };
+                }),
             nga.field('tv_series_packages','reference_many')
                 .targetEntity(admin.getEntity('Packages'))
                 .permanentFilters({ package_type_id: [3,4] })
@@ -151,9 +150,9 @@ export default function (nga, admin) {
             nga.field('rate', 'number')
                 .attributes({ placeholder: 'TV Shows rated. Must be greater than 0, smaller or equal to 10' })
                 .validation({ required: true, validator: function(value){
-                        if(value<=0) throw  new Error ('Rate must be greater than 0');
-                        if(value>10) throw  new Error ('Rate cannot be greater than 10');
-                    }})
+                    if(value<=0) throw  new Error ('Rate must be greater than 0');
+                    if(value>10) throw  new Error ('Rate cannot be greater than 10');
+                }})
                 .label('Rate'),
 
 
@@ -321,9 +320,9 @@ export default function (nga, admin) {
             nga.field('rate', 'number')
                 .attributes({ placeholder: 'TV Shows rated. Must be greater than 0, smaller or equal to 10' })
                 .validation({ required: true, validator: function(value){
-                        if(value<=0) throw  new Error ('Rate must be greater than 0');
-                        if(value>10) throw  new Error ('Rate cannot be greater than 10');
-                    }})
+                    if(value<=0) throw  new Error ('Rate must be greater than 0');
+                    if(value>10) throw  new Error ('Rate cannot be greater than 10');
+                }})
                 .label('Rate'),
             nga.field('clicks', 'number')
                 .attributes({ placeholder: 'TV Shows clicks' })
@@ -432,3 +431,4 @@ export default function (nga, admin) {
     return Series;
 
 }
+

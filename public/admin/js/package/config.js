@@ -9,12 +9,13 @@ export default function (nga, admin) {
         .batchActions([])
         .fields([
             nga.field('package_name')
-                .isDetailLink(true)
+                .isDetailLink(false)
                 .label('Package Name'),
             nga.field('package_type_id', 'reference')
                 .targetEntity(admin.getEntity('packagetypes'))
                 .targetField(nga.field('description'))
                 .cssClasses('hidden-xs')
+                .isDetailLink(false)
                 .label('Package Type'),
         ])
         .listActions(['edit'])

@@ -56,12 +56,12 @@ exports.event =  function(req, res) {
 
     models.channels.findOne({
         attributes: ['title'],
-        where: {channel_number: req.body.channelNumber}
+        where: {channel_number: req.body.channelNumber, company_id: req.thisuser.company_id}
     }).then(function (thischannel) {
         if(thischannel) channel_title = thischannel.title;
         models.my_channels.findOne({
             attributes: ['title'],
-            where: {channel_number: req.body.channelNumber}
+            where: {channel_number: req.body.channelNumber, company_id: req.thisuser.company_id}
         }).then(function (user_channel) {
             if(user_channel) channel_title = user_channel.title;
             models.epg_data.findAll({
@@ -80,7 +80,7 @@ exports.event =  function(req, res) {
                     }
                 ],
                 where: Sequelize.and(
-                    {program_start: {lte: interval_end_human}},
+                    {program_start: {lte: interval_end_human}, company_id: req.thisuser.company_id},
                     Sequelize.or(
                         Sequelize.and(
                             {program_start:{lte:current_human_time}},
@@ -203,12 +203,12 @@ exports.get_event =  function(req, res) {
 
     models.channels.findOne({
         attributes: ['title'],
-        where: {channel_number: req.query.channelNumber}
+        where: {channel_number: req.query.channelNumber, company_id: req.thisuser.company_id}
     }).then(function (thischannel) {
         if(thischannel) channel_title = thischannel.title;
         models.my_channels.findOne({
             attributes: ['title'],
-            where: {channel_number: req.query.channelNumber}
+            where: {channel_number: req.query.channelNumber, company_id: req.thisuser.company_id}
         }).then(function (user_channel) {
             if(user_channel) channel_title = user_channel.title;
             models.epg_data.findAll({
@@ -227,7 +227,7 @@ exports.get_event =  function(req, res) {
                     }
                 ],
                 where: Sequelize.and(
-                    {program_start: {lte: interval_end_human}},
+                    {program_start: {lte: interval_end_human}, company_id: req.thisuser.company_id},
                     Sequelize.or(
                         Sequelize.and(
                             {program_start:{lte:current_human_time}},
@@ -356,6 +356,7 @@ exports.current_epgs =  function(req, res) {
     var qwhere = {};
     if(req.thisuser.show_adult == 0) qwhere.pin_protected = 0; //show adults filter
     else qwhere.pin_protected != ''; //avoid adult filter
+    qwhere.company_id = req.thisuser.company_id;
 
     // requisites for streams provided by the user
     var userstream_qwhere = {"isavailable": true, "login_id": req.thisuser.id};
@@ -370,7 +371,7 @@ exports.current_epgs =  function(req, res) {
 
     models.my_channels.findAll({
         attributes: ['channel_number', 'title'], order: [[ 'channel_number', 'ASC' ]], where: userstream_qwhere,
-        include: [{ model: models.genre, required: true, attributes: ['icon_url'], where: {is_available: true} }]
+        include: [{ model: models.genre, required: true, attributes: ['icon_url'], where: {is_available: true, company_id: req.thisuser.company_id} }]
     }).then(function (user_channel) {
         models.channels.findAll({
             attributes: ['title', 'channel_number'], order: [[ 'channel_number', 'ASC' ]], where: qwhere,
@@ -400,7 +401,7 @@ exports.current_epgs =  function(req, res) {
                         db_funct.final_time('program_end', 'program_end', 'HOUR', req.body.device_timezone, '%m/%d/%Y %H:%i:%s'),
                         db_funct.add_constant(false, 'scheduled')
                     ],
-                    where: {program_start: {lte: server_time}, program_end: {gte: server_time}}
+                    where: {program_start: {lte: server_time}, program_end: {gte: server_time}, company_id: req.thisuser.company_id}
                 }
             ]
         }).then(function (channels) {
@@ -497,6 +498,7 @@ exports.get_current_epgs =  function(req, res) {
     var qwhere = {};
     if(req.thisuser.show_adult == 0) qwhere.pin_protected = 0; //show adults filter
     else qwhere.pin_protected != ''; //avoid adult filter
+    qwhere.company_id = req.thisuser.company_id;
 
     // requisites for streams provided by the user
     var userstream_qwhere = {"isavailable": true, "login_id": req.thisuser.id};
@@ -511,7 +513,7 @@ exports.get_current_epgs =  function(req, res) {
 
     models.my_channels.findAll({
         attributes: ['channel_number', 'title'], order: [[ 'channel_number', 'ASC' ]], where: userstream_qwhere,
-        include: [{ model: models.genre, required: true, attributes: ['icon_url'], where: {is_available: true} }]
+        include: [{ model: models.genre, required: true, attributes: ['icon_url'], where: {is_available: true, company_id: req.thisuser.company_id} }]
     }).then(function (user_channel) {
         models.channels.findAll({
             attributes: ['title', 'channel_number'], order: [[ 'channel_number', 'ASC' ]], where: qwhere,
@@ -541,7 +543,7 @@ exports.get_current_epgs =  function(req, res) {
                         db_funct.final_time('program_end', 'program_end', 'HOUR', req.query.device_timezone, '%m/%d/%Y %H:%i:%s'),
                         db_funct.add_constant(false, 'scheduled')
                     ],
-                    where: {program_start: {lte: server_time}, program_end: {gte: server_time}}
+                    where: {program_start: {lte: server_time}, program_end: {gte: server_time}, company_id: req.thisuser.company_id}
                 }
             ]
         }).then(function (channels) {
@@ -654,6 +656,7 @@ exports.epg = function(req, res) {
         ],
         order: [['channel_number', 'ASC'], ['program_start', 'ASC']],
         where: Sequelize.and(
+            {company_id: req.thisuser.company_id},
             Sequelize.or(
                 {program_start:{between:[starttime, endtime]}},
                 {program_end: {between:[starttime, endtime]}},
@@ -760,6 +763,7 @@ exports.get_epg = function(req, res) {
         ],
         order: [['channel_number', 'ASC'], ['program_start', 'ASC']],
         where: Sequelize.and(
+            {company_id: req.thisuser.company_id},
             Sequelize.or(
                 {program_start:{between:[starttime, endtime]}},
                 {program_end: {between:[starttime, endtime]}},
@@ -853,12 +857,12 @@ exports.daily_epg =  function(req, res) {
         get_channel: function(callback) {
             models.channels.findOne({
                 attributes: ['title'],
-                where: {channel_number: req.body.channel_number}
+                where: {channel_number: req.body.channel_number, company_id: req.thisuser.company_id}
             }).then(function (channel) {
                 if(!channel){
                     models.my_channels.findOne({
                         attributes: ['title'],
-                        where: {channel_number: req.body.channel_number}
+                        where: {channel_number: req.body.channel_number, company_id: req.thisuser.company_id}
                     }).then(function (user_channel) {
                         if(!user_channel){
                             response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
@@ -896,7 +900,7 @@ exports.daily_epg =  function(req, res) {
                         where: {login_id: req.thisuser.id}
                     }
                 ],
-                where: {program_start: {gte: interval_start}, program_end:{lte: interval_end}}
+                where: {program_start: {gte: interval_start}, program_end:{lte: interval_end}, company_id: req.thisuser.company_id}
             }).then(function (result) {
                 if(!result){
                     callback(null, results.get_channel, []); //no epg for this channel, passing empty array instead
@@ -1005,12 +1009,12 @@ exports.get_daily_epg =  function(req, res) {
         get_channel: function(callback) {
             models.channels.findOne({
                 attributes: ['title'],
-                where: {channel_number: channel_number}
+                where: {channel_number: channel_number, company_id: req.thisuser.company_id}
             }).then(function (channel) {
                 if(!channel){
                     models.my_channels.findOne({
                         attributes: ['title'],
-                        where: {channel_number: channel_number}
+                        where: {channel_number: channel_number, company_id: req.thisuser.company_id}
                     }).then(function (user_channel) {
                         if(!user_channel){
                             response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
@@ -1048,7 +1052,7 @@ exports.get_daily_epg =  function(req, res) {
                         where: {login_id: req.thisuser.id}
                     }
                 ],
-                where: {program_start: {gte: interval_start}, program_end:{lte: interval_end}}
+                where: {program_start: {gte: interval_start}, program_end:{lte: interval_end}, company_id: req.thisuser.company_id}
             }).then(function (result) {
                 if(!result){
                     callback(null, results.get_channel, []); //no epg for this channel, passing empty array instead
@@ -1125,11 +1129,12 @@ exports.test_get_epg_data = function(req, res) {
 
     var final_where = {};
 
-    final_where.attributes = [ 'id', 'channel_number', 'title',[db.sequelize.fn("concat", req.app.locals.settings.assets_url, db.sequelize.col('icon_url')), 'icon_url']],
+    final_where.attributes = [ 'id', 'channel_number', 'title',[db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('icon_url')), 'icon_url']],
         final_where.include = [{
             model: models.epg_data, attributes: ['title', 'short_name', 'short_description', 'long_description', 'program_start','program_end','duration_seconds', 'long_description'],
             required: false,
             where: Sequelize.and(
+                {company_id: req.thisuser.company_id},
                 {program_start: {gte:starttime}},
                 {program_start: {lte:endtime}}
             )
@@ -1138,6 +1143,7 @@ exports.test_get_epg_data = function(req, res) {
     if(channelnumbers.length > 0) final_where.where = {channel_number: {in: channelnumbers}}; //limit data only for this list of channels
 
     final_where.order = ['channel_number'];
+    final_where.where.company_id = req.thisuser.company_id;
 
     models.channels.findAll(
         final_where
@@ -1185,11 +1191,12 @@ exports.get_epg_data = function(req, res) {
 
     var final_where = {};
 
-    final_where.attributes = [ 'id', 'channel_number', 'title',[db.sequelize.fn("concat", req.app.locals.settings.assets_url, db.sequelize.col('icon_url')), 'icon_url']],
+    final_where.attributes = [ 'id', 'channel_number', 'title',[db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('icon_url')), 'icon_url']],
         final_where.include = [{
             model: models.epg_data, attributes: ['id','title', 'short_name', 'short_description', 'long_description', 'program_start','program_end','duration_seconds', 'long_description'],
             required: false,
             where: Sequelize.and(
+                {company_id: req.thisuser.company_id},
                 {program_start: {gte:starttime}},
                 {program_start: {lte:endtime}}
             ),

@@ -9,6 +9,7 @@ export default function (nga, admin) {
 			nga.field('vod_id', 'reference')
 				.targetEntity(admin.getEntity('Vods'))
                 .targetField(nga.field('title'))
+				.isDetailLink(false)
 				.label('Vod'),
 			nga.field('title', 'string')
 				.label('Title'),

@@ -13,17 +13,20 @@ module.exports = function(app) {
 
     /* ===== subscriptions ===== */
     app.route('/api/subscriptions')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(subscriptions.list)
         .post(subscriptions.create);
 
     /* ===== mysubscription resellers ===== */
     app.route('/api/mysubscription')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(subscriptions.list)
         .post(subscriptions.create);
 
     app.route('/api/subscriptions/:subscriptionId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(subscriptions.read)
         .put(subscriptions.update)

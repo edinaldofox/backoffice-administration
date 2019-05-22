@@ -13,10 +13,12 @@ export default function (nga, admin) {
             nga.field('channel_id' , 'reference')
                 .targetEntity(admin.getEntity('Channels'))
                 .targetField(nga.field('title'))
+                .isDetailLink(false)
                 .label('Channel'),
             nga.field('stream_source_id', 'reference')
                 .targetEntity(admin.getEntity('ChannelStreamSources'))
                 .targetField(nga.field('stream_source'))
+                .isDetailLink(false)
                 .label('Stream Source'),
             nga.field('stream_url', 'string')
                 // .map(function truncate(value) {

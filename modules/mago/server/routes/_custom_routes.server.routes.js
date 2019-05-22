@@ -17,11 +17,13 @@ module.exports = function(app) {
 
     //transaction based function to creates customer and login data both at the same time.
     app.route('/api/NewCustomer')
-    //.all(policy.isAllowed)
+        .all(policy.Authenticate)
+        //.all(policy.isAllowed)
         .post(customController.create_customer_with_login);
 
 
     app.route('/api/accountslist')
+        .all(policy.Authenticate)
         //.all(policy.isAllowed)
         .get(customController.list_logins_with_customer);
 
@@ -29,20 +31,24 @@ module.exports = function(app) {
 
     ///third party integration API Routes
     app.route('/api/productslist')
+        .all(policy.Authenticate)
         .all(policy.isApiKeyAllowed)
         .get(customController.products_list);
 
 
     ///third party integration API Routes
     app.route('/api/createcustomerlogin')
+        .all(policy.Authenticate)
         .all(policy.isApiKeyAllowed)
         .post(customController.create_customer_with_login);
 
     app.route('/api/upsertsubscription')
+        .all(policy.Authenticate)
         .all(policy.isApiKeyAllowed)
         .post(customController.insert_or_update_user_subscription);
 
     app.route('/api/upsertuserandsubscription')
+        .all(policy.Authenticate)
         .all(policy.isApiKeyAllowed)
         .post(customController.insert_or_update_user_and_subscription);
 

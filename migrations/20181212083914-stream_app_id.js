@@ -12,7 +12,7 @@ module.exports = {
                 return queryInterface.changeColumn('channel_stream', 'stream_resolution', {type: Sequelize.STRING(30), allowNull: false, defaultValue: "1,2,3,4,5,6"}).then(function(success){
                     winston.info('Success updating the default value of channel_stream.stream_resolution to [1, 2, 3, 4, 5, 6]');
                 }).catch(function(err) {winston.error('Changing channel_stream.stream_resolution default value failed with error message: ',err.message);});
-        }).catch(function(error){
+        }).catch(function(err){
             winston.error('Updating the values of column channel_stream.stream_resolution failed with error message: ', err.message);
         });
 

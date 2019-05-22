@@ -14,11 +14,13 @@ module.exports = function(app) {
 
     /* ===== package channels ===== */
     app.route('/api/packagechannels')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(packageChannels.list)
         .post(packageChannels.create);
 
     app.route('/api/packagechannels/:packageChannelId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(packageChannels.read)
         .put(packageChannels.update)

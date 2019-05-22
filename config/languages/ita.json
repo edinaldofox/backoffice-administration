@@ -55,6 +55,13 @@
     "DEVICE_NOT_FOUND": "Impossibile trovare alcun dispositivo con le specifiche richieste",
     "NO_DATA_FOUND": "L'elenco di articoli richiesto è vuoto",
     "GUEST_LOGIN_DISABLED_DESCRIPTION": "GUEST_LOGIN_DISABLED",
-    "GUEST_LOGIN_DISABLED_DATA": "Accesso ospite disabilitato"
+    "GUEST_LOGIN_DISABLED_DATA": "Accesso ospite disabilitato",
+    "BUY": "Compra",
+    "PLAY": "Riproduci",
+    "RELATED": "Simile",
+    "TRAILER": "Trailer",
+    "THUMBUP": "THUMBUP",
+    "THUMBDOWN": "THUMBDOWN",
+    "COMING_SOON": "Prossimamente"
   }
 }

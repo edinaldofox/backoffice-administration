@@ -3,7 +3,9 @@ var path = require('path'),
     response = require(path.resolve("./config/responses.js")),
     akamai_token_generator = require(path.resolve('./modules/streams/server/controllers/akamai_token_v2')),
     crypto = require('crypto'),
-    responses = require(path.resolve("./config/responses.js"));
+    responses = require(path.resolve("./config/responses.js")),
+    ectoken = require('ectoken').V3;
+
 
 //nimble dateFormat function
 var dateFormat = function () {
@@ -324,3 +326,31 @@ exports.nimble_token_generator =  function(req, res) {
     res.send(thisresponse);
 
 };
+
+exports.handleGenerateTokenJson = function(req, res) {
+    const token = generateECToken(req);
+    const resp = {"status_code":200,"error_code":-1,"error_description":"","extra_data":"?" + token,"response_object":[]};
+    res.send(resp);
+}
+
+function generateECToken(req) {
+    const expireAt = Date.now() + 9001;
+    const config = req.app.locals.streamtokens.EDGE_CAST;
+    let ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
+    ip = ip.replace('::ffff:', '');
+
+    const paramString = 'ec_expire=' + expireAt + 
+                        '&ec_proto_allow=' + config.PROTO_ALLOWED +
+                        '&ec_clientip=' + ip;
+                        
+    const token = ectoken.encrypt(config.KEY, paramString);
+    return token;
+}
+
+exports.nimble_drm_key = function(req, res) {
+    var key = req.app.locals.streamtokens.NIMBLE.DRM_KEY;
+
+    var content = Buffer.from(key, 'hex');
+    res.setHeader('Content-Type', 'binary/octet-stream');
+    res.end(content);
+}

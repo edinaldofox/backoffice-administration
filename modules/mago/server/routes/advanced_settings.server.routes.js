@@ -12,11 +12,13 @@ var path = require('path'),
 module.exports = function(app) {
     /* ===== device menus ===== */
     app.route('/api/AdvancedSettings')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(advancedSettings.list)
         .post(advancedSettings.create);
 
     app.route('/api/AdvancedSettings/:AdvancedSettingsId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(advancedSettings.read)
         .put(advancedSettings.update)

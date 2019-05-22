@@ -49,8 +49,6 @@ exports.woocommerce_order_status_change = function(req,res) {
                 thisorder.product_name = woo_data.line_items[0].name;
 
                 //var this request data
-                req.token = {};
-                req.token.uid = 1;
                 req.body.product_id = (woo_data.line_items[0].sku) ? woo_data.line_items[0].sku : '';
                 req.body.product_name = woo_data.line_items[0].name;
 

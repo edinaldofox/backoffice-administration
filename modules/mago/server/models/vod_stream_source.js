@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         description: {
             type: DataTypes.STRING(32),
             allowNull: false
@@ -19,6 +24,7 @@ module.exports = function(sequelize, DataTypes) {
             if (models.vod_stream){
                 vodStreamSource.hasMany(models.vod_stream, {foreignKey: 'stream_source_id'});
             }
+            vodStreamSource.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return vodStreamSource;

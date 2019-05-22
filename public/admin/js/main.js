@@ -2,11 +2,17 @@
 var myApp = angular.module('myApp', ['ng-admin','ng-admin.jwt-auth', 'ngVis', 'pascalprecht.translate', 'ngCookies','dndLists']);
 
 myApp.controller('envVariablesCtrl', ['$scope', '$http', function ($scope, $http) {
-    $http.get('../api/env_settings').then(function(response) {
+    var config = {method: 'GET', url: '../api/env_settings'};
+    if(localStorage.userToken) config.headers = {'Authorization': localStorage.userToken};  //user token should be included as a header in this request
+    $http(config).then(function(response) {
         $scope.version_number = "Version: "+response.data.backoffice_version;
         $scope.company_name = response.data.company_name;
         $scope.company_logo = response.data.company_logo;
     });
+
+    $scope.googlelogin = function () {
+        location.replace("/api/auth/google");
+    }
 }]);
 
 myApp.controller('main', function ($scope, $rootScope, $location, notification) {
@@ -285,9 +291,13 @@ myApp.controller('main', ['Restangular', '$scope', '$uibModal','notification', f
                                 '<div class="container modal-body">'+
                                     '<form>'+
                                         '<div class="form-group col-xs-9">'+
-                                            '<label for="exampleInputEmail1">Email / Username</label>'+
+                                            '<label for="exampleInputEmail1">Username</label>'+
                                             '<hr>'+
-                                            '<input type="input" class="form-control" ng-model="forgot.username" value="forgot.username" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email or username">'+
+                                            '<input type="input" class="form-control" ng-model="forgot.username" value="forgot.username" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter username">'+
+                                            '<hr><br>'+
+                                            '<label for="exampleInputEmail1">or Email</label>'+
+                                            '<hr>'+
+                                            '<input type="input" class="form-control" ng-model="forgot.email" value="forgot.email" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">'+
                                         '</div>'+
                                     '</form>'+
                                 '</div>'+
@@ -296,33 +306,25 @@ myApp.controller('main', ['Restangular', '$scope', '$uibModal','notification', f
                                 '<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>'+
                             '</div>',
                 controller: ('main', ['$scope', '$uibModalInstance', 'confirmClick', 'confirmMessge',
-                        function ($scope, $uibModalInstance, confirmClick, confirmMessge) {
+                    function ($scope, $uibModalInstance, confirmClick, confirmMessge) {
+                        $scope.confirmMessage = confirmMessge;
+                        function closeModal() {
+                            $uibModalInstance.dismiss('cancel');
+                        }
+                        $scope.ok = function () {
+                            closeModal();
+                            Restangular.one('auth/forgot').customPOST($scope.forgot).then(function successCallback(response) {
+                                var reset_message = (response.message) ? response.message : response.data.message;
+                                notification.log(reset_message, { addnCls: 'humane-flatty-success' });
+                            }, function errorCallback(response) {
+                                notification.log(response.message, { addnCls: 'humane-flatty-error' });
+                            });
+                        }
+                        $scope.cancel = function () {
+                            closeModal();
+                        }
 
-                                $scope.confirmMessage = confirmMessge;
-
-                            function closeModal() {
-
-                                $uibModalInstance.dismiss('cancel');
-
-                            }
-
-                            $scope.ok = function () {
-
-                                    closeModal();
-                                    Restangular.one('auth/forgot').customPOST($scope.forgot)
-                                        .then(function successCallback(response) {
-                                            notification.log(response.message, { addnCls: 'humane-flatty-success' });
-
-                                          }, function errorCallback(response) {
-                                        });
-
-                            }
-
-                            $scope.cancel = function () {
-                                closeModal();
-                            }
-
-                        }]),
+                    }]),
                 size: 'lg',
                 windowClass: 'confirm-window',
                 resolve: {
@@ -387,7 +389,11 @@ myApp.directive('sale', require('./smsbatch/sale'));
 myApp.directive('vod', require('./smsbatch/vod'));
 myApp.directive('move', require('./smsbatch/move'));
 myApp.directive('generate', require('./smsbatch/generate'));
-myApp.directive('approveReview', require('./groups/approveReview'));
+myApp.directive('roles', require('./smsbatch/user_roles_button'));
+myApp.directive('allowMenu', require('./groups/allowMenu'));
+myApp.directive('invite', require('./smsbatch/invite'));
+myApp.directive('importchannelLogs', require('./import_channels_csv_m3u/see_logs_import_channel'));
+myApp.directive('importvodLogs', require('./import_vod_csv/see_logs_import_vod'));
 
 //myApp.directive('roles', require('./grouprights/radioRoles'));
 
@@ -395,6 +401,8 @@ myApp.directive('approveReview', require('./groups/approveReview'));
 // personal config
 myApp.config(['$stateProvider', require('./personal-details/user-details')]);
 myApp.config(['$stateProvider', require('./geoip/geoip')]);
+myApp.config(['$stateProvider', require('./support/support')]);
+myApp.config(['$stateProvider', require('./serverStatus/serverStatus')]);
 myApp.config(['$stateProvider', require('./change-pass/change-password')]);
 myApp.config(['$stateProvider', require('./epgData/epgchart')]);
 
@@ -425,6 +433,7 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     admin.addEntity(nga.entity('mychannels'));
     admin.addEntity(nga.entity('Genres'));
     admin.addEntity(nga.entity('LoginData'));
+    admin.addEntity(nga.entity('CustomerAccount'));
     admin.addEntity(nga.entity('Packages'));
     admin.addEntity(nga.entity('livepackages'));
     admin.addEntity(nga.entity('packagechannels'));
@@ -437,6 +446,7 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     admin.addEntity(nga.entity('sales_by_month'));
     admin.addEntity(nga.entity('sales_monthly_expiration'));
     admin.addEntity(nga.entity('sales_by_expiration'));
+    admin.addEntity(nga.entity('company_settings'));
     admin.addEntity(nga.entity('Settings'));
     admin.addEntity(nga.entity('EmailSettings'));
     admin.addEntity(nga.entity('URL'));
@@ -478,11 +488,20 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     admin.addEntity(nga.entity('vodMenuCarousel'));
     admin.addEntity(nga.entity('htmlContent'));
     admin.addEntity(nga.entity('tmdbvods'));
+    admin.addEntity(nga.entity('tmdbseries'));
+
+    //test
+
+    admin.addEntity(nga.entity('import_channel'));
+    admin.addEntity(nga.entity('import_vod'));
 
 
     //Config
+    require('./import_channels_csv_m3u/config')(nga, admin);
+    require('./import_vod_csv/config')(nga, admin);
 
     require('./tmdb_import/config')(nga, admin);
+    require('./tmdb_import_tvseries/config')(nga, admin);
     require('./htmlContent/config')(nga, admin);
     require('./vodMenuCarousel/config')(nga, admin);
     require('./vodmenu/config')(nga, admin);
@@ -495,6 +514,7 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     require('./tv_episode_stream/config')(nga, admin);
     require('./Submenu/config')(nga, admin);
     require('./AdvancedSettings/config')(nga, admin);
+    require('./company_settings/config')(nga, admin);
     require('./settings/PlayerSettings/config')(nga, admin);
     require('./settings/ImagesSettings/config')(nga, admin);
     require('./settings/ApiKeys/config')(nga, admin);
@@ -519,6 +539,7 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     require('./epgimport/config')(nga, admin);
     require('./genre/config')(nga, admin);
     require('./loginData/config')(nga, admin);
+    require('./CustomerAccount/config')(nga, admin);
     require('./livepackages/config')(nga, admin);
     require('./package/config')(nga, admin);
     require('./vod_package/config')(nga, admin);
@@ -559,17 +580,19 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
         admin.dashboard(require('./dashboard/config')(nga, admin));
     }
 
-
     admin.header(require('./header.html'));
 
-    var menujson = require('./menuobject.js');
-    // console.log("objekti menus",menujson);
+    var menu  = localStorage.getItem("menuObject");
+
+    if ( !menu ){
+        var menujson = require('./menuobject.js');
+    } else {
+        var obj = JSON.parse(menu);
+        menujson = obj
+    }
+
+    // var menujson = require('./menuobject.js');
     admin.menu(require('./dynamicmenu')(nga, admin,menujson));
-
-
-         // admin.menu(require('./menu')(nga, admin));
-
-    // App
 
     nga.configure(admin);
 }]);

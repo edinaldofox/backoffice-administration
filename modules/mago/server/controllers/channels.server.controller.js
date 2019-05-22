@@ -6,6 +6,7 @@
 var path = require('path'),
     errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
     logHandler = require(path.resolve('./modules/mago/server/controllers/logs.server.controller')),
+    saas_functions = require(path.resolve('./custom_functions/saas_functions')),
     db = require(path.resolve('./config/lib/sequelize')).models,
     winston = require('winston'),
     refresh = require(path.resolve('./modules/mago/server/controllers/common.controller.js')),
@@ -58,30 +59,43 @@ exports.create = function(req, res) {
     var array_packages_channels = req.body.packages_channels || [];
     delete req.body.packages_channels;
 
-    DBModel.create(req.body).then(function(result) {
-        if (!result) {
-            return res.status(400).send({message: 'fail create data'});
-        } else {
-            logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+    req.body.company_id = req.token.company_id; //save record for this company
 
-            return link_channel_with_packages(result.id,array_packages_channels).then(function(t_result) {
-                    if (t_result.status) {
-                        res.jsonp(result);
-                    }
-                    else {
-                        res.send(t_result);
-                    }
-                })
+    var limit = req.app.locals.backendsettings[req.token.company_id].asset_limitations.channel_limit; //number of channels that this company can create
+
+    saas_functions.check_limit('channels', limit).then(function(limit_reached){
+        if(limit_reached === true) return res.status(400).send({message: "You have reached the limit number of channels you can create for this plan. "});
+        else{
+            DBModel.create(req.body).then(function(result) {
+                if (!result) {
+                    return res.status(400).send({message: 'fail create data'});
+                }
+                else {
+                    logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+
+                    return link_channel_with_packages(result.id,array_packages_channels).then(function(t_result) {
+                        if (t_result.status) {
+                            res.jsonp(result);
+                        }
+                        else {
+                            res.send(t_result);
+                        }
+                    })
+                }
+            }).catch(function(err) {
+                winston.error("Creating channel failed with error: ", err);
+                if(err.name === "SequelizeUniqueConstraintError"){
+                    if(err.errors[0].path === "channel_number") return res.status(400).send({message: 'Check if this channel number is available'}); //channel number exists
+                    else return res.status(400).send({message: err.errors[0].message}); //other duplicate fields. return sequelize error message
+                }
+                else{
+                    return res.status(400).send({message: 'An error occurred while creating this channel. '+err.errors[0].message}); //another error occurred. return sequelize error message
+                }
+            });
         }
-    }).catch(function(err) {
-        winston.error("Creating channel failed with error: ", err);
-       if(err.name === "SequelizeUniqueConstraintError"){
-            if(err.errors[0].path === "channel_number") return res.status(400).send({message: 'Check if this channel number is available'}); //channel number exists
-            else return res.status(400).send({message: err.errors[0].message}); //other duplicate fields. return sequelize error message
-       }
-       else {
-            return res.status(400).send({message: 'An error occurred while creating this channel. '+err.errors[0].message}); //another error occurred. return sequelize error message
-       }
+    }).catch(function(error){
+        winston.error("Error checking for the limit number of channels for company with id ",req.token.company_id," - ", error);
+        return res.status(400).send({message: "The limit number of channels you can create for this plan could not be verified. Check your log file for more information."});
     });
 };
 
@@ -89,7 +103,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.channels);
+    if(req.channels.company_id === req.token.company_id) res.json(req.channels);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -119,30 +134,35 @@ exports.update = function(req, res) {
     var array_packages_channels = req.body.packages_channels || [];
     delete req.body.packages_channels;
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+    if(req.channels.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
 
-        if(deletefile) {
-            fs.unlink(deletefile, function (err) {
-                //todo: return some response?
+            if(deletefile) {
+                fs.unlink(deletefile, function (err) {
+                    //todo: return some response?
+                });
+            }
+
+            return link_channel_with_packages(req.body.id,array_packages_channels).then(function(t_result) {
+                if (t_result.status) {
+                    return res.jsonp(result);
+                }
+                else {
+                    return res.send(t_result);
+                }
+            })
+
+        }).catch(function(err) {
+            winston.error("Update channel data failed with error: ", err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
             });
-        }
-
-        return link_channel_with_packages(req.body.id,array_packages_channels).then(function(t_result) {
-                    if (t_result.status) {
-                        return res.jsonp(result);
-                    }
-                    else {
-                        return res.send(t_result);
-                    }
-                })
-
-    }).catch(function(err) {
-        winston.error("Update channel data failed with error: ", err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 /**
@@ -153,14 +173,19 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Deleting channel failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Deleting channel failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -248,6 +273,8 @@ exports.list = function(req, res) {
     DBModel.count(final_where).then(function(totalrecord) {
 
         final_where.include = [{model:db.genre,required:true},{model:db.packages_channels,attributes: ['package_id']}];
+
+        final_where.where.company_id = req.token.company_id; //return only records for this company
 
         DBModel.findAll(
             final_where

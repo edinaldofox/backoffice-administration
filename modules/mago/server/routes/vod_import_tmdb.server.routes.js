@@ -14,14 +14,17 @@ module.exports = function(app) {
 
     /* ===== vods ===== */
     app.route('/api/tmdbvods')
+        .all(policy.Authenticate)
         .get(tmdbVod.list);
 
     app.route('/api/tmdbvods/:tmdbId')
+        .all(policy.Authenticate)
         //.all(policy.isAllowed)
         .get(tmdbVod.read);
         //.put(tmdbVod.create);
 
     app.route('/api/tmdbvods/*')
+        .all(policy.Authenticate)
     //.all(policy.isAllowed)
         .put(tmdbVod.create);
 

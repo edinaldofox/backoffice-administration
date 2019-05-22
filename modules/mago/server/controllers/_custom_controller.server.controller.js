@@ -64,6 +64,7 @@ exports.list_logins_with_customer = function(req,res) {
                 attributes:['firstname','lastname','email','telephone','address','city','country'],
                 required: true}
         ],
+        where: {company_id: req.token.company_id},
         limit: 100,
         order: 'id desc',
         raw: true
@@ -179,7 +180,7 @@ exports.insert_or_update_user_and_subscription = function(req,res) {
 
 exports.products_list = function(req, res) {
     db.combo.findAll({
-        where: {isavailable: true}
+        where: {isavailable: true, company_id: req.token.company_id}
     }).then(function(results) {
         if (!results) {
             return res.status(404).send({

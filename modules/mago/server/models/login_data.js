@@ -12,6 +12,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         username: {
             type: DataTypes.STRING(32),
             allowNull: false,
@@ -131,6 +136,7 @@ module.exports = function(sequelize, DataTypes) {
                 loginData.hasMany(models.salesreport, {foreignKey: 'login_data_id'});
             }
             if(models.commands) loginData.hasMany(models.commands);
+            loginData.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
 

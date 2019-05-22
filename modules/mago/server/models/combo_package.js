@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         package_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false,
@@ -24,6 +29,7 @@ module.exports = function(sequelize, DataTypes) {
         associate: function(models) {
             comboPackages.belongsTo(models.package, {foreignKey: 'package_id'});
             comboPackages.belongsTo(models.combo, {foreignKey: 'combo_id'});
+            comboPackages.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return comboPackages;

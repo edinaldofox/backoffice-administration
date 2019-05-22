@@ -18,6 +18,8 @@ export default function (nga, admin) {
                 .label('Parameter 1'),
             nga.field('parameter2_value')
                 .label('Parameter 2'),
+            nga.field('parameter3_value')
+                .label('Parameter 3'),
             nga.field('duration')
                 .label('Duration'),
             nga.field('description','text')
@@ -39,11 +41,12 @@ export default function (nga, admin) {
                 .label('Parameter 1'),
             nga.field('parameter2_value')
                 .label('Parameter 2'),
+            nga.field('parameter3_value')
+                .label('Parameter 3'),
             nga.field('duration','number')
                 .label('Duration'),
-
             nga.field('description','text')
-                .attributes({ placeholder: 'Usage Description' })
+                .attributes({ placeholder: 'Usage Description',readOnly: true })
                 .validation({ maxlength: 1000})
                 .label('Description'),
 

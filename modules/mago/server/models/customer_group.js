@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         description: {
             type: DataTypes.STRING(32),
             allowNull: false
@@ -19,6 +24,7 @@ module.exports = function(sequelize, DataTypes) {
             if(models.customer_data){
                 customerGroup.hasMany(models.customer_data, {foreignKey: 'group_id'});
             }
+            customerGroup.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return customerGroup;

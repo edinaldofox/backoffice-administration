@@ -15,6 +15,7 @@ var path = require('path'),
 
 exports.create = function(req, res) {
 
+    req.body.company_id = req.token.company_id; //save record for this company
     DBModel.bulkCreate(req.body, {ignoreDuplicates: true}).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
@@ -35,7 +36,8 @@ exports.create = function(req, res) {
  */
 /*
 exports.read = function(req, res) {
-    res.json(req.packageChannel);
+ if(req.packageChannel.company_id === req.token.company_id) res.json(req.packageChannel);
+ else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 */
 
@@ -46,13 +48,18 @@ exports.read = function(req, res) {
 exports.update = function(req, res) {
     var updateData = req.packageChannel;
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        res.json(result);
-    }).catch(function(err) {
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-        });
-    });
+     if(req.packageChannel.company_id === req.token.company_id){
+         updateData.updateAttributes(req.body).then(function(result) {
+             res.json(result);
+         }).catch(function(err) {
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
+         });
+     }
+     else{
+     res.status(404).send({message: 'User not authorized to access these data'});
+     }
 };
 */
 
@@ -65,15 +72,20 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Removing vod item from package failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Removing vod item from package failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -100,6 +112,8 @@ exports.list = function(req, res) {
     var records_limit = query._end - query._start;
     var qwhere = {};
     if(query.package_id) qwhere.package_id = query.package_id;
+
+    qwhere.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll({
         where: qwhere,

@@ -31,12 +31,14 @@ var sequelizes =  require(path.resolve('./config/lib/sequelize'));
 
  */
 exports.create = function(req, res) {
-    logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+    req.body.company_id = req.token.company_id; //save record for this company
     DBModel.create(req.body).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
         } else {
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body), req.token.company_id);
             return res.jsonp(result);
+            return null;
         }
     }).catch(function(err) {
         winston.error("Creating customer failed with error: ", err);
@@ -50,7 +52,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-  res.json(req.customerData);
+    if(req.customerData.company_id === req.token.company_id) res.json(req.customerData);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -78,15 +81,20 @@ exports.update = function(req, res) {
 
     var updateData = req.customerData;
 
-    logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
-    updateData.updateAttributes(req.body).then(function(result) {
-        res.json(result);
-    }).catch(function(err) {
-        winston.error("Updating customer failed with error: ", err);
-        return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
+    if(req.customerData.company_id === req.token.company_id){
+        logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body), req.token.company_id);
+        updateData.updateAttributes(req.body).then(function(result) {
+            res.json(result);
+        }).catch(function(err) {
+            winston.error("Updating customer failed with error: ", err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 /**
@@ -97,14 +105,19 @@ exports.delete = function(req, res) {
 
   DBModel.findById(deleteData.id).then(function(result) {
     if (result) {
-      result.destroy().then(function() {
-        return res.json(result);
-      }).catch(function(err) {
-          winston.error("Deleting customer failed with error: ", err);
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      });
+        if (result && (result.company_id === req.token.company_id)) {
+            result.destroy().then(function() {
+                return res.json(result);
+            }).catch(function(err) {
+                winston.error("Deleting customer failed with error: ", err);
+                return res.status(400).send({
+                    message: errorHandler.getErrorMessage(err)
+                });
+            });
+        }
+        else{
+            return res.status(400).send({message: 'Unable to find the Data'});
+        }
     } else {
       return res.status(400).send({
         message: 'Unable to find the Data'
@@ -157,6 +170,7 @@ exports.list = function(req, res) {
   //end build final where
 
     if(query.email) qwhere.email = query.email;
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
   DBModel.findAndCountAll(
 
@@ -221,6 +235,7 @@ exports.search_customer = function(req, res){
     if(req.query.firstname) client_where.firstname = req.query.firstname;
     if(req.query.lastname) client_where.lastname = req.query.lastname;
     if(req.query.email) client_where.email = req.query.email;
+    account_where.company_id = req.token.company_id;
 
     if(!req.query.q && !req.query.customer_id && !req.query.firstname && !req.query.lastname && !req.query.email){
         return res.status(200).send([{}]);
@@ -241,7 +256,8 @@ exports.search_customer = function(req, res){
                 db.subscription.findOne({
                     attributes: ['end_date'], where: {
                         end_date: {$gte: Date.now()},
-                        login_id: clients[0].id
+                        login_id: clients[0].id,
+                        company_id: req.token.company_id
                     }
                 }).then(function(active_subscription){
                     if(!active_subscription || !active_subscription.end_date){

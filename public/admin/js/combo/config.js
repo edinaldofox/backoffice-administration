@@ -7,13 +7,13 @@ export default function (nga, admin) {
 		.batchActions([])
 		.fields([
 			nga.field('id', 'string')
-					.isDetailLink(true)
+					.isDetailLink(false)
 					.label('ID'),
 			nga.field('product_id', 'string')
-					.isDetailLink(true)
+					.isDetailLink(false)
 					.label('Product ID'),
 			nga.field('name', 'string')
-				.isDetailLink(true)
+				.isDetailLink(false)
 				.label('Name'),
 			nga.field('duration')
 				.cssClasses('hidden-xs')

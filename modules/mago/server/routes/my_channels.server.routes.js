@@ -10,11 +10,13 @@ module.exports = function(app) {
 
     /* ===== my channels routes ===== */
     app.route('/api/mychannels')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(myChannels.list)
         .post(myChannels.create);
 
     app.route('/api/mychannels/:mychannelId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(myChannels.read)
         .put(myChannels.update)

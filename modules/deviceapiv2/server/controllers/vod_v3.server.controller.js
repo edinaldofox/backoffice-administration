@@ -26,48 +26,73 @@ var moment = require('moment');
  */
 exports.get_movie_details = function(req, res) {
 
+    var transactional_vod_duration = req.app.locals.backendsettings[req.thisuser.company_id].t_vod_duration;
     var attributes = [
         'id', ['adult_content', 'adult'], 'homepage', 'budget', 'mandatory_ads', 'imdb_id', 'original_language', 'original_title', 'expiration_time', 'price',
         ['starring', 'cast'], 'director', [db.sequelize.fn('YEAR', db.sequelize.col('release_date')), "release_year"], [sequelize.literal('"film"'), 'vod_type'],
-        [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('image_url')), 'backdrop_path'],
-        [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('vod.icon_url')), 'poster_path'],
+        [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'backdrop_path'],
+        [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('vod.icon_url')), 'poster_path'],
         ['description', 'overview'], 'popularity', 'revenue', ['duration', 'runtime'], 'vote_count', 'trailer_url', 'vod_preview_url', 'default_subtitle_id',
         [sequelize.fn('DATE_FORMAT', sequelize.col('release_date'), '%Y-%m-%d'), 'release_date'], 'spoken_languages', 'status', 'tagline', 'title', 'vote_average'
     ];
+    var vod_join_list = [
+        {
+            model: models.vod_stream, attributes: ['stream_format', 'drm_platform', 'url', 'token', 'token_url', 'encryption', 'encryption_url'], required: false,
+            where: {stream_source_id: req.thisuser.vod_stream_source, stream_resolution: {$like: "%"+req.auth_obj.appid+"%"}}
+        },
+        {
+            model: models.vod_subtitles, required: false,
+            attributes: ['id', 'title', [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('subtitle_url')), 'url'], ['vod_id', 'vodid']]
+        },
+        {model: models.vod_vod_categories, attributes: ['id'], include: [{model: models.vod_category, attributes: ['id', 'name'], required: false}]},
+        {model: models.t_vod_sales, attributes: ['id'], required: false, where: {login_data_id: req.thisuser.id, vod_id: req.params.vod_id, end_time: {$gte: Date.now()}}},
+        {model: models.vod_resume, attributes: ['resume_position', 'reaction'], required: false, where: {login_id: req.thisuser.id}}
+    ];
+    var subscription_join_list = [
+        {model: models.package, attributes: ['id'], required: true, where: {package_type_id: req.auth_obj.screensize + 2 }, include: [
+            {model: models.package_vod, attributes: ['id'], where: {vod_id: req.params.vod_id}, required: true}
+        ]}
+    ];
 
+    //find vod item data, if it is an available movie that has not expired
     models.vod.findOne({
         attributes: attributes,
-        include: [
-            {
-                model: models.vod_stream, attributes: ['stream_format', 'drm_platform', 'url', 'token', 'token_url', 'encryption', 'encryption_url'], required: false,
-                where: {stream_source_id: req.thisuser.vod_stream_source, stream_resolution: {$like: "%"+req.auth_obj.appid+"%"}}
-            },
-            {
-                model: models.vod_subtitles, required: false,
-                attributes: ['id', 'title', [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('subtitle_url')), 'url'], ['vod_id', 'vodid']]
-            },
-            {model: models.vod_vod_categories, attributes: ['id'], include: [{model: models.vod_category, attributes: ['id', 'name'], required: false}]},
-            {model: models.t_vod_sales, attributes: ['id'], required: false, where: {login_data_id: req.thisuser.id, vod_id: req.params.vod_id, end_time: {$gte: Date.now()}}},
-            {model: models.vod_resume, attributes: ['resume_position', 'reaction'], required: false, where: {login_id: req.thisuser.id}}
-        ],
-        where: {id: req.params.vod_id}
+        include: vod_join_list,
+        where: {id: req.params.vod_id, isavailable: true, expiration_time: {$gte: Date.now()}}
     }).then(function (result) {
-        //check whether vod item is part of the user's active subscription
-        models.subscription.findOne({
-            attributes: ['id'], where: {login_id: req.thisuser.id, end_date: {$gte: Date.now()}}, include: [
-                {model: models.package, attributes: ['id'], required: true, where: {package_type_id: req.auth_obj.screensize + 2 }, include: [
-                        {model: models.package_vod, attributes: ['id'], where: {vod_id: req.params.vod_id}, required: true}
-                    ]}
-            ],
-            subQuery: false //prevent generation of subqueries, which can cause valid subscriptions not being returned
-        }).then(function(subscription_result){
-            if (!result || result.length < 1) {
-                response.send_res_get(req, res, [], 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
-            }
-            else {
-                var vod_data = {};
-                if (result) {
+        if(!result){
+            response.send_res_get(req, res, [], 200, 1, 'NOT_FOUND_DESCRIPTION', 'NO_DATA_FOUND', 'private,max-age=86400');
+        }
+        else{
+            //check whether vod item is part of the user's active subscription
+            models.subscription.findOne({
+                attributes: ['id'],
+                where: {login_id: req.thisuser.id, end_date: {$gte: Date.now()}},
+                include: subscription_join_list,
+                subQuery: false //prevent generation of subqueries, which can cause valid subscriptions not being returned
+            }).then(function(subscription_result){
+                var available_purchase = ((result.t_vod_sales && result.t_vod_sales.length > 0)) ? true : false;
+                var available_for_purchase = (transactional_vod_duration && (moment(result.expiration_time) > moment().add(transactional_vod_duration, 'day')) && (result.price > 0)) ? true : false;
+
+                if(!subscription_result && !available_purchase && !available_for_purchase){
+                    response.send_res_get(req, res, [], 200, 1, 'NOT_FOUND_DESCRIPTION', 'NO_DATA_FOUND', 'private,max-age=86400');
+                }
+                else{
+                    var vod_data = {};
                     vod_data = result.toJSON(); //convert query results from instance to JSON, to modify it
+
+                    //prepare dynamic button list based on client rights to play the item
+                    vod_data.actions = [
+                        {name:"related", description: languages[req.body.language].language_variables["RELATED"]},
+                        {name:"trailer", description: languages[req.body.language].language_variables["TRAILER"]},
+                        {name:"thumbup", description: languages[req.body.language].language_variables["THUMBUP"]},
+                        {name:"thumbdown", description: languages[req.body.language].language_variables["THUMBDOWN"]}
+                    ];
+                    //return play action for purchased movies, or those part of an active subscription
+                    if(available_purchase || subscription_result) vod_data.actions.push({name:"play", description: languages[req.body.language].language_variables["PLAY"]});
+                    //return buy action for movies that can't be played, but are available to buy (price>0) and don't expire before the purchase's end time
+                    else if(available_for_purchase) vod_data.actions.push({name:"buy", description: languages[req.body.language].language_variables["BUY"]});
+                    delete vod_data.t_vod_sales;
 
                     //find and asign value of default subtitle
                     if(result.vod_subtitles){
@@ -93,24 +118,8 @@ exports.get_movie_details = function(req, res) {
                     vod_data.vod_stream = (vod_data.vod_streams && vod_data.vod_streams[0]) ? vod_data.vod_streams[0] : {};
                     delete vod_data.vod_streams;
 
-                    //prepare dynamic button list based on client rights to play the item
-                    vod_data.actions = [
-                        {name:"related", description:"Related"},
-                        {name:"trailer", description:"Trailer"},
-                        {name:"thumbup", description:"Thumbup"},
-                        {name:"thumbdown", description:"Thumbdown"}
-                    ];
-                    //return play action for purchased movies, or those part of an active subscription
-                    if((vod_data.t_vod_sales && vod_data.t_vod_sales.length > 0) || (subscription_result)) vod_data.actions.push({name:"play", description:"Play"});
-                    //return buy action for movies that can't be played, but are available to buy (price>0) and don't expire before the purchase's end time
-                    else if( (moment(vod_data.expiration_time) > moment().add(req.app.locals.backendsettings.t_vod_duration, 'day')) && (vod_data.price > 0) )
-                        vod_data.actions.push({name:"buy", description:"Buy"});
-                    //return commin_soon action for movies that cannot be played or bought
-                    else vod_data.actions.push({name: "coming_soon", description: "Coming soon"});
-                    delete vod_data.t_vod_sales;
-
                     //add url where client can buy a movie
-                    vod_data.payment_url = req.app.locals.backendsettings.assets_url + "/apiv3/vod_payment/vod_purchase/" + vod_data.id + '/' + req.thisuser.username;
+                    vod_data.payment_url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url + "/apiv3/vod_payment/vod_purchase/" + vod_data.id + '/' + req.thisuser.username;
 
                     //prepare ads object
                     vod_data.watch_mandatory_ad = {
@@ -123,14 +132,14 @@ exports.get_movie_details = function(req, res) {
                     if (vod_data.vod_resumes.length < 1) vod_data.vod_resumes = {"resume_position": 0, "reaction": 0};
                     else vod_data.vod_resumes = vod_data.vod_resumes[0];
 
+                    response.send_res_get(req, res, [vod_data], 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
                 }
-                response.send_res_get(req, res, [vod_data], 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
-            }
-        }).catch(function(error){
-            winston.error("Querying for the user's subscription failed with error: ", error);
-            response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
-        });
-        return null;
+            }).catch(function(error){
+                winston.error("Querying for the user's subscription failed with error: ", error);
+                response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
+            });
+            return null;
+        }
     }).catch(function(error) {
         winston.error("Querying for the details of the vod item failed with error: ", error);
         response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
@@ -140,20 +149,33 @@ exports.get_movie_details = function(req, res) {
 
 
 exports.buy_vod_item = function(req,res) {
+    var transactional_vod_duration = req.app.locals.backendsettings[req.thisuser.company_id].t_vod_duration;
+    var end_date = moment().add(transactional_vod_duration, 'day').format();
     models.vod.findOne({
-        attributes: ['title', 'icon_url', 'price'],
-        where: {id: req.params.vod_id}
+        attributes: ['title', 'icon_url', 'price', 'company_id'],
+        where: {id: req.params.vod_id, isavailable: true, price: {$gt: 0}, expiration_time: {$gt: end_date}}
     }).then(function(vod_data){
-        var payment_confirmation_url = req.app.locals.backendsettings.assets_url+'/apiv2/vod/confirm_vod_purchase/'+req.params.vod_id+'/'+req.params.client_username;
-        var template = '<!DOCTYPE html>'+
-            '<html lang="en" xmlns="http://www.w3.org/1999/xhtml"><head><title></title></head>'+
-            '<body>'+
-            '<p>Dear '+req.params.client_username+',</p><p>Welcome to '+config.app.title+
-            '</p><p>Please click the link below to confirm your purchase of the film '+vod_data.title+':</p>'+
-            '<img src="'+req.app.locals.backendsettings.assets_url+vod_data.icon_url+'" alt="'+vod_data.title+'" width="360" height="516">'+
-            '<p><a href="'+payment_confirmation_url+'">Buy Film</a></p>'+
-            '</body>'+
-            '</html>';
+        if(vod_data){
+            var payment_confirmation_url = req.app.locals.backendsettings[vod_data.company_id].assets_url+'/apiv2/vod/confirm_vod_purchase/'+req.params.vod_id+'/'+req.params.client_username;
+            var template = '<!DOCTYPE html>'+
+                '<html lang="en" xmlns="http://www.w3.org/1999/xhtml"><head><title></title></head>'+
+                '<body>'+
+                '<p>Dear '+req.params.client_username+',</p><p>Welcome to '+config.app.title+
+                '</p><p>Please click the link below to confirm your purchase of the film '+vod_data.title+':</p>'+
+                '<img src="'+req.app.locals.backendsettings[vod_data.company_id].assets_url+vod_data.icon_url+'" alt="'+vod_data.title+'" width="360" height="516">'+
+                '<p><a href="'+payment_confirmation_url+'">Buy Film</a></p>'+
+                '</body>'+
+                '</html>';
+        }
+        else {
+            var template = '<!DOCTYPE html>'+
+                '<html lang="en" xmlns="http://www.w3.org/1999/xhtml"><head><title></title></head>'+
+                '<body>'+
+                '<p>Dear '+req.params.client_username+',</p><p>Welcome to '+config.app.title+
+                '</p><p>The film you requested is no longer available to purchace. Please contact our customer care for further details.</p>'+
+                '</body>'+
+                '</html>';
+        }
         res.send(template);
         return null;
     }).catch(function(error){
@@ -190,7 +212,7 @@ exports.buy_vod_item = function(req,res) {
  */
 exports.get_vod_list = function(req,res) {
 
-    var page_length = (req.app.locals.backendsettings.vod_subset_nr) ? req.app.locals.backendsettings.vod_subset_nr : 30; //max nr of movies in the response
+    var page_length = (req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr) ? req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr : 30; //max nr of movies in the response
     if (!req.query.page) req.query.page = 1; //if page param is missing, set page to 1
     var final_where = {};
     final_where.where = {};
@@ -201,9 +223,9 @@ exports.get_vod_list = function(req,res) {
 
     //attribute list
     final_where.attributes = [
-        'id', 'vote_count', 'vote_average', 'title', 'popularity', [ sequelize.literal('"film"'), 'vod_type'], 'trailer_url',
-        [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('image_url')), 'backdrop_path'],
-        [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('icon_url')), 'poster_path'],
+        'id', 'vote_count', 'vote_average', 'title', 'popularity', [ sequelize.literal('"film"'), 'vod_type'], 'trailer_url', 'price', 'expiration_time',
+        [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'backdrop_path'],
+        [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('icon_url')), 'poster_path'],
         'original_language', 'original_title', ['adult_content', 'adult'], ['description', 'overview'], [sequelize.fn('DATE_FORMAT', sequelize.col('release_date'), '%Y-%m-%d'), 'release_date']
     ];
 
@@ -221,6 +243,7 @@ exports.get_vod_list = function(req,res) {
 
     //filter list
     final_where.where.isavailable = true; //return only available movies
+    final_where.where.company_id = req.thisuser.company_id;
     final_where.where.expiration_time = {$gte: Date.now()};
     final_where.where.pin_protected = (req.query.pin_protected === 'true') ? {in: [true, false]} : false; //pin protected content returned only if request explicitly asks for it
     final_where.where.adult_content = (req.query.show_adult === 'true') ? {in: [true, false]} : false; //adult content returned only if request explicitly asks for it
@@ -232,27 +255,62 @@ exports.get_vod_list = function(req,res) {
 
     var category_filter = (req.query.category_id) ? {category_id: Number(req.query.category_id)} : {vod_id: {gt: 0}}; //if specified, filter by category id
 
-    //join tables
-    final_where.include = [
-        {model: models.vod_vod_categories, required: true, attributes: [], where: category_filter}
-    ];
-
     final_where.subQuery = false; //keeps subquery from generating
 
     //start query
-    models.vod.findAndCountAll(
-        final_where
-    ).then(function(results) {
-        var vod_list = {
-            "page": Number(req.query.page), //page number
-            "total_results": results.count, //number of vod items in total for this user
-            "total_pages": Math.ceil(results.count/page_length), //number of pages for this user
-            "results": results.rows //return found records
-        };
-        res.setHeader("X-Total-Count", results.count);
-        response.send_res_get(req, res, vod_list, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
-    }).catch(function(error) {
-        winston.error("Getting the movie list failed with error: ", error);
+
+    models.package.findAll({
+        attributes: ['id'],
+        where: {package_type_id: req.auth_obj.screensize+2},
+        include: [{model: models.subscription, required: true, attributes: ['id'], where: {login_id: req.thisuser.id, end_date: {$gte: Date.now()}}}]
+    }).then(function(packages){
+        var package_list = [];
+        for(var i=0; i<packages.length; i++){
+            package_list.push(packages[i].id);
+        }
+        //join tables
+        final_where.include = [
+            {model: models.vod_vod_categories, required: true, attributes: [], where: category_filter},
+            {model: models.t_vod_sales, required: false, attributes: ['id'], where: {end_time: {$gte: Date.now()}}},
+            {model: models.package_vod, required: false, attributes: ['id'], where: {package_id: {$in: package_list}}}
+        ];
+        //search for vod
+        models.vod.findAndCountAll(
+            final_where
+        ).then(function(results) {
+            //bej async foreach, ku sigurohesh qe filmi ose eshte blerje aktive, ose abonim aktiv, ose (price > 0 dhe expiration > now+duration)
+            var vod_items = [];
+            var transactional_vod_duration = req.app.locals.backendsettings[req.thisuser.company_id].t_vod_duration;
+            async.forEach(results.rows, function(vod, callback){
+                vod = vod.toJSON();
+                var subscription_list = (vod.package_vods && vod.package_vods.length > 0) ? true : false;
+                var purchased = (vod.t_vod_sales && vod.t_vod_sales.length > 0) ? true : false;
+                var available_for_purchase = (vod.price > 0 && transactional_vod_duration && (moment(vod.expiration_time) > moment().add(transactional_vod_duration, 'day')) ) ? true : false;
+
+                if(subscription_list || purchased || available_for_purchase){
+                    delete vod.t_vod_sales;
+                    delete vod.package_vods;
+                    vod_items.push(vod);
+                    callback(null);
+                }
+                else callback(null);
+            },function(error, result){
+                var vod_list = {
+                    "page": Number(req.query.page), //page number
+                    "total_results": results.count, //number of vod items in total for this user. This is a maximum bound, not the exact number
+                    "total_pages": Math.ceil(results.count/page_length), //number of pages for this user. This is a maximum bound, not the exact number
+                    "results": vod_items //return found records
+                };
+                res.setHeader("X-Total-Count", results.count);
+                response.send_res_get(req, res, vod_list, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
+            });
+        }).catch(function(error) {
+            winston.error("Getting the movie list failed with error: ", error);
+            response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
+        });
+        return null;
+    }).catch(function(error){
+        winston.error("Getting the vod package list failed with error: ", error);
         response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
     });
 
@@ -279,6 +337,7 @@ exports.reaction = function(req,res) {
         {
             login_id: req.thisuser.id,
             vod_id: req.params.vod_id,
+            company_id: req.thisuser.company_id,
             resume_position: 0,
             reaction: req.params.reaction,
             device_id: req.auth_obj.boxid
@@ -312,6 +371,7 @@ exports.get_random_vod_item = function(req,res,next) {
     var random_where = {isavailable: true, expiration_time: {$gte: Date.now()}};
     random_where.adult_content = (req.query.show_adult === 'true') ? {$in: [true, false]} : false; //adult content returned only if request explicitly asks for it
     random_where.pin_protected = (req.query.pin_protected === 'true') ? {$in: [true, false]} : false; //pin protected content returned only if request explicitly asks for it
+    random_where.company_id = req.thisuser.company_id;
 
     models.vod.findOne({
         attributes: ['id'],
@@ -343,7 +403,7 @@ exports.get_random_vod_item = function(req,res,next) {
  *
  * Expired and non-available movies are not returned. By default, pin protected or adult movies are not returned, unless specified otherwise.
  *
- * Movie genre, director and cast are used as match criteria. Movies that dont't belong to any genre are excluded.
+ * Movie genre, director and cast are used as match criteria. Movies that don't belong to any genre are excluded.
  *
  * Copy paste this auth for testing purposes
  *auth=%7Bapi_version%3D22%2C+appversion%3D1.1.4.2%2C+screensize%3D480x800%2C+appid%3D2%2C+devicebrand%3D+SM-G361F+Build%2FLMY48B%2C+language%3Deng%2C+ntype%3D1%2C+app_name%3DMAGOWARE%2C+device_timezone%3D2%2C+os%3DLinux%3B+U%3B+Android+5.1.1%2C+auth%3D8yDhVenHT3Mp0O2QCLJFhCUfT73WR1mE2QRc1ZE7J22cRfmskdTmhCk9ssGWhoIBpIzoTEOLIqwl%0A47NaUwLoLZjH1i2WRYaiioIRMqhRvH2FsSuf1YG%2FFoT9fEw4CrxF%0A%2C+hdmi%3Dfalse%2C+firmwareversion%3DLMY48B.G361FXXU1APB1%7D
@@ -351,7 +411,7 @@ exports.get_random_vod_item = function(req,res,next) {
  */
 exports.get_related_movies = function (req, res) {
 
-    var page_length = (req.app.locals.backendsettings.vod_subset_nr) ? req.app.locals.backendsettings.vod_subset_nr : 30; //max nr of movies in the response
+    var page_length = (req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr) ? req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr : 30; //max nr of movies in the response
     if(!req.query.page) req.query.page = 1; //if page param is missing, set page to 1
 
     //set range of movies
@@ -359,7 +419,7 @@ exports.get_related_movies = function (req, res) {
     var limit = page_length; //number of records per request
 
     models.vod.findAll({
-        attributes: ['director', 'starring', [ sequelize.literal('"film"'), 'vod_type']], where: {id: req.params.vod_id},
+        attributes: ['director', 'starring', [ sequelize.literal('"film"'), 'vod_type']], where: {id: req.params.vod_id, company_id: req.thisuser.company_id},
         limit: 1
     }).then(function (result) {
         if (result && result.length > 0) {
@@ -381,6 +441,7 @@ exports.get_related_movies = function (req, res) {
             //prepare the where clause
             var where_condition = "";
             where_condition += " vod.id <> " + req.params.vod_id; //exclude current movie from list
+            where_condition += " AND vod.company_id = "+req.thisuser.company_id+" ";
             where_condition += " AND vod.isavailable = true"; //return only available movies
             where_condition += " AND expiration_time > NOW() "; //do not return movies that have expired
             if (!req.query.pin_protected || req.query.pin_protected !== 'true') where_condition += " AND pin_protected = false"; //return pin_protected content only if explicitly allowed
@@ -389,8 +450,8 @@ exports.get_related_movies = function (req, res) {
 
             var related_query = "SELECT " +
                 "DISTINCT vod.id, vod.vote_count, vod.vote_average, vod.title, vod.popularity, vod.original_language, vod.original_title, vod.adult_content as adult, vod.description as overview, 'film' as vod_type, " +
-                " vod.trailer_url, concat('" + req.app.locals.backendsettings.assets_url + "', vod.image_url) as backdrop_path," +
-                " concat('" + req.app.locals.backendsettings.assets_url + "', vod.icon_url) as poster_path," +
+                " vod.trailer_url, concat('" + req.app.locals.backendsettings[req.thisuser.company_id].assets_url + "', vod.image_url) as backdrop_path," +
+                " concat('" + req.app.locals.backendsettings[req.thisuser.company_id].assets_url + "', vod.icon_url) as poster_path," +
                 " DATE_FORMAT(vod.release_date, '%Y-%m-%d') as release_date, " +
                 " ( " +
                     //" IF( (category_id = "+result[0].category_id+"), 1, 0) + "+ //category matching score
@@ -453,8 +514,8 @@ exports.get_related_movies = function (req, res) {
 exports.get_purchased_movies = function (req, res) {
     var attribute_list = [
         'vote_count', 'vote_average', 'title', 'popularity', [ sequelize.literal('"film"'), 'vod_type'], 'trailer_url',
-        [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('image_url')), 'backdrop_path'],
-        [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('icon_url')), 'poster_path'],
+        [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'backdrop_path'],
+        [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('icon_url')), 'poster_path'],
         'original_language', 'original_title', ['adult_content', 'adult'], ['description', 'overview'], [sequelize.fn('DATE_FORMAT', sequelize.col('release_date'), '%Y-%m-%d'), 'release_date']
     ];
 
@@ -464,6 +525,7 @@ exports.get_purchased_movies = function (req, res) {
 
     var movie_condition = {};
     movie_condition.isavailable = (!req.query.is_available) ? {$in: [true, false]} : (req.query.is_available === 'true'); //return all purchased movies, unless specified otherwise by parameter is_available
+    where_condition.company_id = req.thisuser.company_id;
     movie_condition.pin_protected = (req.query.pin_protected === 'true') ? {in: [true, false]} : false; //pin protected content returned only if request explicitly asks for it
     movie_condition.adult_content = (req.query.show_adult === 'true') ? {$in: [true, false]} : false; //adult content returned only if request explicitly asks for it
 
@@ -507,16 +569,16 @@ exports.get_purchased_movies = function (req, res) {
 exports.get_tvod_movies = function(req, res){
 
     //find duration for vod sale, from special combo with identifier transactional_vod
-    if(typeof req.app.locals.backendsettings.t_vod_duration !== "number"){
+    if(typeof req.app.locals.backendsettings[req.thisuser.company_id].t_vod_duration !== "number"){
         response.send_res_get(req, res, [], 200, 1, 'NOT_FOUND_DESCRIPTION', 'NO_DATA_FOUND', 'private,max-age=86400'); //transactional vod is not enabled, return empty list
     }
     else{
-        var sale_duration = req.app.locals.backendsettings.t_vod_duration;
-        var page_length = (req.app.locals.backendsettings.vod_subset_nr) ? req.app.locals.backendsettings.vod_subset_nr : 30; //max nr of movies in the response
+        var sale_duration = req.app.locals.backendsettings[req.thisuser.company_id].t_vod_duration;
+        var page_length = (req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr) ? req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr : 30; //max nr of movies in the response
         var attribute_list = [
             'vote_count', 'vote_average', 'title', 'popularity', [ sequelize.literal('"film"'), 'vod_type'], 'trailer_url',
-            [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('image_url')), 'backdrop_path'],
-            [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('icon_url')), 'poster_path'],
+            [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'backdrop_path'],
+            [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('icon_url')), 'poster_path'],
             'original_language', 'original_title', ['adult_content', 'adult'], ['description', 'overview'], [sequelize.fn('DATE_FORMAT', sequelize.col('release_date'), '%Y-%m-%d'), 'release_date']
         ];
 
@@ -525,7 +587,8 @@ exports.get_tvod_movies = function(req, res){
             price: {$gt: 0}, //movies with price greater that 0 are available for sale
             expiration_time: {$gte: db.sequelize.fn('DATE_ADD', db.sequelize.literal('NOW()'), db.sequelize.literal('INTERVAL '+sale_duration+' DAY')) }, //make sure the sale duration is longer than the movie's expiration
             adult_content: (req.query.show_adult === 'true') ? {$in: [true, false]} : false, //adult content returned only if request explicitly asks for it
-            pin_protected: (req.query.pin_protected  === 'true') ? {in: [true, false]} : false //pin protected content returned only if request explicitly asks for it
+            pin_protected: (req.query.pin_protected  === 'true') ? {in: [true, false]} : false, //pin protected content returned only if request explicitly asks for it
+            company_id: req.thisuser.company_id
         };
 
         //set range of movies

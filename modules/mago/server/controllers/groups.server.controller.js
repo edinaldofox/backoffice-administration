@@ -13,6 +13,7 @@ var path = require('path'),
  * Create
  */
 exports.create = function(req, res) {
+    if(req.token.role !== 'superadmin') req.body.company_id = req.token.company_id; //save record for this company
 
     DBModel.create(req.body).then(function(result) {
         if (!result) {
@@ -32,7 +33,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.users);
+    if( (req.users.company_id === req.token.company_id) || (req.token.role === 'superadmin') ) res.json(req.users);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -41,14 +43,19 @@ exports.read = function(req, res) {
 exports.update = function(req, res) {
     var updateData = req.users;
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        res.json(result);
-    }).catch(function(err) {
-        winston.error("Updating group failed with error: ", err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
+    if( (req.users.company_id === req.token.company_id) || (req.token.role === 'superadmin') ){
+        updateData.updateAttributes(req.body).then(function(result) {
+            res.json(result);
+        }).catch(function(err) {
+            winston.error("Updating group failed with error: ", err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 /**
@@ -59,14 +66,19 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Deleting group failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if ( (result && (result.company_id === req.token.company_id) ) || (req.token.role === 'superadmin') ) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Deleting group failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -90,7 +102,10 @@ exports.list = function(req, res) {
   var offset_start = parseInt(query._start);
   var records_limit = query._end - query._start;
 
+    var where_condition = (req.token.role !== 'superadmin') ? {company_id: req.token.company_id, code: {$notIn: ['superadmin', 'admin']}} : {};
+
     DBModel.findAndCountAll({
+        where: where_condition,
         include: []
     }).then(function(results) {
         if (!results) {

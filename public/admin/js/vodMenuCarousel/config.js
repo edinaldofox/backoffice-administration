@@ -13,6 +13,7 @@ export default function (nga, admin) {
             nga.field('vod_menu_id','reference')
                 .targetEntity(admin.getEntity('vodMenu'))
                 .targetField(nga.field('name'))
+                .isDetailLink(false)
                 .label('Vod Menu Name'),
             nga.field('name','string')
                 .label('Carousel Name'),

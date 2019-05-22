@@ -13,16 +13,19 @@ var path = require('path'),
 module.exports = function(app) {
 
     app.route('/api/systemmenu1')
+        .all(policy.Authenticate)
         //.all(policy.isAllowed)
         .get(systemmenu.list1);
 
     /* ===== system menu ===== */
     app.route('/api/systemmenu')
+        .all(policy.Authenticate)
         //.all(policy.isAllowed)
         .get(systemmenu.list)
         .post(systemmenu.create);
 
     app.route('/api/systemmenu/:systemmenuId')
+        .all(policy.Authenticate)
         //.all(policy.isAllowed)
         .get(systemmenu.read)
         .put(systemmenu.update)

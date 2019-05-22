@@ -5,12 +5,14 @@ var path = require('path'),
     config = require(path.resolve('./modules/account-kit/server/config')),
     customerFunctions = require(path.resolve('./custom_functions/customer_functions')),
     authenticationHandler = require(path.resolve('./modules/deviceapiv2/server/controllers/authentication.server.controller')),
-    response = require(path.resolve("./config/responses.js"));
+    response = require(path.resolve("./config/responses.js")),
+    db = require(path.resolve('./config/lib/sequelize')).models;
+var winston = require('winston');
 
 const crypto = require('crypto');
 var csrf = 'qwertzuio';
 const me_endpoint_base_url = 'https://graph.accountkit.com/' + config.api_version + '/me';
-const token_exchange_base_url = 'https://graph.accountkit.com/' + config.api_version + '/access_token'; 
+const token_exchange_base_url = 'https://graph.accountkit.com/' + config.api_version + '/access_token';
 
 exports.handleRenderLoginForm = function(req, res) {
     const address = req.protocol + '://' + req.get('host');
@@ -36,9 +38,9 @@ exports.handleLoginSuccess = function(req, res) {
             }
             else {
                 let r = new response.OK();
-                r.status_code=400
+                r.status_code = 702;
                 r.error_code = -1;
-                r.error_description = 'USER_NOT_FOUND'
+                r.error_description = 'USER_NOT_FOUND';
                 res.send(r);
             }
         });
@@ -48,7 +50,7 @@ exports.handleLoginSuccess = function(req, res) {
     }
     else {
         let r = new response.OK();
-        r.status_code=400
+        r.status_code=400;
         r.error_code = -1;
         r.error_description = 'BAD_REQUEST'
         res.send(r);
@@ -70,52 +72,85 @@ function handleAuthSuccess(req, res, access_token) {
             isEmail = true;
         } else {
             let r = new response.OK();
-            r.status_code=702
+            r.status_code=702;
             r.error_code = -1;
-            r.error_description = 'USER_NOT_FOUND'
+            r.error_description = 'USER_NOT_FOUND';
             res.send(r);
             return;
         }
+        db.login_data.findOne({
+            where: { username: username }
+        }).then(function (login_data) {
+            if (!login_data) {
+                //add user
+                req.body = {};
+                req.body.firstname = '';
+                req.body.lastname = '';
+                req.body.address = '';
+                req.body.city = '';
+                req.body.country = '';
+                req.body.telephone = isEmail ? '' : respBody.phone.number;
 
-        //add user
-        req.body = {};
-        req.body.firstname = '';
-        req.body.lastname = '';
-        req.body.address = '';
-        req.body.city = '';
-        req.body.country = '';
-        req.body.telephone = '';
+                req.body.email = username;
+                req.body.username = username;
+                req.body.password = username;
 
-        req.body.email = isEmail ? username : '';
-        req.body.username = username;
+                //  req.body.password = crypto.randomBytes(4).toString('hex').slice(0, 8);
 
-        req.body.salt = authenticationHandler.makesalt();
-        let password = username//crypto.randomBytes(4).toString('hex').slice(0, 8);
-        req.body.password = password;
-        req.body.channel_stream_source_id = (req.body.channel_stream_source_id) ? req.body.channel_stream_source_id : 1;
-        req.body.vod_stream_source = (req.body.vod_stream_source) ? req.body.vod_stream_source : 1;
-        req.body.pin = (req.body.pin) ? req.body.pin : 1234;
-        customerFunctions.find_or_create_customer_and_login(req, res)
-            .then(function (customer) {
-                if (customer.status) {
-                    let user = {
-                        'username': username,
-                        'password': password
-                    }
-                    let responseMsg = new response.OK();
-                    responseMsg.extra_data = 'user';
-                    responseMsg.response_object = [ user ];
-                    res.send(responseMsg);
-                } else {
-                    let r = response.OK();
-                    r.status_code=400
+                customerFunctions.create_customer_with_login(req, res)
+                    .then(function (result) {
+                        if (result.status) {
+                            db.login_data.findOne({where: {
+                                username: username
+                            }}).then(function(login_data){
+                                if (login_data) {
+                                    let password = authenticationHandler.encryptPassword(username, login_data.salt)
+                                    let user = {
+                                        'username': username,
+                                        'password': password
+                                    }
+                                    let responseMsg = new response.OK();
+                                    responseMsg.extra_data = 'user';
+                                    responseMsg.response_object = [user];
+                                    res.send(responseMsg);
+                                }
+                            })
+                        } else {
+                            let r = new response.OK();
+                            r.status_code = 702;
+                            r.error_code = -1;
+                            r.error_description = 'USER_NOT_FOUND';
+                            res.send(r);
+                        }
+                    }).catch(function (err) {
+                    let r = new response.OK();
+                    r.status_code = 500;
                     r.error_code = -1;
-                    r.error_description = 'USER_NOT_FOUND'
-                    res.send(r);    
+                    r.error_description = 'Error';
+                    res.status(500).send(r);
+                });
+            }
+            else {
+                let password = authenticationHandler.encryptPassword(username, login_data.salt);
+
+                let user = {
+                    'username': username,
+                    'password': password
                 }
-            }).catch(function (err) {
-                res.send({ status: false });
-            });
-    });    
+                let responseMsg = new response.OK();
+                responseMsg.extra_data = 'user';
+                responseMsg.response_object = [user];
+
+                res.send(responseMsg);
+            }
+        }).catch(function(error){
+            winston.error(error);
+        })
+    });
 }
 
+exports.encrypt = function(req, res) {
+    let username = req.query.username;
+    let salt = req.query.salt;
+    res.send(authenticationHandler.encryptPassword(username, salt));
+}

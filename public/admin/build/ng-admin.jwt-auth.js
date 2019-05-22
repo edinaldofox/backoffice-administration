@@ -1,12 +1,21 @@
+// import temp from "../js/loginGoogle/loginGoogle.html";
+
 
 
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-  var ngAdminJWTAuthService = function($http, jwtHelper, ngAdminJWTAuthConfigurator) {
+  var ngAdminJWTAuthService = function($http, jwtHelper, ngAdminJWTAuthConfigurator,notification) {
 
     return {
       authenticate: function(data, successCallback, errorCallback) {
 
         var url = ngAdminJWTAuthConfigurator.getAuthURL();
+
+        //getting static obj for superadmin menu
+        var superadminObj;
+        $http.get('js/superadminMenuObj.json').success(function(data){
+            superadminObj = data;
+        });
+        //getting static obj for superadmin menu
 
               //make request towards the authentication api
               return $http({
@@ -20,6 +29,30 @@
                   localStorage.userToken = response.data.token;
                   localStorage.userRole = payload.role;
                   localStorage.userName = payload.sub;
+
+                  if(response.data.menujson.length > 0 ){
+
+                      var menuJSON = JSON.stringify(response.data.menujson);
+                      localStorage.menuObject = menuJSON;
+                      if(response.data.menujson[1].children.length > 0){
+                          localStorage.redirect_url = response.data.menujson[1].children[0].link;
+                      }else{
+                          localStorage.redirect_url = response.data.menujson[1].link;
+                      }
+
+                  }else if (payload.role === 'superadmin'){
+
+                      var menuJSON = JSON.stringify(superadminObj);
+                      localStorage.menuObject = menuJSON;
+                      if(superadminObj[1].children.length > 0){
+                          localStorage.redirect_url = superadminObj[1].children[0].link;
+                      }else{
+                          localStorage.redirect_url = superadminObj[1].link;
+                      }
+
+                  }else{
+                      notification.log('Sorry, this user does not belong to any Menu ', { addnCls: 'humane-flatty-error' });
+                  }
 
                   successCallback(response);
 
@@ -47,6 +80,8 @@
         localStorage.removeItem('userRole');
         localStorage.removeItem('userToken');
         localStorage.removeItem('userName');
+        localStorage.removeItem('menuObject');
+        localStorage.removeItem('redirect_url');
         return true;
       }
 
@@ -54,13 +89,13 @@
 
   };
 
-  ngAdminJWTAuthService.$inject = ['$http', 'jwtHelper', 'ngAdminJWTAuthConfigurator'];
+  ngAdminJWTAuthService.$inject = ['$http', 'jwtHelper', 'ngAdminJWTAuthConfigurator','notification'];
 
   module.exports = ngAdminJWTAuthService;
 },{}],2:[function(require,module,exports){
   var ngAdminJWTAuthConfiguratorProvider = function() {
     var authConfigs = {
-      _nonProtectedStates: ['login']
+      _nonProtectedStates: ['login','auth']
     };
 
     this.setJWTAuthURL = function(url){
@@ -142,9 +177,16 @@
               
                 if (success) {
 
-                    that.$location.path('/dashboard');
-                    window.location.reload();
+                    var redirect_url = localStorage.getItem("redirect_url");
 
+                    if (redirect_url){
+                        window.location.hash = redirect_url;
+                        location.reload();
+                    } else {
+                        localStorage.removeItem('userRole');
+                        localStorage.removeItem('userToken');
+                        localStorage.removeItem('userName');
+                    }
                 }
 
         };
@@ -185,6 +227,18 @@
 },{}],6:[function(require,module,exports){
   'use strict';
 
+        //MUST USE TO WORK CORRECT IN IE
+        	String.prototype.endsWith = function(pattern) {
+            	var d = this.length - pattern.length;
+            	return d >= 0 && this.lastIndexOf(pattern) === d;
+            	};
+
+        	String.prototype.includes = function(pattern) {
+           	var d = this.length - pattern.length;
+           	return d >= 0 && this.lastIndexOf(pattern) === d;
+            	};
+      	//./MUST USE TO WORK CORRECT IN IE
+
   var ngAdminJWTAuth = angular.module('ng-admin.jwt-auth', ['angular-jwt']);
 
   ngAdminJWTAuth.config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
@@ -219,6 +273,50 @@
       controller: 'logoutController',
       controllerAs: 'logoutController',
     });
+
+      $stateProvider.state('auth', {
+          parent: '',
+          url: '/auth',
+          controller: ['$http', '$scope','notification','$stateParams','$location', function($http, $scope, notification,$stateParams,$location) {
+
+            $scope.parameters = $location.search();
+
+            var req = {
+                  method: 'POST',
+                  url: window.location.origin + '/api/auth/logingmail',
+                  headers: {
+                      'Authorization': $scope.parameters.access_token
+                  }
+              };
+
+              $http(req).then(function successCallback(response) {
+
+                  if (response.status === 200){
+
+                      localStorage.userToken = $scope.parameters.access_token;
+                      localStorage.userRole = response.data.user.group.code;
+                      localStorage.userName = response.data.user.username;
+
+                      var menuJSON = JSON.stringify(response.data.menujson);
+                      localStorage.menuObject = menuJSON;
+
+                      if(response.data.menujson[1].children.length > 0){
+                          localStorage.redirect_url = response.data.menujson[1].children[0].link;
+                      }else{
+                          localStorage.redirect_url = response.data.menujson[1].link;
+                      }
+
+                      var redirect_url = localStorage.getItem("redirect_url");
+
+                      window.location.hash = redirect_url;
+                      location.reload();
+                  }
+              }, function errorCallback(response) {
+                  window.location.hash = "login";
+                  notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+              });
+          }],
+      });
 
   }]);
 

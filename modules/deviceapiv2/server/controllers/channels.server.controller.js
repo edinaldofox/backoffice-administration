@@ -66,6 +66,7 @@ exports.list = function(req, res) {
     if(req.thisuser.show_adult == 0) qwhere.pin_protected = 0; //show adults filter
     else qwhere.pin_protected != ''; //avoid adult filter
     qwhere.isavailable = 1;
+    qwhere.company_id = req.thisuser.company_id;
 
     // requisites for streams provided by the user
     var userstream_qwhere = {"isavailable": true, "login_id": req.thisuser.id};
@@ -79,7 +80,7 @@ exports.list = function(req, res) {
     stream_qwhere.stream_resolution = {$like: "%"+req.auth_obj.appid+"%"};
 
     // requisites for catchup streams
-    var catchupstream_where = {stream_source_id: req.thisuser.channel_stream_source_id};
+    var catchupstream_where = {stream_source_id: req.thisuser.channel_stream_source_id, company_id: req.thisuser.company_id};
     if(req.thisuser.player.toUpperCase() === 'default'.toUpperCase()) catchupstream_where.stream_format = {$not: 0}; //don't send mpd streams for default player
     if(req.auth_obj.appid === 3) catchupstream_where.stream_format = 2; // send only hls streams for ios application
     catchupstream_where.stream_mode = 'catchup'; //filter streams based on device resolution
@@ -140,7 +141,7 @@ exports.list = function(req, res) {
                     temp_obj.id = my_channel_list[i].id;
                     temp_obj.channel_number = my_channel_list[i].channel_number;
                     temp_obj.title = my_channel_list[i].title;
-                    temp_obj.icon_url = req.app.locals.settings.assets_url + my_channel_list[i]["genre.icon_url"];
+                    temp_obj.icon_url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url + my_channel_list[i]["genre.icon_url"];
                     temp_obj.stream_url = my_channel_list[i]["stream_url"];
                     temp_obj.genre_id = my_channel_list[i].genre_id;
                     temp_obj.channel_mode = 'live';
@@ -149,7 +150,7 @@ exports.list = function(req, res) {
                     temp_obj.stream_format = "1";
                     temp_obj.drm_platform = "none";
                     temp_obj.token = 0;
-                    temp_obj.token_url = 'http://tibomanager4.tibo.tv/unsecured/token/apiv2/Akamai_token.aspx';
+                    temp_obj.token_url = '';
                     temp_obj.encryption = 0;
                     temp_obj.encryption_url = "0";
                     temp_obj.is_octoshape = 0;
@@ -158,7 +159,7 @@ exports.list = function(req, res) {
                 }
 
                 for (var i = 0; i < result.length; i++) {
-                    result[i].icon_url = req.app.locals.settings.assets_url + result[i]["icon_url"];
+                    result[i].icon_url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url + result[i]["icon_url"];
                     result[i].pin_protected = result[i].pin_protected == 0 ? 'false':'true';
                     result[i].stream_source_id = result[i]["channel_streams.stream_source_id"]; delete result[i]["channel_streams.stream_source_id"];
                     result[i].stream_url = result[i]["channel_streams.stream_url"]; delete result[i]["channel_streams.stream_url"];
@@ -213,6 +214,7 @@ exports.list_get = function(req, res) {
     if(req.thisuser.show_adult == 0) qwhere.pin_protected = 0; //show adults filter
     else qwhere.pin_protected != ''; //avoid adult filter
     qwhere.isavailable = 1;
+    qwhere.company_id = req.thisuser.company_id;
 
     // requisites for streams provided by the user
     var userstream_qwhere = {"isavailable": true, "login_id": req.thisuser.id};
@@ -226,7 +228,7 @@ exports.list_get = function(req, res) {
     stream_qwhere.stream_resolution = {$like: "%"+req.auth_obj.appid+"%"};
 
     // requisites for catchup streams
-    var catchupstream_where = {stream_source_id: req.thisuser.channel_stream_source_id};
+    var catchupstream_where = {stream_source_id: req.thisuser.channel_stream_source_id, company_id: req.thisuser.company_id};
     if(req.thisuser.player.toUpperCase() === 'default'.toUpperCase()) catchupstream_where.stream_format = {$not: 0}; //don't send mpd streams for default player
     if(req.auth_obj.appid === 3) catchupstream_where.stream_format = 2; // send only hls streams for ios application
     catchupstream_where.stream_mode = 'catchup'; //filter streams based on device resolution
@@ -287,7 +289,7 @@ exports.list_get = function(req, res) {
                     temp_obj.id = my_channel_list[i].id;
                     temp_obj.channel_number = my_channel_list[i].channel_number;
                     temp_obj.title = my_channel_list[i].title;
-                    temp_obj.icon_url = req.app.locals.settings.assets_url + my_channel_list[i]["genre.icon_url"];
+                    temp_obj.icon_url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url + my_channel_list[i]["genre.icon_url"];
                     temp_obj.stream_url = my_channel_list[i]["stream_url"];
                     temp_obj.genre_id = my_channel_list[i].genre_id;
                     temp_obj.channel_mode = 'live';
@@ -295,7 +297,7 @@ exports.list_get = function(req, res) {
                     temp_obj.stream_source_id = 1;
                     temp_obj.stream_format = "1";
                     temp_obj.token = 0;
-                    temp_obj.token_url = 'http://tibomanager4.tibo.tv/unsecured/token/apiv2/Akamai_token.aspx';
+                    temp_obj.token_url = '';
                     temp_obj.encryption = 0;
                     temp_obj.encryption_url = "0";
                     temp_obj.drm_platform = "none";
@@ -305,7 +307,7 @@ exports.list_get = function(req, res) {
                 }
 
                 for (var i = 0; i < result.length; i++) {
-                    result[i].icon_url = req.app.locals.settings.assets_url + result[i]["icon_url"];
+                    result[i].icon_url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url + result[i]["icon_url"];
                     result[i].pin_protected = result[i].pin_protected == 0 ? 'false':'true';
                     result[i].stream_source_id = result[i]["channel_streams.stream_source_id"]; delete result[i]["channel_streams.stream_source_id"];
                     result[i].stream_url = result[i]["channel_streams.stream_url"]; delete result[i]["channel_streams.stream_url"];
@@ -367,8 +369,8 @@ exports.list_get = function(req, res) {
  */
 exports.genre = function(req, res) {
     models.genre.findAll({
-        attributes: ['id',['description', 'name'], [Sequelize.fn('concat', req.app.locals.settings.assets_url, Sequelize.col('icon_url')), 'icon'] ],
-        where: {is_available: true}
+        attributes: ['id',['description', 'name'], [Sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, Sequelize.col('icon_url')), 'icon'] ],
+        where: {is_available: true, company_id: req.thisuser.company_id}
     }).then(function (result) {
         var favorite_genre = {
             "id": 666,
@@ -410,8 +412,8 @@ exports.genre = function(req, res) {
  */
 exports.genre_get = function(req, res) {
     models.genre.findAll({
-        attributes: ['id',['description', 'name'], [Sequelize.fn('concat', req.app.locals.settings.assets_url, Sequelize.col('icon_url')), 'icon'] ],
-        where: {is_available: true}
+        attributes: ['id',['description', 'name'], [Sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, Sequelize.col('icon_url')), 'icon'] ],
+        where: {is_available: true, company_id: req.thisuser.company_id}
     }).then(function (result) {
         var favorite_genre = {
             "id": 666,
@@ -476,7 +478,8 @@ exports.favorites = function(req, res) {
             if(req.body.action == "1"){
                 models.favorite_channels.create({
                     channel_id: channel_id,
-                    user_id: user_id
+                    user_id: user_id,
+                    company_id: req.thisuser.company_id
                 }).then(function (result) {
                     var extra_data = "Added channel "+req.body.channelNumber+" as a favorite of user "+req.auth_obj.username; //todo: dynamic response
                     response.send_res(req, res, [], 200, 1, 'OK_DESCRIPTION', extra_data, 'private,max-age=86400');
@@ -549,7 +552,7 @@ exports.program_info = function(req, res) {
 
     models.epg_data.findOne({
         attributes: ['title', 'long_description', 'program_start', 'program_end'],
-        where: {id: req.body.program_id},
+        where: {id: req.body.program_id, company_id: req.thisuser.company_id},
         include: [
             {
                 model: models.channels, required: true, attributes: ['title', 'description'],
@@ -632,7 +635,7 @@ exports.program_info = function(req, res) {
 exports.schedule = function(req, res) {
     models.epg_data.findOne({
         attributes: ['id', 'channel_number', 'program_start'],
-        where: {id: req.body.program_id}
+        where: {id: req.body.program_id, company_id: req.thisuser.company_id}
     }).then(function (epg_program) {
         if(epg_program){
             models.program_schedule.findOne({
@@ -641,12 +644,13 @@ exports.schedule = function(req, res) {
                 if(!scheduled){
                     models.program_schedule.create({
                         login_id: req.thisuser.id,
-                        program_id: req.body.program_id
+                        program_id: req.body.program_id,
+                        company_id: req.thisuser.company_id
                     }).then(function (scheduled){
                         var response_data = [{
                             "action": 'created'
                         }];
-                        var firebase_key = req.app.locals.settings.firebase_key;
+                        var firebase_key = req.app.locals.backendsettings[req.thisuser.company_id].firebase_key;
                         //programstart is converted to unix time, decreased by 5 min, decreased by current time. This gives the difference between the current time and 5 min before the start of the program
                         schedule.schedule_program(moment(epg_program.program_start).format('x') - Date.now() - 300000, firebase_key, scheduled.id, req.thisuser.id, epg_program.channel_number, req.body.program_id);
                         response.send_res(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'no-store');

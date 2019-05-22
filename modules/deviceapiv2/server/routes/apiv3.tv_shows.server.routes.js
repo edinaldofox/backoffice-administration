@@ -25,4 +25,8 @@ module.exports = function(app) {
     app.route('/apiv3/tv_show/episode_details/:episode_id')
         .all(authpolicy.isAllowed)
         .get(tvShowController.episode_details);
+
+    app.route('/apiv3/tv_show/related_shows/:tv_show_id')
+        .all(authpolicy.isAllowed)
+        .get(tvShowController.related_shows);
 };

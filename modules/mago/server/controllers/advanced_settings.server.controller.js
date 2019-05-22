@@ -16,7 +16,8 @@ var path = require('path'),
  */
 exports.create = function(req, res) {
 
-    logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+    logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+    req.body.company_id = req.token.company_id; //save record for this company
     DBModel.create(req.body).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
@@ -35,32 +36,37 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.advancedsettings);
+    if(req.advancedsettings.company_id === req.token.company_id) res.json(req.advancedsettings);
+    else return res.status(404).send({message: 'User not authorized to access these data'});
 };
 
 /**
  * Update
  */
 exports.update = function(req, res) {
-    var updateData = req.advancedsettings;
 
-    var new_advancedsetting = {}; //temporary timestamps will be stored here
+    if(req.advancedsettings.company_id === req.token.company_id){
+        var updateData = req.advancedsettings;
 
-    new_advancedsetting = merge(req.body, new_advancedsetting); //merge values left @req.body with values stored @temp object into a new object
-    logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(new_advancedsetting)); //write new values in logs
+        var new_advancedsetting = {}; //temporary timestamps will be stored here
+        new_advancedsetting = merge(req.body, new_advancedsetting); //merge values left @req.body with values stored @temp object into a new object
 
-    updateData.updateAttributes(new_advancedsetting).then(function(result) {
-
-        //refresh advanced settings in app memory
-        req.app.locals.advancedsettings[result.id - 1] = result.toJSON();
-
-        res.json(result);
-    }).catch(function(err) {
-        winston.error("Updating a setting record failed with error: ", err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
+        updateData.updateAttributes(new_advancedsetting).then(function(result) {
+            req.app.locals.advancedsettings[result.id - 1] = result.toJSON(); //refresh advanced settings in app memory
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(new_advancedsetting), req.token.company_id); //write new values in logs
+            res.json(result);
+            return null;
+        }).catch(function(err) {
+            winston.error("Updating a setting record failed with error: ", err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
+
 };
 
 /**
@@ -71,14 +77,20 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Deleting a setting record failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Deleting a setting record failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -108,6 +120,8 @@ exports.list = function(req, res) {
     if(query._orderBy) final_where.order = query._orderBy + ' ' + query._orderDir;
     final_where.include = [];
     //end build final where
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(
 

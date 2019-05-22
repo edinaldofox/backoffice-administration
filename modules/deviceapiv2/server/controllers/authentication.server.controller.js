@@ -8,6 +8,9 @@ var path = require('path'),
     querystring = require("querystring"),
     models = db.models;
 
+
+
+
 //returns a random salt
 function makesalt(){
     return crypto.randomBytes(16).toString('base64');

@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         name: {
             type: DataTypes.STRING(128),
             allowNull: false
@@ -35,6 +40,7 @@ module.exports = function(sequelize, DataTypes) {
             if(models.vod_menu_carousel){
                 vodmenu.hasMany(models.vod_menu_carousel, {foreignKey: 'vod_menu_id'});
             }
+            vodmenu.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return vodmenu;

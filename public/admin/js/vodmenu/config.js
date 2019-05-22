@@ -59,7 +59,25 @@ export default function (nga, admin) {
         .actions(['list'])
         .title('<h4>Vod Menu <i class="fa fa-angle-right" aria-hidden="true"></i> Edit: {{ entry.values.id }}</h4>')
         .fields([
-            VodMenu.creationView().fields()
+            VodMenu.creationView().fields(),
+
+            nga.field('vodMenuCarousel', 'referenced_list')
+                .label('VOD Menu Carousel')
+                .targetEntity(admin.getEntity('vodMenuCarousel'))
+                .targetReferenceField('vod_menu_id')
+                .targetFields([
+                    nga.field('name')
+                        .label('Carousel Name'),
+                    nga.field('order')
+                        .label('Order'),
+                    nga.field('url')
+                        .label('Url')
+                ])
+                .listActions(['edit', 'delete']),
+            nga.field('Add VOD Menu Carousel', 'template')
+                .label('')
+                .template('<ma-create-button entity-name="vodMenuCarousel" class="pull-right" label="Add VOD Menu Carousel" default-values="{ vod_menu_id: entry.values.id }"></ma-create-button>'),
+
         ]);
 
     VodMenu.deletionView()

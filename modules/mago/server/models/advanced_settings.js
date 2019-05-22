@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         parameter_id: {
             type: DataTypes.STRING(100),
             allowNull: false,
@@ -26,6 +31,10 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.STRING(100),
             allowNull: true
         },
+        parameter3_value: {
+            type: DataTypes.STRING(100),
+            allowNull: true
+        },
         duration: {
             type: DataTypes.INTEGER(50),
             allowNull: true
@@ -36,7 +45,10 @@ module.exports = function(sequelize, DataTypes) {
         }
     }, {
         tableName: 'advanced_settings',
-        timestamps: false
+        timestamps: false,
+        associate: function(models) {
+            advancedSettings.belongsTo(models.settings, {foreignKey: 'company_id'});
+        }
     });
     return advancedSettings;
 };

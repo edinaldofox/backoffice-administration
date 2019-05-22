@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         username: {
             type: DataTypes.STRING(30),
             allowNull: true
@@ -101,6 +106,7 @@ module.exports = function(sequelize, DataTypes) {
         tableName: 'devices',
         associate: function(models) {
             Devices.belongsTo(models.login_data, {foreignKey: 'login_data_id'});
+            Devices.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return Devices;

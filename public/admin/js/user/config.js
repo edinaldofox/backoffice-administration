@@ -5,11 +5,18 @@ export default function (nga, admin) {
 	user.listView()
 		.title('<h4>Users <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>')
 		.batchActions([])
+        .actions(['<roles post="entry"></roles>', 'filter', 'export','create','<invite type="invite_users" selection="selection"></invite>'])
 		.fields([
 			nga.field('group_id', 'reference')
 				.targetEntity(admin.getEntity('Groups'))
                 .targetField(nga.field('name'))
 				.label('Group'),
+			nga.field('company_id', 'reference')
+					.targetEntity(admin.getEntity('Settings'))
+					.targetField(nga.field('company_name'))
+					.attributes({ placeholder: 'Choose company from dropdown list' })
+					.perPage(-1)
+					.label('Company'),
 			nga.field('username', 'string')
 				.label('Username'),
 			nga.field('email', 'email')
@@ -34,6 +41,10 @@ export default function (nga, admin) {
                 .label('')
                 .template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>')
                 .pinned(true),
+            nga.field('group_id', 'reference')
+                .targetEntity(admin.getEntity('Groups'))
+                .targetField(nga.field('name'))
+                .label('Group'),
 		])
 		.listActions(['edit'])
         .exportFields([
@@ -53,8 +64,15 @@ export default function (nga, admin) {
                         }
                     }
                 })
+				.permanentFilters({exclude_group: 'superadmin'})
                 .attributes({ placeholder: 'Select group' })
 				.label('Group *'),
+			nga.field('company_id', 'reference')
+					.targetEntity(admin.getEntity('Settings'))
+					.targetField(nga.field('company_name'))
+					.attributes({ placeholder: 'Choose company from dropdown list' })
+					.perPage(-1)
+					.label('Company'),
 			nga.field('username', 'string')
 				.attributes({ placeholder: 'Username must be at least 3 character long' })
 				.validation({ required: true, minlength: 3 })
@@ -97,7 +115,53 @@ export default function (nga, admin) {
     	.title('<h4>Users <i class="fa fa-angle-right" aria-hidden="true"></i> Edit: {{ entry.values.username }}</h4>')  
     	.actions(['list'])         
         .fields([
-            user.creationView().fields(),
+			nga.field('group_id', 'reference')
+					.targetEntity(admin.getEntity('Groups'))
+					.targetField(nga.field('name'))
+					.validation({validator: function(value) {
+						if(value === null || value === ''){
+							throw new Error('Please Select Group');
+						}
+					}
+					})
+					.permanentFilters({exclude_group: 'superadmin'})
+					.attributes({ placeholder: 'Select group' })
+					.label('Group *'),
+			nga.field('username', 'string')
+					.attributes({ placeholder: 'Username must be at least 3 character long' })
+					.validation({ required: true, minlength: 3 })
+					.label('Username'),
+			nga.field('hashedpassword', 'password')
+					.attributes({ placeholder: 'Password must be at least 4 character long' })
+					.validation({ required: true, minlength: 4})
+					.label('Password'),
+			nga.field('email', 'email')
+					.attributes({ placeholder: 'Email' })
+					.validation({ required: true })
+					.label('Email'),
+			nga.field('telephone', 'string')
+					.attributes({ placeholder: 'Telephone' })
+					.validation({ required: true })
+					.label('Telephone'),
+			nga.field('jwtoken', 'string')
+					.attributes({ placeholder: 'Api Key', readOnly: true })
+					.defaultValue('')
+					.label('Api Key'),
+			nga.field('template')
+					.label('')
+					.template('<generate post="entry"></generate>'),
+			nga.field('isavailable', 'boolean')
+					.validation({ required: true })
+					.label('Is Available'),
+			nga.field('template')
+					.label('')
+					.template(edit_button),
+			//hidden from UI
+			nga.field('third_party_api_token', 'string')
+					.cssClasses('hidden')
+					.attributes({ placeholder: 'Third party token' })
+					.defaultValue('')
+					.label(''),
         ]);
 
 	return user;

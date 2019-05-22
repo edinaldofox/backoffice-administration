@@ -14,11 +14,13 @@ module.exports = function(app) {
 
     /* ===== genres ===== */
     app.route('/api/genres')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(genres.list)
         .post(genres.create);
 
     app.route('/api/genres/:genreId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(genres.read)
         .put(genres.update)

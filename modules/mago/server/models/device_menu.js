@@ -9,6 +9,12 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1,
+            unique: 'position'
+        },
         title: {
             type: DataTypes.STRING(20),
             allowNull: false
@@ -32,7 +38,7 @@ module.exports = function(sequelize, DataTypes) {
         position: {
             type: DataTypes.INTEGER(11),
             allowNull: false,
-            unique: true
+            unique: 'position'
         },
         menu_level: {
             type: DataTypes.INTEGER(11),
@@ -63,6 +69,7 @@ module.exports = function(sequelize, DataTypes) {
     }, {
         tableName: 'device_menu',
         associate: function(models) {
+            deviceMenu.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return deviceMenu;

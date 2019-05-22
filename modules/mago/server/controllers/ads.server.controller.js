@@ -92,7 +92,7 @@ exports.create = function(req, res) {
         where.device_active = true;  //ads only sent to logged users
 
         setTimeout(function(){
-            send_ad(where, title, message,  imageGif, xOffset, yOffset, duration, link_url, activity, req.app.locals.settings.firebase_key, res);
+            send_ad(where, title, message,  imageGif, xOffset, yOffset, duration, link_url, activity, req.app.locals.backendsettings[req.token.company_id].firebase_key, res);
         }, delivery_time);
 
         return res.status(200).send({
@@ -115,6 +115,7 @@ exports.list = function(req, res) {
     query.include = [{model: db.login_data, attributes: ['username'], required: true, where: join_where}];
 
     query.where = where;
+    query.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(query).then(function(results) {
         if (!results) {

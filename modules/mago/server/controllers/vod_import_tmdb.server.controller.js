@@ -145,7 +145,7 @@ exports.create = function(req, res) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
         } else {
-            // logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+            // logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
             return link_vod_with_genres(result.id,array_vod_vod_categories, db.vod_vod_categories).then(function(t_result) {
                 if (t_result.status) {
                     return link_vod_with_packages(result.id, array_package_vod, db.package_vod).then(function(t_result) {
@@ -195,7 +195,7 @@ exports.list = function(req, res) {
     request(options, function (error, response, body) {
         if (error) throw new Error(error);
         let res_data = JSON.parse(body);
-        res.setHeader("X-Total-Count", res_data.total_results);
+        // res.setHeader("X-Total-Count", res_data.total_results);
         res.send(res_data.results);
     });
 };
@@ -215,7 +215,9 @@ exports.dataByID = function(req, res, next, id) {
         url: 'https://api.themoviedb.org/3/movie/'+id,
         qs:
             { language: 'en-US',
-                api_key: 'e76289b7e0306b6e6b6088148b804f01' },
+                api_key: 'e76289b7e0306b6e6b6088148b804f01',
+                append_to_response: 'credits,videos'
+            },
         body: '{}' };
 
 
@@ -223,16 +225,44 @@ exports.dataByID = function(req, res, next, id) {
         if (error) throw new Error(error);
         let res_data = JSON.parse(body);
 
+        //get all starring/cast from tmdb
+            var b;
+            var starring_array = '';
+            for (b = 0; b < res_data.credits.cast.length; b++ ){
+                starring_array += res_data.credits.cast[b].name+',';
+            }
+        //./get all starring/cast from tmdb
+
+        //get director from tmdb
+            var c;
+            var director_array = '';
+            for (c = 0; c < res_data.credits.crew.length; c++ ){
+
+                if (res_data.credits.crew[c].job === 'Director')
+                director_array += res_data.credits.crew[c].name;
+            }
+        //./get director from tmdb
+
+        //get trailer url
+        if(res_data.videos.results.length > 0){
+             res_data.trailer_url = 'https://www.youtube.com/watch?v='+res_data.videos.results[0].key;
+        }else {
+            res_data.trailer_url = '';
+        }
+        //./get trailer url
+
         res_data.description = res_data.overview; delete res_data.overview;
         res_data.duration = res_data.runtime; delete res_data.runtime;
         res_data.adult_content = res_data.adult; delete res_data.adult;
         res_data.icon_url = res_data.poster_path; delete res_data.poster_path;
         res_data.image_url = res_data.backdrop_path; delete res_data.backdrop_path;
+        res_data.starring = starring_array; delete res_data.credits;
+        res_data.director = director_array;
+
+
 
         res.send(res_data);
     });
-
-
 };
 
 /**

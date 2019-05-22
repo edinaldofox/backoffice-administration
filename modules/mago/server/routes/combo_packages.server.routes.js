@@ -14,11 +14,13 @@ module.exports = function(app) {
 
     /* ===== combo packages ===== */
     app.route('/api/combopackages')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(comboPackages.list)
         .post(comboPackages.create);
 
     app.route('/api/combopackages/:comboPackageId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(comboPackages.read)
         .put(comboPackages.update)

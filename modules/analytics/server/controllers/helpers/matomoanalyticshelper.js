@@ -18,11 +18,10 @@ function getipaddress(theip){
 
 function trackobject(object_data,req, cb) {
 
-    //var matomourl = 'https://tibo.innocraft.cloud/piwik.php';
     var matomourl = 'http://35.205.255.229/piwik.php';
     var thismoment = new Date;
 
-    object_data.idsite = 2; //matomo required , MAGO SITE
+    object_data.idsite = 2; //matomo required
     object_data.rec = 1; //matomo required
     //object_data.send_image=0;
 

@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         vod_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false,
@@ -36,7 +41,8 @@ module.exports = function(sequelize, DataTypes) {
         tableName: 'vod_vod_categories',
         associate: function(models) {
             vod_vod_categories.belongsTo(models.vod, {foreignKey: 'vod_id'});
-            vod_vod_categories.belongsTo(models.vod_category, {foreignKey: 'category_id'})
+            vod_vod_categories.belongsTo(models.vod_category, {foreignKey: 'category_id'});
+            vod_vod_categories.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return vod_vod_categories;

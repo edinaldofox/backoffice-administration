@@ -9,6 +9,7 @@ var path = require('path'),
 module.exports = function(app) {
 
     app.route('/api/commands')
+        .all(policy.Authenticate)
         .get(commands.list)
         .post(commands.create);
 

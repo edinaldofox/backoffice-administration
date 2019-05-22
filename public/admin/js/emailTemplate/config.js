@@ -18,6 +18,7 @@ export default function (nga, admin) {
                     { value: 'reset-password-email', label: 'Email Template for Reset Password' },
                     { value: 'weather-widget', label: 'Weather Widget' },
                     { value: 'invoice-info', label: 'Invoice Information' },
+                    { value: 'user-invite-email', label: 'User Invite Email' }
                     // { value: 'reset-password-confirm-email', label: '' },
                     // { value: 'reset-password-email', label: '' },
                     // { value: 'reset-password-enter-password', label: '' },
@@ -44,6 +45,7 @@ export default function (nga, admin) {
                     { value: 'reset-password-email', label: 'Email Template for Reset Password' },
                     { value: 'weather-widget', label: 'Weather Widget' },
                     { value: 'invoice-info', label: 'Invoice Information' },
+                    { value: 'user-invite-email', label: 'User Invite Email' }
                     // { value: 'reset-password-confirm-email', label: '' },
                     // { value: 'reset-password-email', label: '' },
                     // { value: 'reset-password-enter-password', label: '' },
@@ -88,6 +90,7 @@ export default function (nga, admin) {
                     { value: 'reset-password-email', label: 'Email Template for Reset Password' },
                     { value: 'weather-widget', label: 'Weather Widget' },
                     { value: 'invoice-info', label: 'Invoice Information' },
+                    { value: 'user-invite-email', label: 'User Invite Email' }
                     // { value: 'reset-password-confirm-email', label: '' },
                     // { value: 'reset-password-email', label: '' },
                     // { value: 'reset-password-enter-password', label: '' },

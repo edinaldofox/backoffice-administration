@@ -18,6 +18,7 @@ var path = require('path'),
 exports.create = function(req, res) {
 
     req.body.appid = req.body.appid.toString();
+    req.body.company_id = req.token.company_id; //save record for this company
 
     DBModel.create(req.body).then(function(result) {
         if (!result) {
@@ -43,7 +44,8 @@ exports.create = function(req, res) {
  */
 
 exports.read = function(req, res) {
-    res.json(req.deviceMenu);
+    if(req.deviceMenu.company_id === req.token.company_id) res.json(req.deviceMenu);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 
@@ -59,23 +61,28 @@ exports.update = function(req, res) {
     }
     req.body.appid = req.body.appid.toString();
 
-    updateData.updateAttributes(req.body).then(function(result){
-        if(deletefile) {
-            fs.unlink(deletefile, function (err) {
-                //todo: do sth on error?
-            });
-        }
-        res.json(result);
-    }).catch(function(err) {
-        if(err.name === "SequelizeUniqueConstraintError"){
-            if(err.errors[0].path === "position")  return res.status(400).send({message: 'This position is being used by another menu'}); //position is taken
-            else return res.status(400).send({message: err.errors[0].message}); //other duplicate fields. return sequelize error message
-        }
-        else {
-            winston.error("Updating menu failed with error: ", err);
-            return res.status(400).send({message: 'An error occurred while editing menu item. '+err.errors[0].message}); //another error occurred. return sequelize error message
-        }
-    });
+    if(req.body.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result){
+            if(deletefile) {
+                fs.unlink(deletefile, function (err) {
+                    //todo: do sth on error?
+                });
+            }
+            res.json(result);
+        }).catch(function(err) {
+            if(err.name === "SequelizeUniqueConstraintError"){
+                if(err.errors[0].path === "position")  return res.status(400).send({message: 'This position is being used by another menu'}); //position is taken
+                else return res.status(400).send({message: err.errors[0].message}); //other duplicate fields. return sequelize error message
+            }
+            else {
+                winston.error("Updating menu failed with error: ", err);
+                return res.status(400).send({message: 'An error occurred while editing menu item. '+err.errors[0].message}); //another error occurred. return sequelize error message
+            }
+        });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 
 };
 
@@ -87,15 +94,20 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Deleting menu failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Deleting menu failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
-            return null;
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -132,6 +144,8 @@ exports.list = function(req, res) {
   if(query._orderBy) final_where.order = query._orderBy + ' ' + query._orderDir;
   final_where.include = [];
   //end build final where
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
   DBModel.findAndCountAll(
 

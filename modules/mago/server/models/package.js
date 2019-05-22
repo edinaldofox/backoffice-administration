@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         package_type_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false
@@ -26,6 +31,7 @@ module.exports = function(sequelize, DataTypes) {
             if(models.packages_channels) Package.hasMany(models.packages_channels, {foreignKey: 'package_id'});
             if(models.package_vod) Package.hasMany(models.package_vod, {foreignKey: 'package_id'});
             if(models.tv_series_packages)  Package.hasMany(models.tv_series_packages, {foreignKey: 'package_id'});
+            Package.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return Package;

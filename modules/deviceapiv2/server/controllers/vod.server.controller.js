@@ -47,8 +47,8 @@ exports.list_get_newdata = function(req, res) {
             var allowed_content = [0,1]; //(req.thisuser.show_adult === true) ? [0, 1] : [0];
             var show_adult = (req.query.show_adult === 'true') ? {$in: [true, false]} : false; //adult content returned only if request explicitly asks for it
 
-            var offset = (!req.params.pagenumber || req.params.pagenumber === '-1') ? 0 : ((parseInt(req.params.pagenumber)-1)*req.app.locals.settings.vod_subset_nr); //for older versions of vod, start query at first record
-            var limit = (!req.params.pagenumber || req.params.pagenumber === '-1') ? 99999999999 : req.app.locals.settings.vod_subset_nr; //for older versions of vod, set limit to 99999999999
+            var offset = (!req.params.pagenumber || req.params.pagenumber === '-1') ? 0 : ((parseInt(req.params.pagenumber)-1)*req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr); //for older versions of vod, start query at first record
+            var limit = (!req.params.pagenumber || req.params.pagenumber === '-1') ? 99999999999 : req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr; //for older versions of vod, set limit to 99999999999
 
 
             if(isNaN(req.headers['etag'])) {
@@ -64,8 +64,8 @@ exports.list_get_newdata = function(req, res) {
                     [db.sequelize.fn('concat', db.sequelize.col('vod.description'), '<p><strong>Director:</strong> ', db.sequelize.col('vod.director'),
                         '</p><p><strong>Starring:</strong> ', db.sequelize.col('vod.starring'), '</p>'), 'description'],
                     [db.sequelize.fn('YEAR', db.sequelize.col('release_date')), "release_date"],
-                    [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('image_url')), 'largeimage'],
-                    [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('icon_url')), 'icon']
+                    [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'largeimage'],
+                    [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('icon_url')), 'icon']
                 ],
                 include: [
                     {
@@ -75,7 +75,7 @@ exports.list_get_newdata = function(req, res) {
                     {model: models.vod_vod_categories, required: true, attributes: ['category_id'], where:{is_available: true}, include: [{model: models.vod_category, attributes: ['name']}]},
                     {model: models.package_vod, required: true, attributes: [], where: {package_id: {in: package_list}}}
                 ],
-                where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, updatedAt:{gt: tmptimestamp}, expiration_time: {$gte: Date.now()}},
+                where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, updatedAt:{gt: tmptimestamp}, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
                 offset: offset,
                 limit: limit
             }).then(function (result) {
@@ -150,13 +150,14 @@ exports.list_get = function(req, res) {
     var allowed_content = (req.thisuser.show_adult === true) ? [0, 1] : [0];
     var show_adult = (req.query.show_adult === 'true') ? {$in: [true, false]} : false; //adult content returned only if request explicitly asks for it
 
-    var offset = (!req.params.pagenumber || req.params.pagenumber === '-1') ? 0 : ((parseInt(req.params.pagenumber)-1)*req.app.locals.settings.vod_subset_nr); //for older versions of vod, start query at first record
-    var limit = (!req.params.pagenumber || req.params.pagenumber === '-1') ? 99999999999 : req.app.locals.settings.vod_subset_nr; //for older versions of vod, set limit to 99999999999
+    var offset = (!req.params.pagenumber || req.params.pagenumber === '-1') ? 0 : ((parseInt(req.params.pagenumber)-1)*req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr); //for older versions of vod, start query at first record
+    var limit = (!req.params.pagenumber || req.params.pagenumber === '-1') ? 99999999999 : req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr; //for older versions of vod, set limit to 99999999999
+
 
     models.vod.findAll({
         attributes: ['id', 'title', 'pin_protected', 'duration', 'rate', [db.sequelize.literal('UNIX_TIMESTAMP(vod.createdAt) * 1000'), "dataadded"],
-            [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('image_url')), 'largeimage'],
-            [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('vod.icon_url')), 'icon'],
+            [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'largeimage'],
+            [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('vod.icon_url')), 'icon'],
             [db.sequelize.fn('concat', db.sequelize.col('vod.description'), '<p><strong>Director:</strong> ', db.sequelize.col('vod.director'),
                 '</p><p><strong>Starring:</strong> ', db.sequelize.col('vod.starring'), '</p>'), 'description'],
             [db.sequelize.fn('YEAR', db.sequelize.col('release_date')), "release_date"]],
@@ -172,7 +173,7 @@ exports.list_get = function(req, res) {
                 }]
             }
         ],
-        where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         offset: offset,
         limit: limit,
         subQuery: false
@@ -236,14 +237,14 @@ exports.list = function(req, res) {
     var allowed_content = (req.thisuser.show_adult === true) ? [0, 1] : [0];
     var show_adult = (req.body.show_adult === 'true') ? {$in: [true, false]} : false; //adult content returned only if request explicitly asks for it
 
-    var offset = (!req.body.subset_number || req.body.subset_number === '-1') ? 0 : ((parseInt(req.body.subset_number)-1)*req.app.locals.settings.vod_subset_nr); //for older versions of vod, start query at first record
-    var limit = (!req.body.subset_number || req.body.subset_number === '-1') ? 99999999999 : req.app.locals.settings.vod_subset_nr; //for older versions of vod, set limit to 99999999999
+    var offset = (!req.body.subset_number || req.body.subset_number === '-1') ? 0 : ((parseInt(req.body.subset_number)-1)*req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr); //for older versions of vod, start query at first record
+    var limit = (!req.body.subset_number || req.body.subset_number === '-1') ? 99999999999 : req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr; //for older versions of vod, set limit to 99999999999
 
     models.vod.findAll({
         attributes: ['id', 'title', 'pin_protected', 'duration', 'rate', [db.sequelize.literal('UNIX_TIMESTAMP(vod.createdAt) * 1000'), "dataadded"],
             [db.sequelize.fn('YEAR', db.sequelize.col('release_date')), "release_date"],
-            [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('image_url')), 'largeimage'],
-            [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('vod.icon_url')), 'icon'],
+            [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'largeimage'],
+            [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('vod.icon_url')), 'icon'],
             [db.sequelize.fn('concat', db.sequelize.col('vod.description'), '<p><strong>Director:</strong> ', db.sequelize.col('vod.director'),
                 '</p><p><strong>Starring:</strong> ', db.sequelize.col('vod.starring'), '</p>'), 'description']
         ],
@@ -259,7 +260,7 @@ exports.list = function(req, res) {
                 }]
             }
         ],
-        where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         offset: offset,
         limit: limit,
         subQuery: false
@@ -327,21 +328,23 @@ exports.categories = function(req, res) {
     models.vod_category.findAll({
         attributes: [ 'id', 'name', 'password', 'sorting', 'icon_url', 'small_icon_url'],
         include: [{
-            model: models.vod_vod_categories, attributes: [], where: {is_available: true}, include: [
+            model: models.vod_vod_categories, attributes: [], where: {is_available: true, company_id: req.thisuser.company_id}, include: [
                 {model: models.vod, attributes: [], required: true, where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
                     include: [
                         {model: models.vod_stream,  required: true, attributes: []},
                         {model: models.package_vod, required: true, attributes: [],
                             include: [{
                                 model: models.package, required: true, attributes: [], where: {package_type_id: req.auth_obj.screensize + 2 },
-                                include: [{model: models.subscription, required: true, attributes: [], where: {login_id: req.thisuser.id, end_date: {$gte: Date.now()}}}]
+                                include: [{
+                                    model: models.subscription, required: true, attributes: [], where: {login_id: req.thisuser.id, end_date: {$gte: Date.now()}}
+                                }]
                             }]
                         }
                     ]
                 }
             ]
         }],
-        where: {password:{in: allowed_content}, isavailable: true}
+        where: {password:{in: allowed_content}, isavailable: true, company_id: req.thisuser.company_id}
     }).then(function (result) {
         var category_list = [];
         //type conversation of id from int to string. Setting static values
@@ -351,8 +354,8 @@ exports.categories = function(req, res) {
                 "name": result[i].name,
                 "password": (result[i].password) ? "True" : "False",
                 "sorting": result[i].sorting,
-                "IconUrl": req.app.locals.settings.assets_url+result[i].icon_url,
-                "small_icon_url": req.app.locals.settings.assets_url+result[i].small_icon_url,
+                "IconUrl": req.app.locals.backendsettings[req.thisuser.company_id].assets_url+result[i].icon_url,
+                "small_icon_url": req.app.locals.backendsettings[req.thisuser.company_id].assets_url+result[i].small_icon_url,
                 "pay": "False"
             };
             category_list.push(temp_list);
@@ -387,7 +390,7 @@ exports.categories_get = function(req, res) {
     models.vod_category.findAll({
         attributes: [ 'id', 'name', 'password', 'sorting', 'icon_url', 'small_icon_url'],
         include: [{
-            model: models.vod_vod_categories, attributes: [], where: {is_available: true}, include: [
+            model: models.vod_vod_categories, attributes: [], where: {is_available: true, company_id: req.thisuser.company_id}, include: [
                 {model: models.vod, attributes: [], required: true, where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
                     include: [
                         {model: models.vod_stream,  required: true, attributes: []},
@@ -403,7 +406,7 @@ exports.categories_get = function(req, res) {
                 }
             ]
         }],
-        where: {password:{in: allowed_content}, isavailable: true}
+        where: {password:{in: allowed_content}, isavailable: true, company_id: req.thisuser.company_id}
     }).then(function (result) {
         var category_list = [];
         //type conversation of id from int to string. Setting static values
@@ -413,8 +416,8 @@ exports.categories_get = function(req, res) {
                 "name": result[i].name,
                 "password": (result[i].password) ? "True" : "False",
                 "sorting": result[i].sorting,
-                "IconUrl": req.app.locals.settings.assets_url+result[i].icon_url,
-                "small_icon_url": req.app.locals.settings.assets_url+result[i].small_icon_url,
+                "IconUrl": req.app.locals.backendsettings[req.thisuser.company_id].assets_url+result[i].icon_url,
+                "small_icon_url": req.app.locals.backendsettings[req.thisuser.company_id].assets_url+result[i].small_icon_url,
                 "pay": "False"
             };
             category_list.push(temp_list);
@@ -455,7 +458,7 @@ exports.categories_get = function(req, res) {
  * auth=8yDhVenHT3Mp0O2QCLJFhCUfT73WR1mE2QRc1ZE7J22cRfmskdTmhCk9ssGWhoIBpIzoTEOLIqwl%0A47NaUwLoLZjH1i2WRYaiioIRMqhRvH2FsSuf1YG%2FFoT9fEw4CrxF%0A
  */
 exports.subtitles = function(req, res) {
-    var subtitle_where = (req.body.vod_id) ? {vod_id: req.body.vod_id} : {vod_id: {$gt: 0}};
+    var subtitle_where = (req.body.vod_id) ? {vod_id: req.body.vod_id, company_id: req.thisuser.company_id} : {vod_id: {$gt: 0}, company_id: req.thisuser.company_id};
     var allowed_content = (req.thisuser.show_adult === true) ? [0, 1] : [0];
 
     models.vod_subtitles.findAll({
@@ -484,7 +487,7 @@ exports.subtitles = function(req, res) {
             var temp_obj = {};
             temp_obj.vodid = String(result[i].toJSON().vodid);
             temp_obj.title = result[i].title;
-            temp_obj.url = req.app.locals.settings.assets_url+result[i].subtitle_url;
+            temp_obj.url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url+result[i].subtitle_url;
             vod_subtitles.push(temp_obj)
         }
         response.send_res(req, res, vod_subtitles, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
@@ -513,7 +516,7 @@ exports.subtitles_get = function(req, res) {
     var allowed_content = (req.thisuser.show_adult === true) ? [0, 1] : [0];
 
     models.vod_subtitles.findAll({
-        attributes: [ ['vod_id', 'vodid'], 'title', [db.sequelize.fn("concat", req.app.locals.settings.assets_url, db.sequelize.col('subtitle_url')), 'url'] ],
+        attributes: [ ['vod_id', 'vodid'], 'title', [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('subtitle_url')), 'url'] ],
         include: [
             { model: models.vod, required: true, attributes: [], where: {pin_protected: {in: allowed_content}, isavailable: true, expiration_time: {$gte: Date.now()}},
                 include: [
@@ -531,7 +534,8 @@ exports.subtitles_get = function(req, res) {
                     }
                 ]
             }
-        ]
+        ],
+        where:{company_id: req.thisuser.company_id}
     }).then(function (result) {
         //type conversation of id from int to string
         for(var i=0; i< result.length; i++){
@@ -569,7 +573,7 @@ exports.totalhits = function(req, res) {
     if(req.body.id_vod != "all"){
         models.vod.findAll({
             attributes: [ ['id', 'id_vod'], ['clicks', 'hits'] ],
-            where: {id: req.body.id_vod, pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+            where: {id: req.body.id_vod, pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
             include: [
                 {model: models.vod_stream, required: true, attributes: []},
                 {model: models.vod_vod_categories, required: true, attributes: [], where:{is_available: true},
@@ -588,7 +592,7 @@ exports.totalhits = function(req, res) {
     else{
         models.vod.findAll({
             attributes: [ ['id', 'id_vod'], ['clicks', 'hits'] ],
-            where: {pin_protected: {in: allowed_content}, isavailable: true, expiration_time: {$gte: Date.now()}},
+            where: {pin_protected: {in: allowed_content}, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
             include: [
                 {model: models.vod_stream, required: true, attributes: []},
                 {model: models.vod_vod_categories, required: true, attributes: [], where:{is_available: true},
@@ -645,7 +649,7 @@ exports.mostwatched = function(req, res) {
         attributes: ['id', 'clicks'],
         limit: 30, subQuery: false,
         order: [[ 'clicks', 'DESC' ]],
-        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         include: [
             {model: models.vod_stream, required: true, attributes: []},
             {model: models.vod_vod_categories, required: true, attributes: [], where: {is_available: true},
@@ -702,7 +706,7 @@ exports.mostwatched_get = function(req, res) {
         attributes: ['id', 'clicks'],
         limit: 30, subQuery: false,
         order: [[ 'clicks', 'DESC' ]],
-        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         include: [
             {model: models.vod_stream, required: true, attributes: []},
             {model: models.vod_vod_categories, required: true, attributes: [], where: {is_available: true},
@@ -751,7 +755,7 @@ exports.mostrated = function(req, res) {
     //if most rated movies are requested
     models.vod.findAll({
         attributes: ['id', 'rate'], order: [[ 'rate', 'DESC' ]],
-        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         limit: 30, subQuery: false,
         include: [
             {model: models.vod_stream, required: true, attributes: []},
@@ -807,7 +811,7 @@ exports.mostrated_get = function(req, res) {
     //if most rated movies are requested
     models.vod.findAll({
         attributes: ['id', 'rate'], order: [[ 'rate', 'DESC' ]],
-        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         limit: 30, subQuery: false,
         include: [
             {model: models.vod_stream, required: true, attributes: []},
@@ -857,7 +861,7 @@ exports.mostrated_get = function(req, res) {
 exports.related = function(req, res) {
 
     models.vod.findAll({
-        attributes: [/*'category_id',*/ 'director', 'starring'], where: {id: req.body.vod_id},
+        attributes: [/*'category_id',*/ 'director', 'starring'], where: {id: req.body.vod_id, company_id: req.thisuser.company_id},
         limit: 1
     }).then(function (result) {
         var director_list = result[0].director.split(',');
@@ -880,6 +884,8 @@ exports.related = function(req, res) {
         if(!req.body.show_adult || req.body.show_adult !== 'true') where_condition = where_condition + " AND adult_content = false ";
 
         where_condition += " AND subscription.login_id = "+req.thisuser.id+" and subscription.end_date > NOW() AND package.package_type_id = "+ Number(req.auth_obj.screensize + 2) +" ";
+
+        where_condition += " AND company_id = "+req.thisuser.company_id+"";
 
         var related_query = "SELECT DISTINCT vod.id, "+
             " ( "+
@@ -940,7 +946,7 @@ exports.suggestions = function(req, res) {
 
     models.vod.findAll({
         attributes: ['id'],
-        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         include: [
             {model: models.vod_stream, required: true, attributes: []},
             {
@@ -989,7 +995,7 @@ exports.suggestions_get = function(req, res) {
 
     models.vod.findAll({
         attributes: ['id'],
-        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         include: [
             {model: models.vod_stream, required: true, attributes: []},
             {
@@ -1039,7 +1045,7 @@ exports.categoryfilms = function(req, res) {
 
     models.vod.findAll({
         attributes: ['id'],
-        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         include: [
             {model: models.vod_stream, required: true, attributes: []},
             {model: models.vod_vod_categories, required: true, attributes: [], where: {category_id: req.body.category_id, is_available: true},
@@ -1092,7 +1098,7 @@ exports.categoryfilms_get = function(req, res) {
 
     models.vod.findAll({
         attributes: ['id'],
-        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}},
+        where: {pin_protected: {in: allowed_content}, adult_content: show_adult, isavailable: true, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         include: [
             {model: models.vod_stream, required: true, attributes: []},
             {model: models.vod_vod_categories, required: true, attributes: [], where: {category_id: req.query.category_id, is_available: true},
@@ -1142,11 +1148,12 @@ exports.get_vod_item_details = function(req, res) {
     models.vod.find({
         where: {
             id: vodID,
-            expiration_time: {$gte: Date.now()}
+            expiration_time: {$gte: Date.now()},
+            company_id: req.thisuser.company_id
         },
         include: [
             {model: models.vod_subtitles,
-                attributes: ['id', 'vod_id', 'title', [db.sequelize.fn("concat", req.app.locals.backendsettings.assets_url, db.sequelize.col('subtitle_url')), 'subtitle_url'], 'createdAt', 'updatedAt']
+                attributes: ['id', 'vod_id', 'title', [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('subtitle_url')), 'subtitle_url'], 'createdAt', 'updatedAt']
             },
             {
                 model: models.vod_vod_categories, required: true, attributes: ['category_id'], where: {is_available: true},
@@ -1168,7 +1175,7 @@ exports.get_vod_item_details = function(req, res) {
 
             raw_obj[0].id=result.id;
             raw_obj[0].title=result.title;
-            raw_obj[0].vod_type = "film"; //this param should still be returned. will there be mixed results?
+            raw_obj[0].vod_type = "film";
             raw_obj[0].duration =result.duration ;
             raw_obj[0].pin_protected = result.pin_protected;
             raw_obj[0].subtitles = result.vod_subtitles;
@@ -1176,8 +1183,8 @@ exports.get_vod_item_details = function(req, res) {
             raw_obj[0].stream_format = result.vod_streams[0].stream_format;
             raw_obj[0].url = result.vod_streams[0].url;
             raw_obj[0].description = result.description + '<p><strong>Director:</strong> ' + result.director + '</p><p><strong>Starring:</strong> ' + result.starring+'</p>';
-            raw_obj[0].icon_url = req.app.locals.settings.assets_url+result.icon_url;
-            raw_obj[0].image_url = req.app.locals.settings.assets_url+result.image_url;
+            raw_obj[0].icon_url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url+result.icon_url;
+            raw_obj[0].image_url = req.app.locals.backendsettings[req.thisuser.company_id].assets_url+result.image_url;
             raw_obj[0].categoryid = String(result.vod_vod_categories[0].category_id);
             raw_obj[0].category_names = category_names;
             raw_obj[0].rate = (result.rate > 0 && result.rate <=10) ? String(result.rate) : "5"; // rate should be in the interval ]0:10]
@@ -1224,10 +1231,10 @@ exports.get_tvshow_item_details = function(req, res) {
             [db.sequelize.fn('YEAR', db.sequelize.col('tv_series.release_date')), "year"],
             [db.sequelize.fn('concat', db.sequelize.col('tv_series.description'), '<p><strong>Director:</strong> ', db.sequelize.col('tv_series.director'),
                 '</p><p><strong>Starring:</strong> ', db.sequelize.col('tv_series.cast'), '</p>'), 'description'],
-            [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('tv_series.icon_url')), 'icon'],
-            [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('tv_series.image_url')), 'largeimage']
+            [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('tv_series.icon_url')), 'icon'],
+            [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('tv_series.image_url')), 'largeimage']
         ],
-        where: {id: vodID, expiration_time: {$gte: Date.now()}},
+        where: {id: vodID, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id},
         include: [
             {model: models.tv_season, attributes: ['id', 'season_number', 'title'], where: {expiration_time: {$gte: Date.now()}} },
             {model: models.tv_series_categories, where: {is_available: true}, attributes: ['id'],
@@ -1252,7 +1259,7 @@ exports.get_tvshow_item_details = function(req, res) {
                 attributes: ["id", [ sequelize.literal('"tv_episode"'), 'vod_type'], "title", "rate", "trailer_url", [db.sequelize.fn('YEAR', db.sequelize.col('tv_episode.release_date')), "year"],
                     [db.sequelize.fn('concat', db.sequelize.col('tv_episode.description'), '<p><strong>Director:</strong> ', db.sequelize.col('tv_episode.director'),
                         '</p><p><strong>Starring:</strong> ', db.sequelize.col('tv_episode.cast'), '</p>'), 'description'],
-                    [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('tv_episode.icon_url')), 'icon']
+                    [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('tv_episode.icon_url')), 'icon']
                 ],
                 where: {tv_season_id: season_id, expiration_time: {$gte: Date.now()}},
                 include: [{model: models.tv_episode_stream, where: {stream_source_id: req.thisuser.vod_stream_source, stream_resolution: {$like: "%"+req.auth_obj.appid+"%"}}, attributes: []}]
@@ -1300,7 +1307,7 @@ exports.get_tvshow_item_details = function(req, res) {
 exports.get_vod_item_related = function(req, res) {
 
     models.vod.findAll({
-        attributes: ['director', 'starring'], where: {id: req.params.vodID},
+        attributes: ['director', 'starring'], where: {id: req.params.vodID, company_id: req.thisuser.company_id},
         limit: 1
     }).then(function (result) {
         if(result && result.length > 0){
@@ -1328,14 +1335,15 @@ exports.get_vod_item_related = function(req, res) {
             if(req.thisuser.show_adult === true) where_condition = where_condition + " AND pin_protected = false ";
             if(!req.query.show_adult || req.query.show_adult !== 'true') where_condition = where_condition + " AND adult_content = false ";
             where_condition += " AND subscription.login_id = "+req.thisuser.id+" and subscription.end_date > NOW() AND package.package_type_id = "+ Number(req.auth_obj.screensize + 2) +" ";
+            where_condition += " AND company_id = "+req.thisuser.company_id+" ";
 
             var offset = isNaN(parseInt(req.query._start)) ? 0 : parseInt(req.query._start);
-            var limit =  isNaN(parseInt(req.query._end)) ?  req.app.locals.settings.vod_subset_nr: parseInt(req.query._end) - offset;
+            var limit =  isNaN(parseInt(req.query._end)) ?  req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr: parseInt(req.query._end) - offset;
             var order_by = (req.query._orderBy) ? req.query._orderBy + ' ' + req.query._orderDir : "matching_score DESC";
             var related_query = "SELECT DISTINCT CAST(vod.id AS CHAR) AS id, vod.title, 'film' as vod_type, "+
                 "CONCAT(vod.description, '<p><strong>Director:</strong> ', vod.director, ' </p><p><strong>Starring:</strong> ', vod.starring, '</p>') AS description, vod.rate, vod.duration, " +
-                "vod.pin_protected, YEAR(vod.release_date) as year, UNIX_TIMESTAMP(vod.createdAt) as dataadded, CONCAT('" + req.app.locals.settings.assets_url + "', vod.icon_url) AS icon, " +
-                " concat('"+req.app.locals.settings.assets_url + "', vod.image_url) as largeimage,"+
+                "vod.pin_protected, YEAR(vod.release_date) as year, UNIX_TIMESTAMP(vod.createdAt) as dataadded, CONCAT('" + req.app.locals.backendsettings[req.thisuser.company_id].assets_url + "', vod.icon_url) AS icon, " +
+                " concat('"+req.app.locals.backendsettings[req.thisuser.company_id].assets_url + "', vod.image_url) as largeimage,"+
                 " ( "+
                 //" IF( (category_id = "+result[0].category_id+"), 1, 0) + "+ //category matching score
                 " ( "+director_matching_score+" ) + "+ //director matching score
@@ -1416,16 +1424,17 @@ exports.get_vod_items_recommended = function(req, res) {
                 [db.sequelize.fn('YEAR', db.sequelize.col('release_date')), "year"],
                 [db.sequelize.fn('concat', db.sequelize.col('vod.description'), '<p><strong>Director:</strong> ', db.sequelize.col('vod.director'),
                 '</p><p><strong>Starring:</strong> ', db.sequelize.col('vod.starring'), '</p>'), 'description'],
-                [db.sequelize.fn("concat", req.app.locals.settings.assets_url, db.sequelize.col('icon_url')), 'icon'],
-                [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('image_url')), 'largeimage'],
+                [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('icon_url')), 'icon'],
+                [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'largeimage'],
                 [db.sequelize.literal('UNIX_TIMESTAMP(createdAt) * 1000'), "dataadded"]
             ];
             qwhere.where.pin_protected = 0;
             if(!req.query.show_adult || req.query.show_adult !== 'true') qwhere.where.adult_content = false;  //adult content returned only if request explicitly asks for it
             qwhere.where.isavailable = 1;
             qwhere.offset = isNaN(parseInt(query._start)) ? 0:parseInt(query._start);
-            qwhere.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.settings.vod_subset_nr: parseInt(query._end) - qwhere.offset;
+            qwhere.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr: parseInt(query._end) - qwhere.offset;
             qwhere.where.expiration_time = {$gte: Date.now()};
+            qwhere.where.company_id = req.thisuser.company_id;
 
             if(query._orderBy) qwhere.order = query._orderBy + ' ' + query._orderDir;
             qwhere.include = [
@@ -1537,7 +1546,7 @@ exports.get_vod_list = function(req, res) {
                         else if(query.updated_after) vod_final_where.where.updatedAt = {gt: query.updated_after};
 
                         vod_final_where.offset = isNaN(parseInt(query._start)) ? 0:parseInt(query._start);
-                        vod_final_where.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.settings.vod_subset_nr: parseInt(query._end) - vod_final_where.offset;
+                        vod_final_where.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.backendsettings[1].vod_subset_nr: parseInt(query._end) - vod_final_where.offset;
 
                         if(query._orderBy === 'createdAt'){
                             vod_final_where.order = 'dataadded' + ' ' + query._orderDir;
@@ -1549,8 +1558,8 @@ exports.get_vod_list = function(req, res) {
                         vod_final_where.attributes = ['id', 'title', 'pin_protected', 'rate', 'duration', 'clicks', [db.sequelize.fn('YEAR', db.sequelize.col('release_date')), "year"],
                             [db.sequelize.fn('concat', db.sequelize.col('vod.description'), '<p><strong>Director:</strong> ', db.sequelize.col('director'),
                                 '</p><p><strong>Starring:</strong> ', db.sequelize.col('starring'), '</p>'), 'description'],
-                            [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('vod.icon_url')), 'icon'],
-                            [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('image_url')), 'largeimage'],
+                            [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('vod.icon_url')), 'icon'],
+                            [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'largeimage'],
                             [db.sequelize.fn('UNIX_TIMESTAMP', db.sequelize.col('vod.createdAt')), 'dataadded']
                         ];
                         vod_final_where.include = [
@@ -1619,7 +1628,7 @@ exports.get_vod_list = function(req, res) {
                         else if(query.updated_after) tv_shows_final_where.where.updatedAt = {gt: query.updated_after};
 
                         tv_shows_final_where.offset = isNaN(parseInt(query._start)) ? 0:parseInt(query._start);
-                        tv_shows_final_where.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.settings.vod_subset_nr: parseInt(query._end) - tv_shows_final_where.offset;
+                        tv_shows_final_where.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.backendsettings[1].vod_subset_nr: parseInt(query._end) - tv_shows_final_where.offset;
 
                         if(query._orderBy === 'createdAt'){
                             tv_shows_final_where.order = 'dataadded' + ' ' + query._orderDir;
@@ -1631,8 +1640,8 @@ exports.get_vod_list = function(req, res) {
                         tv_shows_final_where.attributes = ['id', 'title', 'pin_protected', 'rate', 'clicks', [db.sequelize.fn('YEAR', db.sequelize.col('release_date')), "year"],
                             [db.sequelize.fn('concat', db.sequelize.col('tv_series.description'), '<p><strong>Director:</strong> ', db.sequelize.col('director'),
                                 '</p><p><strong>Starring:</strong> ', db.sequelize.col('cast'), '</p>'), 'description'],
-                            [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('tv_series.icon_url')), 'icon'],
-                            [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('image_url')), 'largeimage'],
+                            [db.sequelize.fn('concat', req.app.locals.backendsettings[1].assets_url, db.sequelize.col('tv_series.icon_url')), 'icon'],
+                            [db.sequelize.fn('concat', req.app.locals.backendsettings[1].assets_url, db.sequelize.col('image_url')), 'largeimage'],
                             [db.sequelize.fn('UNIX_TIMESTAMP', db.sequelize.col('tv_series.createdAt')), 'dataadded']
                         ];
                         tv_shows_final_where.include = [
@@ -1729,7 +1738,7 @@ exports.searchvod = function(req, res) {
                 }]
             }
         ],
-        where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, title: {like: '%'+req.body.search_string+'%'}, expiration_time: {$gte: Date.now()}}
+        where: {pin_protected:{in: allowed_content}, adult_content: show_adult, isavailable: true, title: {like: '%'+req.body.search_string+'%'}, expiration_time: {$gte: Date.now()}, company_id: req.thisuser.company_id}
     }).then(function (result) {
         var raw_result = [];
         //flatten nested json array
@@ -1777,7 +1786,8 @@ exports.resume_movie = function(req, res) {
             vod_id: req.body.vod_id,
             resume_position: req.body.resume_position,
             reaction: 0,
-            device_id: req.auth_obj.boxid
+            device_id: req.auth_obj.boxid,
+            company_id: req.thisuser.company_id
         }
     ).then(function (result) {
         response.send_res(req, res, [], 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'no-store');
@@ -1820,11 +1830,11 @@ exports.get_movie_details = function(req, res) {
             },
             {
                 model: models.vod_subtitles,
-                attributes: ['id', 'title', [db.sequelize.fn("concat", req.app.locals.settings.assets_url, db.sequelize.col('subtitle_url')), 'url'], ['vod_id', 'vodid']]
+                attributes: ['id', 'title', [db.sequelize.fn("concat", req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('subtitle_url')), 'url'], ['vod_id', 'vodid']]
             },
             {model: models.vod_vod_categories, attributes: ['id'], required: true, include: [{model: models.vod_category, attributes: ['id', 'name'], required: true}]}
         ],
-        where: {id: Number(req.params.vod_id)}
+        where: {id: Number(req.params.vod_id), company_id: req.thisuser.company_id}
     }).then(function (result) {
         var vod_data = {};
         if(result){
@@ -1903,11 +1913,11 @@ exports.get_tv_series_data = function(req, res){
     models.tv_series.find({
         attributes: ['id', [ sequelize.literal('"tv_series"'), 'vod_type']],
         where: {
-            id: vodID, expiration_time: {$gte: Date.now()}
+            id: vodID, expiration_time: {$gte: Date.now(), company_id: req.thisuser.company_id}
         },
         include: [
             {model: models.tv_season, attributes: ['id', 'season_number', 'title', [ sequelize.literal('"tv_season"'), 'vod_type']],
-                where: {expiration_time: {$gte: Date.now()}, is_available: true}},
+                where: {expiration_time: {$gte: Date.now()}, is_available: true, adult_content: show_adult, pin_protected: show_adult}},
             {model: models.tv_series_categories, where: {is_available: true}, attributes: ['id'],
                 include: [{model: models.vod_category, where: {isavailable: true},  attributes: ['name' ]}]
             }
@@ -1931,11 +1941,11 @@ exports.get_tv_series_data = function(req, res){
                     [db.sequelize.fn('YEAR', db.sequelize.col('release_date')), "year"],
                     [db.sequelize.fn('concat', db.sequelize.col('description'), '<p><strong>Director:</strong> ', db.sequelize.col('director'),
                         '</p><p><strong>Starring:</strong> ', db.sequelize.col('cast'), '</p>'), 'description'],
-                    [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('icon_url')), 'icon'],
-                    [db.sequelize.fn('concat', req.app.locals.settings.assets_url, db.sequelize.col('image_url')), 'largeimage'],
+                    [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('icon_url')), 'icon'],
+                    [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'largeimage'],
                     [sequelize.literal('"'+result.category_names+'"'), 'category_names']
                 ],
-                where: {tv_season_id: season_id, expiration_time: {$gte: Date.now()}, is_available: true, adult_content: show_adult, pin_protected: pin_protected},
+                where: {tv_season_id: season_id, expiration_time: {$gte: Date.now()}, is_available: true, adult_content: show_adult, pin_protected: show_adult, company_id: req.thisuser.company_id},
                 include: [
                     {model: models.tv_episode_stream, where: {stream_source_id: req.thisuser.vod_stream_source, stream_resolution: {$like: "%"+req.auth_obj.appid+"%"}}, attributes: []}
                 ]
@@ -1989,8 +1999,9 @@ exports.vod_menu_list = function(req, res) {
     models.vod_menu.findAll({
         attributes: ['id', 'name', 'description','order','pin_protected','isavailable'],
         include: [{
-            model: models.vod_menu_carousel, attributes: ['id','name','description','order','url','isavailable'], required: false
-        }]
+            model: models.vod_menu_carousel, attributes: ['id','name','description','order','url','isavailable'], required: false,  where: {company_id: req.thisuser.company_id}
+        }],
+        where: {company_id: req.thisuser.company_id}
     }).then(function (result) {
 
         response.send_res_get(req, res, result, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');

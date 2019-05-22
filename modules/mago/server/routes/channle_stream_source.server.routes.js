@@ -15,11 +15,13 @@ module.exports = function(app) {
 
     /* ===== channel stream sources ===== */
     app.route('/api/channelstreamsources')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(channelStreamSources.list)
         .post(channelStreamSources.create);
 
     app.route('/api/channelstreamsources/:channelStreamSourceId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(channelStreamSources.read)
         .put(channelStreamSources.update)

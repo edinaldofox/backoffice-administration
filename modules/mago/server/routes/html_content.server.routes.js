@@ -8,21 +8,33 @@ var path = require('path'),
 module.exports = function(app) {
     /* ===== device menus ===== */
     app.route('/api/htmlContent')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(htmlContent.list)
         .post(htmlContent.create);
 
     app.route('/api/htmlContent/:htmlContentId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(htmlContent.read)
         .put(htmlContent.update)
         .delete(htmlContent.delete);
 
+    app.param('htmlContentId', htmlContent.dataByID);
+
     app.route('/api/htmlContentApp/:contentID')
-    //.all(policy.isAllowed)
+        // .all(policy.Authenticate)
+        //.all(policy.isAllowed)
         .get(htmlContent.read);
 
     app.param('contentID', htmlContent.htmlcontent_to_app);
 
-    app.param('htmlContentId', htmlContent.dataByID);
+
+    app.route('/api/htmlContentApp')
+        // .all(policy.Authenticate)
+        //.all(policy.isAllowed)
+        .get(htmlContent.htmlcontent_name_to_app);
+
+
+
 };

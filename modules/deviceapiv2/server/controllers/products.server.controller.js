@@ -9,7 +9,7 @@ var path = require('path'),
 
 exports.product_list = function(req, res) {
     models.combo.findAll({
-        attributes: ['id', 'name', 'duration'], where: {isavailable: true}, order: [['name', 'ASC']]
+        attributes: ['id', 'name', 'duration'], where: {isavailable: true, company_id: req.thisuser.company_id}, order: [['name', 'ASC']]
     }).then(function (product_list) {
         response.send_res(req, res, product_list, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
     }).catch(function(error) {
@@ -23,7 +23,7 @@ exports.product_list = function(req, res) {
 
 exports.product_list_get = function(req, res) {
     models.combo.findAll({
-        attributes: ['id', 'name', 'duration'], where: {isavailable: true}, order: [['name', 'ASC']]
+        attributes: ['id', 'name', 'duration'], where: {isavailable: true, company_id: req.thisuser.company_id}, order: [['name', 'ASC']]
     }).then(function (product_list) {
         response.send_res_get(req, res, product_list, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
     }).catch(function(error) {

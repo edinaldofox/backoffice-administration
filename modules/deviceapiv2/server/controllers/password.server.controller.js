@@ -16,6 +16,7 @@ var path = require('path'),
     login_data = db.login_data,
     email_templates = db.email_templates,
     devices = db.devices;
+var winston = require('winston');
 
 /**
  * Reset password GET from email token
@@ -74,17 +75,14 @@ exports.validateResetToken = function(req, res) {
  */
 exports.forgot = function(req, res, next) {
     var smtpConfig = {
-        host: (req.app.locals.settings.smtp_host) ? req.app.locals.settings.smtp_host.split(':')[0] : 'smtp.gmail.com',
-        port: (req.app.locals.settings.smtp_host) ? Number(req.app.locals.settings.smtp_host.split(':')[1]) : 465,
-        secure: (req.app.locals.settings.smtp_secure === false) ? req.app.locals.settings.smtp_secure : true,
+        host: (req.app.locals.backendsettings[1].smtp_host) ? req.app.locals.backendsettings[1].smtp_host.split(':')[0] : 'smtp.gmail.com',
+        port: (req.app.locals.backendsettings[1].smtp_host) ? Number(req.app.locals.backendsettings[1].smtp_host.split(':')[1]) : 465,
+        secure: (req.app.locals.backendsettings[1].smtp_secure === false) ? req.app.locals.backendsettings[1].smtp_secure : true,
         auth: {
-            user: req.app.locals.settings.email_username,
-            pass: req.app.locals.settings.email_password
-        },
-		tls: {
-			rejectUnauthorized: false
-		}	
-	}
+            user: req.app.locals.backendsettings[1].email_username,
+            pass: req.app.locals.backendsettings[1].email_password
+        }
+    };
 
     var smtpTransport = nodemailer.createTransport(smtpConfig);
 
@@ -102,6 +100,17 @@ exports.forgot = function(req, res, next) {
                     if (!user) {
                         return res.status(400).send(response.APPLICATION_RESPONSE(req.body.language, 702, -1, 'USER_NOT_FOUND', 'User not found', []));
                     }  else {
+                        //prepare smtp configurations
+                        var smtpConfig = {
+                            host: (req.app.locals.backendsettings[user.company_id].smtp_host) ? req.app.locals.backendsettings[user.company_id].smtp_host.split(':')[0] : 'smtp.gmail.com',
+                            port: (req.app.locals.backendsettings[user.company_id].smtp_host) ? Number(req.app.locals.backendsettings[user.company_id].smtp_host.split(':')[1]) : 465,
+                            secure: (req.app.locals.backendsettings[user.company_id].smtp_secure === false) ? req.app.locals.backendsettings[user.company_id].smtp_secure : true,
+                            auth: {
+                                user: req.app.locals.backendsettings[user.company_id].email_username,
+                                pass: req.app.locals.backendsettings[user.company_id].email_password
+                            }
+                        };
+
                         //generate new password
                         var plaintext_password = randomstring.generate({ length: 4, charset: 'alphanumeric' });
                         var salt = authentication.makesalt();
@@ -151,7 +160,7 @@ exports.forgot = function(req, res, next) {
 
             email_templates.findOne({
                 attributes:['title','content'],
-                where: {template_id: 'reset-password-email' }
+                where: {template_id: 'reset-password-email' , company_id: user.customer_datum.company_id}
             }).then(function (result,err) {
                 if(!result){
                     res.render(path.resolve('modules/deviceapiv2/server/templates/reset-password-email'), {
@@ -174,7 +183,7 @@ exports.forgot = function(req, res, next) {
         function(emailHTML, user, done) {
             var mailOptions = {
                 to: user.customer_datum.email, //user.email,
-                from: req.app.locals.settings.email_address,
+                from: req.app.locals.backendsettings[user.company_id].email_address,
                 subject: 'Password Reset',
                 html: emailHTML
             };

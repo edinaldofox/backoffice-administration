@@ -8,6 +8,11 @@ module.exports = function(sequelize, DataTypes) {
             primaryKey: true,
             autoIncrement: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         group_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false,
@@ -18,17 +23,7 @@ module.exports = function(sequelize, DataTypes) {
             allowNull: false,
             unique: 'compositeIndex'
         },
-        read: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
-        edit: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
-        create: {
+        allow: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
@@ -38,6 +33,7 @@ module.exports = function(sequelize, DataTypes) {
         associate: function(models) {
             Grouprights.belongsTo(models.api_group, {foreignKey: 'api_group_id'});
             Grouprights.belongsTo(models.groups, {foreignKey: 'group_id'});
+            Grouprights.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return Grouprights;

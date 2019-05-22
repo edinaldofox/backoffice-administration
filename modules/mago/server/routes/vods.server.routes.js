@@ -17,13 +17,16 @@ module.exports = function(app) {
 
     /* ===== vods ===== */
     app.route('/api/vods')
+        .all(policy.Authenticate)
         .get(vods.list);
 
     app.route('/api/vods')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(vods.create);
 
     app.route('/api/vods/:vodId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vods.read)
         .put(vods.update)
@@ -35,13 +38,16 @@ module.exports = function(app) {
 
     /* ===== VodEpisode ===== */
     app.route('/api/VodEpisode')
+        .all(policy.Authenticate)
         .get(tv_episodes.list);
 
     app.route('/api/VodEpisode')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(tv_episodes.create);
 
     app.route('/api/VodEpisode/:VodEpisodeId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(tv_episodes.read)
         .put(tv_episodes.update)
@@ -53,13 +59,16 @@ module.exports = function(app) {
 
     /* ===== VodSeries ===== */
     app.route('/api/Series')
+        .all(policy.Authenticate)
         .get(tv_shows.list);
 
     app.route('/api/Series')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(tv_shows.create);
 
     app.route('/api/Series/:SeriesId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(tv_shows.read)
         .put(tv_shows.update)
@@ -71,13 +80,16 @@ module.exports = function(app) {
 
     /* ===== VodSeason ===== */
     app.route('/api/Season')
+        .all(policy.Authenticate)
         .get(tv_seasons.list);
 
     app.route('/api/Season')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(tv_seasons.create);
 
     app.route('/api/Season/:SeasonId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(tv_seasons.read)
         .put(tv_seasons.update)
@@ -87,8 +99,9 @@ module.exports = function(app) {
 
 
     app.route('/api/update_film')
-    .all(policy.isAllowed)
-    .put(vods.update_film);
+        .all(policy.Authenticate)
+        .all(policy.isAllowed)
+        .put(vods.update_film);
 
 
 };

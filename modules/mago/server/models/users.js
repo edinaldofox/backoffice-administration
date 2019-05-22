@@ -12,6 +12,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         username: {
             type: DataTypes.STRING(45),
             allowNull: false,
@@ -137,6 +142,7 @@ module.exports = function(sequelize, DataTypes) {
             }
             Users.belongsTo(models.groups, {foreignKey: 'group_id'});
             Users.hasMany(models.logs, {foreignKey: 'user_id'});
+            Users.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
 

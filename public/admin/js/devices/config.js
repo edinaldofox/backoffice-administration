@@ -112,6 +112,8 @@ export default function (nga, admin) {
                 .attributes({ placeholder: 'Username' })
                 .label('Username'),
         ])
+        .sortField('appid')
+        .sortDir('ASC')
 		.listActions(['edit'])
 		.exportFields([
          devices.listView().fields(),

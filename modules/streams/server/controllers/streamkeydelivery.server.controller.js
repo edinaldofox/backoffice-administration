@@ -2,7 +2,6 @@
 var path = require('path'),
     crypto = require('crypto'),
     response = require(path.resolve("./config/responses.js"));
-    //googlelogs = require(path.resolve("./modules/_tibo324/server/controllers/tibo324googlelogs.server.controller.js"));
 var winston = require("winston");
 
 const keyStr = "31313131313131313131313131313131";

@@ -10,11 +10,13 @@ module.exports = function(app) {
 
     /* ===== vod subtitles===== */
     app.route('/api/vodsubtitles')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vodSubtitles.list)
         .post(vodSubtitles.create);
 
     app.route('/api/vodsubtitles/:vodSubtitleId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vodSubtitles.read)
         .put(vodSubtitles.update)

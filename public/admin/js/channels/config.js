@@ -10,13 +10,14 @@ export default function (nga, admin) {
 			nga.field('channel_number', 'string')
 					.label('Number'),
 			nga.field('title', 'string')
-					.isDetailLink(true)
+					.isDetailLink(false)
 					.label('Title'),
 			nga.field('epg_map_id', 'string')
 					.label('EPG MAP ID'),
             nga.field('genre_id', 'reference')
                 .targetEntity(admin.getEntity('Genres'))
                 .targetField(nga.field('description'))
+                .isDetailLink(false)
                 .label('Genres'),
             nga.field('icon_url', 'file')
                 .template('<img src="{{ entry.values.icon_url }}" height="35" width="35" />')
@@ -257,6 +258,7 @@ export default function (nga, admin) {
 		                nga.field('stream_source_id', 'reference')
 		                    .targetEntity(admin.getEntity('ChannelStreamSources'))
 		                    .targetField(nga.field('stream_source'))
+                            .isDetailLink(false)
 		                    .cssClasses('hidden-xs')
 		                    .label('Stream Source'),
 		                nga.field('stream_format')

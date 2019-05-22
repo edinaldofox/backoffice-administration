@@ -66,7 +66,7 @@ exports.catchup_events =  function(req, res) {
         include: [
             {
                 model: models.channels, required: true, attributes: ['title', 'channel_number'],
-                where: {channel_number: req.body.channelNumber} //limit data only for this channel
+                where: {channel_number: req.body.channelNumber, company_id: req.thisuser.company_id} //limit data only for this channel
             },
             {model: models.program_schedule,
                 required: false, //left join
@@ -74,7 +74,7 @@ exports.catchup_events =  function(req, res) {
                 where: {login_id: req.thisuser.id}
             }
         ],
-        where: {program_start: {lte: interval_end_human}, program_end: {gte: current_human_time}}
+        where: {program_start: {lte: interval_end_human}, program_end: {gte: current_human_time}, company_id: req.thisuser.company_id}
     }).then(function (result) {
         //todo: what if channel number is invalid and it finds no title???
         var raw_result = [];
@@ -125,7 +125,7 @@ exports.get_catchup_events =  function(req, res) {
         include: [
             {
                 model: models.channels, required: true, attributes: ['title', 'channel_number'],
-                where: {channel_number: req.query.channelNumber} //limit data only for this channel
+                where: {channel_number: req.query.channelNumber, company_id: req.thisuser.company_id} //limit data only for this channel
             },
             {model: models.program_schedule,
                 required: false, //left join
@@ -133,7 +133,7 @@ exports.get_catchup_events =  function(req, res) {
                 where: {login_id: req.thisuser.id}
             }
         ],
-        where: {program_start: {lte: interval_end_human}, program_end: {gte: current_human_time}}
+        where: {program_start: {lte: interval_end_human}, program_end: {gte: current_human_time}, company_id: req.thisuser.company_id}
     }).then(function (result) {
         //todo: what if channel number is invalid and it finds no title???
         var raw_result = [];
@@ -195,7 +195,7 @@ exports.catchup_stream =  function(req, res) {
     models.channels.findOne({
         attributes: ['id'],
         include: [{model: models.channel_stream, required: true,  where: stream_where}],
-        where: {channel_number: channel_number}
+        where: {channel_number: channel_number, company_id: req.thisuser.company_id}
     }).then(function (catchup_streams) {
         if(catchup_streams){
             var thestream = catchup_streams.channel_streams[0].stream_url;

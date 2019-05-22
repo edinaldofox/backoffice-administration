@@ -16,6 +16,7 @@ var path = require('path'),
  */
 exports.create = function(req, res) {
 
+    req.body.company_id = req.token.company_id; //save record for this company
     DBModel.create(req.body).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
@@ -35,7 +36,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.vodSubtitle);
+    if(req.vodSubtitle.company_id === req.token.company_id) res.json(req.vodSubtitle);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -49,19 +51,25 @@ exports.update = function(req, res) {
         var deletefile = path.resolve('./public'+updateData.subtitle_url);
     }
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        if(deletefile) {
-            fs.unlink(deletefile, function (err) {
-                //todo: return ome warning
+    if(req.vodSubtitle.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            if(deletefile) {
+                fs.unlink(deletefile, function (err) {
+                    //todo: return ome warning
+                });
+            }
+            res.json(result);
+        }).catch(function(err) {
+            winston.error(err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
             });
-        }
-        res.json(result);
-    }).catch(function(err) {
-        winston.error(err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
+
 };
 
 /**
@@ -72,15 +80,20 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                               return res.json(result);
-            }).catch(function(err) {
-                winston.error(err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error(err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
-            return null;
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -114,6 +127,7 @@ exports.list = function(req, res) {
     qwhere.$or.title = {};
     qwhere.$or.title.$like = '%'+query.q+'%';
   }
+    qwhere.company_id = req.token.company_id; //return only records for this company
 
   DBModel.findAndCountAll({
     where: qwhere,

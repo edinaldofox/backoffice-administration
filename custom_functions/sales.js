@@ -41,7 +41,8 @@ function add_subscription(req, res, login_id, combo_id, username){
                     customer_username:   username,
                     user_username:       '',
                     start_date:          startdate,
-                    end_date:            enddate
+                    end_date:            enddate,
+                    company_id:          current_subscription.company_id
                 }).then(function(result){
                     db.salesreport.create({
                         user_id:            1,
@@ -49,7 +50,8 @@ function add_subscription(req, res, login_id, combo_id, username){
                         login_data_id:      login_id,
                         user_username:      username,
                         distributorname:    '',
-                        saledate:           dateFormat(Date.now(), 'yyyy-mm-dd HH:MM:ss')
+                        saledate:           dateFormat(Date.now(), 'yyyy-mm-dd HH:MM:ss'),
+                        company_id:          current_subscription.company_id
                     }).then(function(result){
                         var clear_response = new response.APPLICATION_RESPONSE(req.body.language, 200, 1, 'OK_DESCRIPTION', 'OK_DATA');
                         res.send(clear_response);
@@ -72,7 +74,7 @@ function add_subscription(req, res, login_id, combo_id, username){
 exports.add_subscription_transaction = function(req,res,sale_or_refund,transaction_id,start_date,end_date) {
 
     // if product_id exists in param list search combo by product_id, else search by combo id
-    var combo_where = {}; //query parameter
+    var combo_where = {company_id: req.token.company_id}; //query parameter
     if(req.body.product_id) {
         combo_where = {product_id: req.body.product_id, isavailable: true}; //if product id is coming
     }
@@ -115,6 +117,7 @@ exports.add_subscription_transaction = function(req,res,sale_or_refund,transacti
                             var sub = {
                                 login_id: loginData.id,
                                 package_id: item.package_id,
+                                company_id: (req.body.company_id) ? req.body.company_id : 1,
                                 customer_username: loginData.username,
                                 user_username: req.token.username //live
                             };
@@ -163,7 +166,8 @@ exports.add_subscription_transaction = function(req,res,sale_or_refund,transacti
                             login_data_id: loginData.id,
                             user_username: loginData.id,
                             saledate: Date.now(),
-                            active:sale_or_refund
+                            active:sale_or_refund,
+                            company_id: (req.body.company_id) ? req.body.company_id : 1
                         };
 
                         if(sale_or_refund == 1) {
@@ -174,7 +178,7 @@ exports.add_subscription_transaction = function(req,res,sale_or_refund,transacti
                         else {
                             salesreportdata.active = 0;
                             salesreportdata.cancelation_date = Date.now();
-                            salesreportdata.cancelation_user = req.token.uid;
+                            salesreportdata.cancelation_user = req.token.id;
                             salesreportdata.cancelation_reason = "api request";
 
                             transactions_array.push(
@@ -220,7 +224,7 @@ exports.buy_movie = function(req, res, username, vod_id, transaction_id) {
         attributes: ['id', 'duration'],
         where: {product_id: 'transactional_vod', isavailable: true}
     }).then(function(t_vod_combo) {
-        if(typeof req.app.locals.backendsettings.t_vod_duration !== "number"){
+        if(typeof req.app.locals.backendsettings[req.thisuser.company_id].t_vod_duration !== "number"){
             return {status: false, message:'buying movie failed. transactional vod not available', sale_data: []}; //the feature of transactional vod is not active
         }
         else{
@@ -237,7 +241,8 @@ exports.buy_movie = function(req, res, username, vod_id, transaction_id) {
                         login_data_id: client.id,
                         start_time: Date.now(),
                         end_time: moment().add(t_vod_combo.duration, 'day'),
-                        transaction_id: transaction_id
+                        transaction_id: transaction_id,
+                        company_id: req.token.company_id
                     };
                     var salesreport_data = {
                         transaction_id: transaction_id,
@@ -246,7 +251,8 @@ exports.buy_movie = function(req, res, username, vod_id, transaction_id) {
                         login_data_id: client.id,
                         user_username: username,
                         distributorname: '',
-                        saledate: Date.now()
+                        saledate: Date.now(),
+                        company_id: req.token.company_id
                     };
                     movie_purchase_data.push(db.t_vod_sales.create(t_vod_sales_data, {transaction: t})); //insert subscription data in the final response
                     movie_purchase_data.push(db.salesreport.create(salesreport_data, {transaction: t})); //insert sale data in the final response

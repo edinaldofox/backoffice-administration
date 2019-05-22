@@ -27,10 +27,6 @@ export default function (nga, admin) {
     htmlContent.creationView()
         .title('<h4>HTML Content <i class="fa fa-angle-right" aria-hidden="true"></i> Create: Template</h4>')
         .fields([
-            nga.field('id','number')
-                .attributes({ placeholder: 'ID' })
-                .validation({required: true})
-                .label('ID'),
             nga.field('name','string')
                 .attributes({ placeholder: 'Name' })
                 .validation({required: true})
@@ -50,7 +46,7 @@ export default function (nga, admin) {
                 .label('Content *'),
             nga.field('url')
             .transform(function (value,entry) {
-                var url = window.location.origin + '/api/htmlContentApp/' + entry.id;
+                var url = window.location.origin + '/api/htmlContentApp?name=' + entry.name;
                 return url;
             })
                 .cssClasses('hidden')
@@ -82,6 +78,8 @@ export default function (nga, admin) {
                     }
                 })
                 .label('Content *'),
+            nga.field('url')
+                .label('URL'),
 
             nga.field('template')
                 .label('')

@@ -31,16 +31,14 @@ export default function (nga, admin) {
 					.choices([
 						{ value: 0, label: 'Url' },
 						{ value: 1, label: 'Live TV' },
-						{ value: 2, label: 'EPG' },
 						{ value: 3, label: 'Logout' },
 						{ value: 4, label: 'Apps' },
 						{ value: 8, label: 'Webview url' },
 						{ value: 10, label: 'Network Test' },
 						{ value: 11, label: 'Vod' },
-						{ value: 12, label: 'Application menu' },
+						{ value: 12, label: 'Run Application' },
 						{ value: 14, label: 'Video Url' },
 						{ value: 20, label: 'Personal' },
-						{ value: 21, label: 'Catchup' },
                         { value: 22, label: 'Language' }
 					])
 					.validation({ required: true })
@@ -150,16 +148,14 @@ export default function (nga, admin) {
                 .choices([
                     { value: 0, label: 'Url' },
                     { value: 1, label: 'Live TV' },
-                    { value: 2, label: 'EPG' },
                     { value: 3, label: 'Logout' },
                     { value: 4, label: 'Apps' },
 					{ value: 8, label: 'Webview url' },
                     { value: 10, label: 'Network Test' },
                     { value: 11, label: 'Vod' },
-					{ value: 12, label: 'Application menu' },
+					{ value: 12, label: 'Run Application' },
 					{ value: 14, label: 'Video Url' },
                     { value: 20, label: 'Personal' },
-                    { value: 21, label: 'Catchup' },
                     { value: 22, label: 'Language' }
                 ])
                 .validation({validator: function(value) {
@@ -263,16 +259,14 @@ export default function (nga, admin) {
                 .choices([
                     { value: 0, label: 'Url' },
                     { value: 1, label: 'Live TV' },
-                    { value: 2, label: 'EPG' },
                     { value: 3, label: 'Logout' },
                     { value: 4, label: 'Apps' },
                     { value: 8, label: 'Webview url' },
                     { value: 10, label: 'Network Test' },
                     { value: 11, label: 'Vod' },
-                    { value: 12, label: 'Application menu' },
+                    { value: 12, label: 'Run Application' },
                     { value: 14, label: 'Video Url' },
                     { value: 20, label: 'Personal' },
-                    { value: 21, label: 'Catchup' },
                     { value: 22, label: 'Language' }
                 ])
                 .validation({validator: function(value) {

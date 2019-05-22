@@ -175,7 +175,7 @@ function uploadFile (req, res){
     /* get request and upload file informations */
     var tomodel = req.params.model;
     var tofield = req.params.field;
-    var existingfile = path.resolve('./public'+req.app.locals.settings[tofield]);
+    var existingfile = path.resolve('./public'+req.app.locals.backendsettings[1][tofield]);
     var fileName= req.files.file.name;
      var fileExtension = get_file_extention(fileName);
     var tempPath = req.files.file.path;
@@ -203,7 +203,7 @@ function uploadFile (req, res){
                         { where: {id: 1 }}
                     ).then(function (update_result) {
                         //update memory value
-                        //an if is required req.app.locals.settings[tofield] = uploadLinkPath;
+                        //an if is required req.app.locals.backendsettings[1][tofield] = uploadLinkPath;
                         //delete existing file if available
                         fs.unlink(existingfile, function (err) {
                             //todo: do sth on error?

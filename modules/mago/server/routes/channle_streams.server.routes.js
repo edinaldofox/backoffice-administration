@@ -14,11 +14,13 @@ module.exports = function(app) {
 
     /* ===== channel streams ===== */
     app.route('/api/channelstreams')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(channelStreams.list)
         .post(channelStreams.create);
 
     app.route('/api/channelstreams/:channelStreamId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(channelStreams.read)
         .put(channelStreams.update)

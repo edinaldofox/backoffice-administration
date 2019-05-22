@@ -20,7 +20,8 @@ exports.listOfSubscribers = function(req, res) {
                 order: [['end_date','ASC']],
                 limit: 1
             }
-        ]
+        ],
+        where: {company_id: req.token.company_id}
     }).then(function(results) {
         if (!results) {
             return res.status(404).send({
@@ -40,7 +41,8 @@ exports.listOfSubscribers = function(req, res) {
  * */
 exports.listOfSales = function(req, res) {
     SalesReport.findAll({
-        include: [db.combo,db.users]
+        include: [db.combo,db.users],
+        where: {company_id: req.token.company_id}
     }).then(function(results) {
         if (!results) {
             return res.status(404).send({
@@ -68,7 +70,8 @@ exports.expiringNextWeek = function(req, res) {
                     new Date().getNextWeekSunday()
                 ]
             }}}
-        ]
+        ],
+        where: {company_id: req.token.company_id}
     }).then(function(results) {
         if (!results) {
             return res.status(404).send({
@@ -88,7 +91,8 @@ exports.expiringNextWeek = function(req, res) {
  * */
 exports.listSalesByProduct = function(req, res) {
     Combo.findAll({
-        include: [db.salesreport]
+        include: [db.salesreport],
+        where: {company_id: req.token.company_id}
     }).then(function(results) {
         if (!results) {
             return res.status(404).send({

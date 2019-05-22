@@ -10,6 +10,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         tv_episode_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false
@@ -26,6 +31,7 @@ module.exports = function(sequelize, DataTypes) {
         tableName: 'tv_episode_subtitles',
         associate: function(models) {
             tv_episode_subtitles.belongsTo(models.tv_episode, {foreignKey: 'tv_episode_id'});
+            tv_episode_subtitles.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     tv_episode_subtitles.beforeDestroy(function(vod_subtitles, options) {

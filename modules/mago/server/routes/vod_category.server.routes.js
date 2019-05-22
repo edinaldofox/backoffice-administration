@@ -9,11 +9,13 @@ module.exports = function(app) {
 
     /* ===== vod categories ===== */
     app.route('/api/vodcategories')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vodCategories.list)
         .post(vodCategories.create);
 
     app.route('/api/vodcategories/:vodCategoryId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vodCategories.read)
         .put(vodCategories.update)

@@ -14,11 +14,13 @@ export default function (nga, admin) {
 				nga.field('user_id', 'reference')
 						.targetEntity(admin.getEntity('Users'))
 						.targetField(nga.field('username'))
+						.isDetailLink(false)
 						.label('Sales Agent'),
 
 				nga.field('login_data_id', 'reference')
 						.targetEntity(admin.getEntity('LoginData'))
 						.targetField(nga.field('username'))
+						.isDetailLink(false)
 						.label('Username'),
 
                 nga.field('login_data_id', 'reference')
@@ -28,6 +30,7 @@ export default function (nga, admin) {
                             return entry['customer_datum.firstname'] + ' ' + entry['customer_datum.lastname'];
                         })
                     )
+					.isDetailLink(false)
                     .label('Full Name'),
 
                 nga.field('transaction_id', 'string')
@@ -53,6 +56,7 @@ export default function (nga, admin) {
 				nga.field('cancelation_user', 'reference')
 						.targetEntity(admin.getEntity('Users'))
 						.targetField(nga.field('username'))
+						.isDetailLink(false)
 						.label('Cancelation User'),
 				nga.field('cancelation_reason', 'text')
 						.cssClasses('hidden-xs')
