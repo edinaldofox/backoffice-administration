@@ -13,14 +13,15 @@ var path = require('path'),
 
 
 //function link_channel_with_packages(channel_id,array_package_ids) {
-function link_channels_with_package(array_channel_ids, package_id) {
+function link_channels_with_package(array_channel_ids, package_id, company_id) {
 
     var transactions_array = [];
 
     return DBModel.destroy({
         where: {
             package_id: package_id,
-            channel_id: {$notIn: array_channel_ids}
+            channel_id: {$notIn: array_channel_ids},
+            company_id: company_id
         }
     }).then(function (result) {
         return sequelize_t.sequelize.transaction(function (t) {
@@ -29,6 +30,7 @@ function link_channels_with_package(array_channel_ids, package_id) {
                     DBModel.upsert({
                         channel_id: array_channel_ids[i],
                         package_id: package_id,
+                        company_id: company_id
                     }, {transaction: t})
                 )
             }
@@ -61,7 +63,7 @@ function link_channels_with_package(array_channel_ids, package_id) {
 
 exports.create = function(req, res) {
 
-    return link_channels_with_package(req.body.channel_id, req.body.package_id).then(function(t_result) {
+    return link_channels_with_package(req.body.channel_id, req.body.package_id, req.token.company_id).then(function(t_result) {
         if (t_result.status) {
             return res.jsonp(t_result);
         }
@@ -90,7 +92,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.packageChannel);
+    if(req.packageChannel.company_id === req.token.company_id) res.json(req.packageChannel);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -99,14 +102,19 @@ exports.read = function(req, res) {
 exports.update = function(req, res) {
     var updateData = req.packageChannel;
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        res.json(result);
-    }).catch(function(err) {
-        winston.error(err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
+    if(req.packageChannel.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            res.json(result);
+        }).catch(function(err) {
+            winston.error(err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 /**
@@ -117,15 +125,20 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Removing a channel from a package failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Removing a channel from a package failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -150,6 +163,8 @@ exports.list = function(req, res) {
     var records_limit = query._end - query._start;
     var qwhere = {};
     if(query.package_id) qwhere.package_id = query.package_id;
+
+    qwhere.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll({
         where: qwhere,

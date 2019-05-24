@@ -7,14 +7,15 @@ var path = require('path'),
     errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
     winston = require('winston'),
     db = require(path.resolve('./config/lib/sequelize')).models,
-    DBModel = db.grouprights;
+    policy = require('../policies/mago.server.policy');
 
 /**
  * Create
  */
 exports.create = function(req, res) {
 
-    DBModel.create(req.body).then(function(result) {
+    req.body.company_id = req.token.company_id; //save record for this company
+    db.grouprights.create(req.body).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
         } else {
@@ -32,7 +33,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.users);
+    if(req.users.company_id === req.token.company_id || req.token.role === 'superadmin') res.json(req.users);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -41,24 +43,33 @@ exports.read = function(req, res) {
 exports.update = function(req, res) {
     //var updateData = req.users;
 
-    DBModel.findOne(
+    req.body.company_id = req.token.company_id;
+
+    db.grouprights.findOne(
         {
             where: {
                 group_id: req.body.group_id,
-                api_group_id: req.body.api_group_id
+                api_group_id: req.body.api_group_id,
+                company_id: req.token.company_id
             }
         }
     ).then(function(result){
         if(result) {
             result.update(req.body)
                 .then(function(result) {
-                    res.json({message: 'update success'});
+                    policy.updateGroupRights(req.body.group_id)
+                        .then(function(upd) {
+                            res.json({message: 'update success'});
+                        })
                 });
         }
         else {
-            DBModel.create(req.body)
+            db.grouprights.create(req.body)
                 .then(function(result) {
-                    res.json({message: 'Create success'});
+                    policy.updateGroupRights(req.body.group_id)
+                        .then(function(upd) {
+                            res.json({message: 'Create success'});
+                        });
                 });
         }
         return null;
@@ -79,16 +90,22 @@ exports.update = function(req, res) {
 exports.delete = function(req, res) {
     var deleteData = req.users;
 
-    DBModel.findById(deleteData.id).then(function(result) {
+    db.grouprights.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Deleting group right failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Deleting group right failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -110,7 +127,8 @@ exports.list = function(req, res) {
 
     db.api_group.findAndCountAll({
         attributes: ['id', 'api_group_name', 'description'],
-        include: [{model:db.grouprights, where: { group_id: req.query.group_id },required: false, attributes: ['group_id', 'read','edit','create']}],
+        where: {api_group_name: {$notIn: ['users_and_roles', 'sale_agents']}},
+        include: [{model:db.grouprights, where: { group_id: req.query.group_id, company_id: req.token.company_id },required: false, attributes: ['group_id', 'allow']}],
         order: ['api_group.id'],
         raw: true
     }).then(function(results) {
@@ -140,7 +158,7 @@ exports.dataByID = function(req, res, next, id) {
         });
     }
 
-    DBModel.find({
+    db.grouprights.find({
         where: {
             id: id
         },

@@ -7,12 +7,35 @@ var config = require('../config'),
   express = require('./express'),
   chalk = require('chalk'),
   sequelize = require('./sequelize-connect'),
-  winston = require('./winston');
+  winston = require('./winston'),
+  redis = require('./redis');
 
 
 module.exports.init = function init(callback) {
-  var app = express.init(sequelize);
-  if (callback) callback(app, sequelize, config);
+  var app;
+  if (process.env.NODE_APP_INSTANCE == 0) {
+    //start server redis immediately
+    redis.startServer(function(err) {
+      if (err) {
+        winston.error(err);
+        process.exit(1);
+      }
+
+      if (process.send) {
+        process.send('ready');
+      }
+      
+      redis.createClient();
+      app = express.init(sequelize, redis.client);
+      if (callback) callback(app, sequelize, config);    
+    })
+  }
+  else {
+    process.send('ready')
+    redis.createClient();
+    app = express.init(sequelize, redis.client);
+    if (callback) callback(app, sequelize, config);    
+  }
 };
 
 module.exports.start = function start(callback) {

@@ -13,21 +13,27 @@ var path = require('path'),
 module.exports = function(app) {
     /* ===== customer data ===== */
     app.route('/api/customerdata')
+        .all(policy.Authenticate)
         .get(customerData.list);
 		
     app.route('/api/customerdata')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
-        .post(customerData.create);		
+        .post(customerData.create);
 
     app.route('/api/customerdata/:customerDataId')
+        .all(policy.Authenticate)
         .get(customerData.read);
 		
     app.route('/api/customerdata/:customerDataId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .put(customerData.update)
         .delete(customerData.delete);		
 
     app.param('customerDataId', customerData.dataByID);
 
-    app.route('/api/search_customer').get(customerData.search_customer); //todo: pjese e apive te mbrojtura me permission
+    app.route('/api/search_customer')
+        .all(policy.Authenticate)
+        .get(customerData.search_customer);
 };

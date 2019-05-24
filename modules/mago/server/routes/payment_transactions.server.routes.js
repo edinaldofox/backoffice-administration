@@ -14,10 +14,12 @@ module.exports = function(app) {
 
     /* ===== Payment Transactions ===== */
     app.route('/api/PaymentTransactions')
+        .all(policy.Authenticate)
         //.all(policy.isAllowed)
         .get(paymentTransactions.list);
 
     app.route('/api/PaymentTransactions/:PaymentTransactionID')
+        .all(policy.Authenticate)
         //.all(policy.isAllowed)
         .get(paymentTransactions.read);
 

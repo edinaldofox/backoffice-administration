@@ -14,16 +14,20 @@ module.exports = function(app) {
 
     /* ===== combos ===== */
     app.route('/api/combos')
+        .all(policy.Authenticate)
         .get(combos.list);
 
     app.route('/api/combos')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(combos.create);
 
 	app.route('/api/combos/:comboId')
+        .all(policy.Authenticate)
         .get(combos.read);
 
 	app.route('/api/combos/:comboId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .put(combos.update)
         .delete(combos.delete);

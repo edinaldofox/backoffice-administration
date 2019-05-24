@@ -43,6 +43,13 @@ module.exports = function(app) {
         .get(tokenGenerators.nimble_token_generator)
         .post(tokenGenerators.nimble_token_generator);
 
+    app.route('/apiv2/token/verizon/*')
+        .all(authpolicy.isAllowed)
+        .get(tokenGenerators.handleGenerateTokenJson)
+        .post(tokenGenerators.handleGenerateTokenJson);
+    app.route('/apiv2/drm/nimble')
+        .all(authpolicy.isAllowed)
+        .get(tokenGenerators.nimble_drm_key);
 
     app.route('/apiv2/catchup/flussonic')
         .all(authpolicy.isAllowed)

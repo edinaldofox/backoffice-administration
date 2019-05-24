@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         transaction_id: {
             type: DataTypes.STRING(128),
             allowNull: true,
@@ -65,6 +70,7 @@ module.exports = function(sequelize, DataTypes) {
             salesreport.belongsTo(models.combo, {foreignKey: 'combo_id'});
             salesreport.belongsTo(models.users, {foreignKey: 'user_id'});
             salesreport.belongsTo(models.login_data, {foreignKey: 'login_data_id'});
+            salesreport.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return salesreport;

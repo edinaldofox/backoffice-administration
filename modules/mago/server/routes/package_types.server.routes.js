@@ -14,11 +14,13 @@ module.exports = function(app) {
 
     /* ===== package types ===== */
     app.route('/api/packagetypes')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(packageTypes.list)
         .post(packageTypes.create);
 
     app.route('/api/packagetypes/:packageTypeId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(packageTypes.read)
         .put(packageTypes.update)

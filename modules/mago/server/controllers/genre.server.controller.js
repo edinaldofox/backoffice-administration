@@ -24,6 +24,7 @@ exports.create = function(req, res) {
         if(result && result.id === 665){
             req.body.id = 667;
         }
+        req.body.company_id = req.token.company_id; //save record for this company
         DBModel.create(req.body).then(function(result) {
             if (!result) {
                 return res.status(400).send({message: 'fail create data'});
@@ -50,7 +51,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-  res.json(req.genre);
+    if(req.genre.company_id === req.token.company_id) res.json(req.genre);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -59,22 +61,27 @@ exports.read = function(req, res) {
 exports.update = function(req, res) {
     var updateData = req.genre;
 
-    if(updateData.icon_url != req.body.icon_url) {
-        var deletefile = path.resolve('./public'+updateData.icon_url);
+    if(req.genre.company_id === req.token.company_id){
+        if(updateData.icon_url != req.body.icon_url) {
+            var deletefile = path.resolve('./public'+updateData.icon_url);
+        }
+        updateData.updateAttributes(req.body).then(function(result) {
+            if(deletefile)
+                fs.unlink(deletefile, function (err) {
+                    //todo: return some error message???
+                });
+            return res.jsonp(result);
+        }).catch(function(err) {
+            winston.error("Updating genre failed with error: ", err);
+            res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
+            return null;
+        });
     }
-    updateData.updateAttributes(req.body).then(function(result) {
-        if(deletefile)
-        fs.unlink(deletefile, function (err) {
-            //todo: return some error message???
-        });
-        return res.jsonp(result);
-    }).catch(function(err) {
-        winston.error("Updating genre failed with error: ", err);
-        res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-        });
-        return null;
-    });
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 /**
@@ -85,14 +92,19 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(ER_ROW_IS_REFERENCED_2) {
-                return res.status(400).send({ message: "Cannot delete genre with channels" }) //this row is referenced by another record
-            }).catch(function(error) {
-                winston.error("Deleting genre failed with error: ", error);
-                return res.status(400).send({ message: "Unable to delete genre" })
-            });
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(ER_ROW_IS_REFERENCED_2) {
+                    return res.status(400).send({ message: "Cannot delete genre with channels" }) //this row is referenced by another record
+                }).catch(function(error) {
+                    winston.error("Deleting genre failed with error: ", error);
+                    return res.status(400).send({ message: "Unable to delete genre" })
+                });
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({ message: 'Unable to find the Data' });
         }
@@ -129,6 +141,7 @@ exports.list = function(req, res) {
 
   DBModel.findAndCountAll({
       attributes:['id','description', 'icon_url', 'is_available'],
+      where: {company_id: req.token.company_id},
       include:[{
           model:db.models.channels, required:false,
           attributes:[[db.sequelize.fn('count',db.sequelize.col('channels.id')),'total']],

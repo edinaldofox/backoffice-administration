@@ -6,6 +6,7 @@
 var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
     logHandler = require(path.resolve('./modules/mago/server/controllers/logs.server.controller')),
+    saas_functions = require(path.resolve('./custom_functions/saas_functions')),
     winston = require('winston'),
     authenticationHandler = require(path.resolve('./modules/deviceapiv2/server/controllers/authentication.server.controller')),
   db = require(path.resolve('./config/lib/sequelize')).models,
@@ -40,28 +41,43 @@ var path = require('path'),
 exports.create = function(req, res) {
 
   var newData = req.body;
+  newData.company_id = req.token.company_id; //save record for this company
     newData.salt = authenticationHandler.makesalt();
-    logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
     newData['updatedate'] = new Date();
-    DBModel.create(newData).then(function(result) {
-      if (!result) {
-        return res.status(400).send({message: 'fail create data'});
-      } else {
-        return res.jsonp(result);
-      }
-    }).catch(function(err) {
-      winston.error("Creating client account failed with error: ", err);
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
+  var limit = req.app.locals.backendsettings[req.token.company_id].asset_limitations.client_limit; //number of client accounts that this company can create
+
+  saas_functions.check_limit('login_data', limit).then(function(limit_reached){
+    if(limit_reached === true) return res.status(400).send({message: "You have reached the limit number of client accounts you can create for this plan. "});
+    else{
+      DBModel.create(newData).then(function(result) {
+        if (!result) {
+          return res.status(400).send({message: 'fail create data'});
+        } else {
+          logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body), req.token.company_id);
+          return res.jsonp(result);
+          return null;
+        }
+      }).catch(function(err) {
+        winston.error("Creating client account failed with error: ", err);
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
       });
-    });
+    }
+  }).catch(function(error){
+    winston.error("Error checking for the limit number of client accounts for company with id ",req.token.company_id," - ", error);
+    return res.status(400).send({message: "The limit number of client accounts you can create for this plan could not be verified. Check your log file for more information."});
+  });
+
+
 };
 
 /**
  * Show current
  */
 exports.read = function(req, res) {
-  res.json(req.loginData);
+  if(req.loginData.company_id === req.token.company_id) res.json(req.loginData);
+  else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -95,16 +111,23 @@ exports.update = function(req, res) {
     if(req.body.updatevodtimestamp === true) {req.body.vodlastchange = Date.now(); }
     if(req.body.updatelivetvtimestamp === true) {req.body.livetvlastchange = Date.now(); }
     var updateData = req.loginData;
-    logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
 
+  if(req.body.company_id === req.token.company_id){
     updateData.updateAttributes(req.body).then(function(result) {
-        res.json(result);
+      logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body), req.token.company_id);
+      res.json(result);
+      return null;
     }).catch(function(err) {
       winston.error("Updating client account failed with error: ", err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-        });
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
     });
+  }
+  else{
+    res.status(404).send({message: 'User not authorized to access these data'});
+  }
+
 };
 
 /**
@@ -115,14 +138,19 @@ exports.delete = function(req, res) {
 
   DBModel.findById(deleteData.id).then(function(result) {
     if (result) {
-      result.destroy().then(function() {
-        return res.json(result);
-      }).catch(function(err) {
-        winston.error("Deleting client account failed with error: ", err);
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
+      if (result && (result.company_id === req.token.company_id)) {
+        result.destroy().then(function() {
+          return res.json(result);
+        }).catch(function(err) {
+          winston.error("Deleting client account failed with error: ", err);
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
         });
-      });
+      }
+      else{
+        return res.status(400).send({message: 'Unable to find the Data'});
+      }
     } else {
       return res.status(400).send({
         message: 'Unable to find the Data'
@@ -167,6 +195,8 @@ exports.list = function(req, res) {
   final_where.include = [{model:db.customer_data,required:true}];
   //end build final where
 
+  final_where.where.company_id = req.token.company_id; //return only records for this company
+
   DBModel.findAndCountAll(
 
       final_where
@@ -194,6 +224,7 @@ exports.latest = function(req, res) {
   DBModel.findAll({
     include: [db.customer_data],
     limit: 10,
+    where: {company_id: req.token.company_id},
     order: [['createdAt','ASC']]
   }).then(function(results) {
     if (!results) {

@@ -17,11 +17,12 @@ var path = require('path'),
  * Create
  */
 exports.create = function(req, res) {
+    req.body.company_id = req.token.company_id; //save record for this company
     DBModel.create(req.body).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
         } else {
-            logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
             return res.jsonp(result);
         }
     }).catch(function(err) {
@@ -36,7 +37,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.vod);
+    if(req.vod.company_id === req.token.company_id) res.json(req.vod);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -52,25 +54,30 @@ exports.update = function(req, res) {
         var deleteimage = path.resolve('./public'+updateData.image_url);
     }
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        if(deletefile) {
-            fs.unlink(deletefile, function (err) {
-                //todo: return some warning
+    if(req.vod.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            if(deletefile) {
+                fs.unlink(deletefile, function (err) {
+                    //todo: return some warning
+                });
+            }
+            if(deleteimage) {
+                fs.unlink(deleteimage, function (err) {
+                    //todo: return some warning
+                });
+            }
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+            return res.json(result);
+        }).catch(function(err) {
+            winston.error("Updating vod item failed with error: ", err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
             });
-        }
-        if(deleteimage) {
-            fs.unlink(deleteimage, function (err) {
-                //todo: return some warning
-            });
-        }
-        logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
-        return res.json(result);
-    }).catch(function(err) {
-        winston.error("Updating vod item failed with error: ", err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 /**
@@ -80,15 +87,20 @@ exports.delete = function(req, res) {
     var deleteData = req.vod;
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Deleting vod failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Deleting vod failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
-            return null;
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -138,6 +150,8 @@ exports.list = function(req, res) {
     if(query._orderBy) final_where.order = query._orderBy + ' ' + query._orderDir;
     final_where.include = [db.vod_vod_categories, db.package];
     //end build final where
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(
         final_where
@@ -231,6 +245,8 @@ exports.update_film = function(req, res) {
         if(req.body.title) vod_where.title = req.body.title;
         if(req.body.year) vod_where.year = req.body.year;
     }
+
+    vod_where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findOne({
         attributes: ['title', 'imdb_id'], where: vod_where

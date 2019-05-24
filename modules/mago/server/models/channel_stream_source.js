@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         stream_source: {
             type: DataTypes.STRING(30),
             allowNull: false
@@ -18,6 +23,7 @@ module.exports = function(sequelize, DataTypes) {
         associate: function(models) {
             if (models.channel_stream){
                 channelStreamSource.hasMany(models.channel_stream, {foreignKey: 'stream_source_id'});
+                channelStreamSource.belongsTo(models.settings, {foreignKey: 'company_id'});
             }
         }
     });

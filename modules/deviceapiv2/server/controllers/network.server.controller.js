@@ -11,6 +11,7 @@ var path = require('path'),
     response = require(path.resolve("./config/responses.js")),
     querystring = require("querystring"),
     models = db.models;
+var winston = require('winston');
 
 //makes a database call. returns database_error if connection failed, one genre_id otherwise
 
@@ -138,6 +139,7 @@ exports.gcm = function(req, res) {
 exports.command_response = function(req,res) {
 
 	req.body.action = 'receive';
+	req.body.company_id = req.thisuser.company_id;
 
 	models.messages.create(
 		req.body

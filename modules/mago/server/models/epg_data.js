@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         channel_number: {
             type: DataTypes.INTEGER(11),
             allowNull: false
@@ -71,6 +76,7 @@ module.exports = function(sequelize, DataTypes) {
         associate: function(models) {
             epgData.belongsTo(models.channels, {foreignKey: 'channels_id'});
             epgData.hasMany(models.program_schedule, {foreignKey: 'program_id'});
+            epgData.belongsTo(models.settings, {foreignKey: 'company_id'});
         },
         indexes: [
             { fields: ['program_start', 'channel_number'], unique: true },

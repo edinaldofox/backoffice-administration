@@ -16,7 +16,8 @@ function save_messages(obj, messagein, ttl, action, callback){
         googleappid: obj.googleappid,
         title: messagein,
         message: messagein,
-        action: action
+        action: action,
+        company_id: req.token.company_id //save record for this company
     }).then(function(result) {
         if (!result) {
             winston.error('Fail to create data')
@@ -85,6 +86,7 @@ exports.create = function(req, res) {
 
         if(req.body.sendtoactivedevices) where.device_active = true; //if we only want to send push msgs to active devices, add condition
         where.appid = {in: device_types}; //filter devices by application id
+        where.company_id = req.token.company_id;
 
         DBDevices.findAll(
             {
@@ -111,7 +113,7 @@ exports.create = function(req, res) {
                     else if(['5', '6'].indexOf(result[i].appid))
                         var message = new push_msg.INFO_PUSH(req.body.title, req.body.message, '1',{});
                     else var message = {"action": "notification", "parameter1": req.body.message, "parameter2": req.body.message, "parameter3": ""};
-                    push_msg.send_notification(result[i].googleappid, req.app.locals.settings.firebase_key, result[i].login_datum.username, message, req.body.timetolive, true, true, function(result){});
+                    push_msg.send_notification(result[i].googleappid, req.app.locals.backendsettings[req.token.company_id].firebase_key, result[i].login_datum.username, message, req.body.timetolive, true, true, function(result){});
                 }
                 return res.status(200).send({
                     message: 'Message sent'
@@ -130,8 +132,13 @@ exports.send_message_action = function(req, res) {
     DBDevices.find(
         {
             where: {
-                id: req.body.deviceid,
-                $or: [{appid: 1}, {appid: 2},{appid: 4} ]
+                where: Sequelize.and(
+                    {company_id: req.token.company_id},
+                    Sequelize.or({
+                        id: req.body.deviceid,
+                        $or: [{appid: 1}, {appid: 2},{appid: 4} ]
+                    })
+                )
             }
         }
     ).then(function(result) {
@@ -163,7 +170,8 @@ exports.send_message_action = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.messages);
+    if(req.messages.company_id === req.token.company_id) res.json(req.messages);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -172,14 +180,19 @@ exports.read = function(req, res) {
 exports.update = function(req, res) {
     var updateData = req.messages;
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        res.json(result);
-    }).catch(function(err) {
-        winston.error("Updating message failed with error: ", err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
+    if(req.messages.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            res.json(result);
+        }).catch(function(err) {
+            winston.error("Updating message failed with error: ", err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 /**
@@ -190,14 +203,20 @@ exports.delete = function(req, res) {
 
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error("Deleting message failed with error: ", err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error("Deleting message failed with error: ", err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -226,6 +245,8 @@ exports.list = function(req, res) {
     if(parseInt(query._end)) final_where.limit = parseInt(query._end)-parseInt(query._start);
     if(query._orderBy) final_where.order = query._orderBy + ' ' + query._orderDir;
     final_where.include = [];
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(
 

@@ -8,11 +8,13 @@ var path = require('path'),
 module.exports = function(app) {
     /* ===== device menus ===== */
     app.route('/api/Submenu')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(Submenu.list)
         .post(Submenu.create);
 
     app.route('/api/Submenu/:SubmenuId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(Submenu.read)
         .put(Submenu.update)

@@ -9,10 +9,12 @@ export default function (nga, admin) {
 			nga.field('vod_id', 'reference')
 				.targetEntity(admin.getEntity('Vods'))
                 .targetField(nga.field('title'))
+                .isDetailLink(false)
 				.label('Vod'),
 			nga.field('stream_source_id', 'reference')
 				.targetEntity(admin.getEntity('VodStreamSources'))
                 .targetField(nga.field('description'))
+                .isDetailLink(false)
 				.label('Stream Source'),
 			nga.field('url', 'string')
 				// .map(function truncate(value) {

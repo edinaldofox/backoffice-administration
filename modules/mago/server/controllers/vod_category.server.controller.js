@@ -15,6 +15,7 @@ var path = require('path'),
  */
 exports.create = function(req, res) {
 
+    req.body.company_id = req.token.company_id; //save record for this company
     DBModel.create(req.body).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
@@ -33,7 +34,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-  res.json(req.vodCategory);
+    if(req.vodCategory.company_id === req.token.company_id) res.json(req.vodCategory);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -48,24 +50,29 @@ exports.update = function(req, res) {
         var deletesmallfile = path.resolve('./public'+updateData.small_icon_url);
     }
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        if(deletefile) {
-            fs.unlink(deletefile, function (err) {
-                //todo: display some warning
+    if(req.vodCategory.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            if(deletefile) {
+                fs.unlink(deletefile, function (err) {
+                    //todo: display some warning
+                });
+            }
+            if(deletesmallfile) {
+                fs.unlink(deletesmallfile, function (err) {
+                    //todo: display some warning
+                });
+            }
+            res.json(result);
+        }).catch(function(err) {
+            winston.error(err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
             });
-        }
-        if(deletesmallfile) {
-            fs.unlink(deletesmallfile, function (err) {
-                //todo: display some warning
-            });
-        }
-        res.json(result);
-    }).catch(function(err) {
-        winston.error(err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 /**
@@ -75,14 +82,20 @@ exports.delete = function(req, res) {
     var deleteData = req.vodCategory;
     DBModel.findById(deleteData.id).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error(err);
-                return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error(err);
+                    return res.status(400).send({
+                        message: errorHandler.getErrorMessage(err)
+                    });
                 });
-            });
+                return null;
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -122,7 +135,9 @@ exports.list = function(req, res) {
   }
   if(query._orderBy) final_where.order = query._orderBy + ' ' + query._orderDir;
   final_where.include = [];
-  
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
+
   DBModel.findAndCountAll(
 
       final_where

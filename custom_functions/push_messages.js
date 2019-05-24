@@ -72,14 +72,15 @@ function send_notification(fcm_token, firebase_key, user, message, ttl, push_mes
 }
 
 
-function save_message(user, googleappid, message, action, title){
+function save_message(user, googleappid, message, action, title, company_id){
 
     db.messages.create({
         username: user,
         googleappid: googleappid,
         message: message,
         action: action,
-        title: title
+        title: title,
+        company_id: company_id
     }).then(function(result) {
         winston.info('Push notifications saved')
     }).catch(function(err) {

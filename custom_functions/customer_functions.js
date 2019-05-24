@@ -110,6 +110,7 @@ exports.create_customer_with_login = function(req, res) {
                                 //begin data customer creation transaction
                                 return db_t.sequelize.transaction(function (t) {
                                     req.body.group_id = (req.body.group_id) ? req.body.group_id:1;
+                                    req.company_id = (req.token) ? req.token.company_id : 1;
 
                                     return db.customer_data.create(
                                         req.body,{transaction: t}
@@ -124,7 +125,7 @@ exports.create_customer_with_login = function(req, res) {
                                     });
                                 }).then(function (result) {
                                     // Transaction has been committed
-                                    return {status: true, message: "Customer and account created successfully"};
+                                    return {status: true, message: result};
                                 }).catch(function (err) {
                                     // Transaction has been rolled back
                                     winston.error("error creating customer: ",err);
@@ -186,6 +187,7 @@ exports.find_or_create_customer_and_login = function(req, res) {
                     //begin data customer creation transaction
                     return db_t.sequelize.transaction(function (t) {
                         req.body.group_id = (req.body.group_id) ? req.body.group_id : 1;
+                        req.body.company_id = login_data.company_id;
                         return db.customer_data.create(
                             req.body, {transaction: t}
                         ).then(function (new_customer) {

@@ -14,7 +14,8 @@ var path = require('path'),
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.paymentTransaction);
+    if(req.paymentTransaction.company_id === req.token.company_id) res.json(req.paymentTransaction);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -39,6 +40,8 @@ exports.list = function(req, res) {
     if(query._orderBy) final_where.order = query._orderBy + ' ' + query._orderDir;
     final_where.include = [];
     //end build final where
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(
         final_where

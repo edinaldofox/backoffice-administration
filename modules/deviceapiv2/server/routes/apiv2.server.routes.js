@@ -5,6 +5,7 @@
 var path = require('path'),
     config = require(path.resolve('./config/config')),
     authpolicy = require('../auth/apiv2.server.auth.js'),
+    authpolicy_v3 = require('../auth/apiv3.server.auth.js'),
     credentialsController = require(path.resolve('./modules/deviceapiv2/server/controllers/credentials.server.controller')),
     channelsController = require(path.resolve('./modules/deviceapiv2/server/controllers/channels.server.controller')),
     catchupController = require(path.resolve('./modules/deviceapiv2/server/controllers/catchup.server.controller')),
@@ -25,7 +26,7 @@ var path = require('path'),
 module.exports = function(app) {
 
     app.use('/apiv2',function (req, res, next) {
-        winston.info(req.originalUrl +'  '+ JSON.stringify(req.body));
+        winston.info(req.ip.replace('::ffff:', '') + ' # ' + req.originalUrl +' # '+ JSON.stringify(req.body));
         //commented because everything is handled on global security config
 		//res.header("Access-Control-Allow-Origin", "*");
         next();
@@ -36,6 +37,12 @@ module.exports = function(app) {
     app.route('/apiv2/credentials/login')
         .all(authpolicy.plainAuth)
         .all(authpolicy.isAllowed)
+        .post(credentialsController.login);
+
+    /* ===== login data credentials===== */
+    app.route('/apiv2/credentials/login_account_kit')
+        .all(authpolicy_v3.plainAuth)
+        .all(authpolicy_v3.isAllowed)
         .post(credentialsController.login);
 
     app.route('/apiv2/credentials/logout')
@@ -114,7 +121,7 @@ module.exports = function(app) {
         .get(settingsController.help_support);
     app.route('/apiv2/help_support')
         .get(settingsController.help_support);
-	
+
     //main device menu
     app.route('/apiv2/main/device_menu')
         .all(authpolicy.isAllowed)
@@ -262,12 +269,22 @@ module.exports = function(app) {
         // .all(authpolicy.isAllowed)
         .get(mainController.get_weather_widget);
 
-
-    /* ===== welcome message ===== */
-
+    /* ===== WELCOME MESSAGE ===== */
     app.route('/apiv2/welcomeMessage')
         .all(authpolicy.isAllowed)
         .get(mainController.get_welcomeMessage);
 
+    /* ===== QR CODE ===== */
+    app.route('/apiv2/qrcode')
+        // .all(authpolicy.isAllowed)
+        .post(mainController.get_qrCode);
+
+    //LOGIN FORM TEMPLATE
+    app.route('/apiv2/htmlContent/remotedeviceloginform')
+    // .all(authpolicy.isAllowed)
+        .get(mainController.getloginform);
+
+    app.route('/apiv2/remotedevicelogin')
+        .post(mainController.qr_login);
 
 };

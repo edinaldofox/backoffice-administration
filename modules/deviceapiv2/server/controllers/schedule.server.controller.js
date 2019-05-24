@@ -37,7 +37,7 @@ function send_notification(event_time, firebase_key, login_data_id, channel_numb
         else{
             models.epg_data.findOne({
                 attributes: ['id', 'channel_number', 'program_start', 'title', 'long_description'],
-                where: {id: program_id}
+                where: {id: program_id, company_id: req.thisuser.company_id}
             }).then(function (epg_program) {
                 if(!epg_program || epg_program.length<0){
                     winston.info("no epg records found")

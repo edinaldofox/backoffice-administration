@@ -14,14 +14,17 @@ module.exports = function(app) {
 
     /* ===== channels ===== */
     app.route('/api/channels')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(channels.list);
 
     app.route('/api/channels')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(channels.create);
 
     app.route('/api/channels/:channelId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(channels.read)
         .put(channels.update)

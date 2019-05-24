@@ -14,11 +14,13 @@ module.exports = function(app) {
 
     /* ===== vod streams ===== */
     app.route('/api/vodstreams')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vodStreams.list)
         .post(vodStreams.create);
 
     app.route('/api/vodstreams/:vodStreamId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vodStreams.read)
         .put(vodStreams.update)

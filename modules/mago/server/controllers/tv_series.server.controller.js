@@ -14,7 +14,7 @@ var path = require('path'),
     request = require("request"),
     fs = require('fs');
 
-function link_tv_show_with_genres(tv_show_id,array_category_ids, db_model) {
+function link_tv_show_with_genres(tv_show_id,array_category_ids, db_model, company_id) {
     var transactions_array = [];
     //todo: references must be updated to non-available, not deleted
     return db_model.update(
@@ -24,6 +24,7 @@ function link_tv_show_with_genres(tv_show_id,array_category_ids, db_model) {
         {
             where: {
                 tv_show_id: tv_show_id,
+                company_id: company_id,
                 category_id: {$notIn: array_category_ids}
             }
         }
@@ -34,6 +35,7 @@ function link_tv_show_with_genres(tv_show_id,array_category_ids, db_model) {
                     db_model.upsert({
                         tv_show_id: tv_show_id,
                         category_id: array_category_ids[i],
+                        company_id: company_id,
                         is_available: true
                     }, {transaction: t}).catch(function(error){
                         winston.error(error)
@@ -53,10 +55,11 @@ function link_tv_show_with_genres(tv_show_id,array_category_ids, db_model) {
     })
 }
 
-function link_tv_show_with_packages(item_id, data_array, model_instance) {
+function link_tv_show_with_packages(item_id, data_array, model_instance, company_id) {
     var transactions_array = [];
     var destroy_where = (data_array.length > 0) ? {
         tv_show_id: item_id,
+        company_id: company_id,
         package_id: {$notIn: data_array}
     } : {tv_show_id: item_id};
 
@@ -68,6 +71,7 @@ function link_tv_show_with_packages(item_id, data_array, model_instance) {
                 transactions_array.push(
                     model_instance.upsert({
                         tv_show_id: item_id,
+                        company_id: company_id,
                         package_id: data_array[i],
                         is_available: true
                     }, {transaction: t})
@@ -99,14 +103,16 @@ exports.create = function(req, res) {
     var array_tv_series_packages = req.body.tv_series_packages || [];
     delete req.body.tv_series_packages;
 
+    req.body.company_id = req.token.company_id; //save record for this company
+
     DBModel.create(req.body).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
         } else {
-            logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
-            return link_tv_show_with_genres(result.id,array_tv_series_categories, db.tv_series_categories).then(function(t_result) {
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+            return link_tv_show_with_genres(result.id,array_tv_series_categories, db.tv_series_categories, req.token.company_id).then(function(t_result) {
                 if (t_result.status) {
-                    return link_tv_show_with_packages(result.id, array_tv_series_packages, db.tv_series_packages).then(function(t_result) {
+                    return link_tv_show_with_packages(result.id, array_tv_series_packages, db.tv_series_packages, req.token.company_id).then(function(t_result) {
                         if (t_result.status) {
                             return res.jsonp(result);
                         }
@@ -133,7 +139,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.tv_show);
+    if(req.tv_show.company_id === req.token.company_id) res.json(req.tv_show);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -155,39 +162,44 @@ exports.update = function(req, res) {
     var array_tv_series_packages = req.body.tv_series_packages || [];
     delete req.body.tv_series_packages;
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        if(deletefile) {
-            fs.unlink(deletefile, function (err) {
-                //todo: return some warning
-            });
-        }
-        logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
-        if(deleteimage) {
-            fs.unlink(deleteimage, function (err) {
-                //todo: return some warning
-            });
-        }
-        return link_tv_show_with_genres(req.body.id,array_tv_series_categories, db.tv_series_categories).then(function(t_result) {
-            if (t_result.status) {
-                return link_tv_show_with_packages(req.body.id, array_tv_series_packages, db.tv_series_packages).then(function(t_result) {
-                    if (t_result.status) {
-                        return res.jsonp(result);
-                    }
-                    else {
-                        return res.send(t_result);
-                    }
-                })
+    if(req.tv_show.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            if(deletefile) {
+                fs.unlink(deletefile, function (err) {
+                    //todo: return some warning
+                });
             }
-            else {
-                return res.send(t_result);
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+            if(deleteimage) {
+                fs.unlink(deleteimage, function (err) {
+                    //todo: return some warning
+                });
             }
-        })
-    }).catch(function(err) {
-        winston.error(err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
+            return link_tv_show_with_genres(req.body.id,array_tv_series_categories, db.tv_series_categories, req.token.company_id).then(function(t_result) {
+                if (t_result.status) {
+                    return link_tv_show_with_packages(req.body.id, array_tv_series_packages, db.tv_series_packages, req.token.company_id).then(function(t_result) {
+                        if (t_result.status) {
+                            return res.jsonp(result);
+                        }
+                        else {
+                            return res.send(t_result);
+                        }
+                    })
+                }
+                else {
+                    return res.send(t_result);
+                }
+            })
+        }).catch(function(err) {
+            winston.error(err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 
@@ -207,7 +219,7 @@ exports.delete = function(req, res) {
                 return db.tv_series_categories.destroy({where: {tv_show_id: req.tv_show.id}}, {transaction: t}).then(function (removed_genres) {
                     return db.t_tv_series_sales.destroy({where: {tv_show_id: req.tv_show.id}}, {transaction: t}).then(function (removed_series_sales) {
                         return db.tv_season.destroy({where: {tv_show_id: req.tv_show.id}}, {transaction: t}).then(function (removed_seasons) {
-                            return db.tv_series.destroy({where: {id: req.tv_show.id}}, {transaction: t});
+                            return db.tv_series.destroy({where: {id: req.tv_show.id, company_id: req.token.company_id}}, {transaction: t});
                         });
                     });
                 });
@@ -254,6 +266,8 @@ exports.list = function(req, res) {
     if(query.expiration_time) qwhere.expiration_time = query.expiration_time;
     if(query.is_available === 'true') qwhere.is_available = true;
     else if(query.is_available === 'false') qwhere.is_available = false;
+    if(query.pin_protected === '1') qwhere.pin_protected = true;
+    else if(query.pin_protected === '0') qwhere.pin_protected = false;
 
     //start building where
     final_where.where = qwhere;
@@ -289,6 +303,7 @@ exports.list = function(req, res) {
 
     final_where.distinct = true; //avoids wrong count number when using includes
     //end build final where
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     if(query.not_id){
         db.tv_series_packages.findAll({attributes: [ 'tv_show_id'], where: {package_id: query.not_id}}).then(function(excluded_tv_show_items){

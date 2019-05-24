@@ -34,6 +34,7 @@ module.exports = function(app) {
         .post(stripeFunctions.stripe_order_charge);
 
     app.route('/apiv2/payments/stripe/addsubscription')
+        .all(policy.isApiKeyAllowed)
         .all(paymentGatewaysPolicy.stripe_isAllowed)
         .post(stripeFunctions.stripe_add_subscription);
 

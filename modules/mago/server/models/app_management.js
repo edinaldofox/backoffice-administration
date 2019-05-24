@@ -8,6 +8,11 @@ module.exports = function(sequelize, DataTypes) {
             primaryKey: true,
             autoIncrement: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         appid: {
             type: DataTypes.INTEGER(11),
             allowNull: false
@@ -52,7 +57,10 @@ module.exports = function(sequelize, DataTypes) {
             allowNull: false
         }
     }, {
-        tableName: 'app_management'
+        tableName: 'app_management',
+        associate: function(models) {
+            appManagement.belongsTo(models.settings, {foreignKey: 'company_id'});
+        }
     });
     return appManagement;
 };

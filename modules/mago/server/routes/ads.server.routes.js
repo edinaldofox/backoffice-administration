@@ -10,6 +10,8 @@ module.exports = function(app) {
 
     //todo: per keto routes dhe per push te tjera, permission????
     app.route('/api/ads')
+        .all(policy.Authenticate)
+        .all(policy.isAllowed)
         .get(ads.list)
         .post(ads.create);
 };

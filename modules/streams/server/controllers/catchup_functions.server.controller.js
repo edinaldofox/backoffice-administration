@@ -30,7 +30,7 @@ exports.flussonic_catchup_stream = function(req,res) {
     }).then(function (result) {
         var clear_response = new response.APPLICATION_RESPONSE(req.body.language, 200, 1, 'OK_DESCRIPTION', 'OK_DATA');
         var response_object = {};
-        response_object.streamurl = result[0].channel_streams[0].stream_url.replace('[timestamp]',req.body.timestamp).replace('[duration]',req.app.locals.settings.activity_timeout);
+        response_object.streamurl = result[0].channel_streams[0].stream_url.replace('[timestamp]',req.body.timestamp).replace('[duration]',req.app.locals.backendsettings[req.thisuser.company_id].activity_timeout);
 
         //if query parameters not empty
         if(Object.keys(req.query).length > 0) {

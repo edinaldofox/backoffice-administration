@@ -8,11 +8,13 @@ var path = require('path'),
 module.exports = function(app) {
     /* ===== vod menus ===== */
     app.route('/api/vodmenucarousel')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vodmenucarousel.list)
         .post(vodmenucarousel.create);
 
     app.route('/api/vodmenucarousel/:vodmenucarouselId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vodmenucarousel.read)
         .put(vodmenucarousel.update)

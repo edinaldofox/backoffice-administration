@@ -4,6 +4,7 @@ var path = require('path'),
 	crypto = require('crypto'),
 	async = require('async'),
 	nodemailer = require('nodemailer'),
+	winston = require('winston'),
 	response = require(path.resolve("./config/responses.js")),
 	authentication = require(path.resolve('./modules/deviceapiv2/server/controllers/authentication.server.controller.js')),
 	subscription = db.subscription,
@@ -17,17 +18,14 @@ var path = require('path'),
 
 exports.createaccount = function(req,res) {
 	var smtpConfig = {
-		host: (req.app.locals.settings.smtp_host) ? req.app.locals.settings.smtp_host.split(':')[0] : 'smtp.gmail.com',
-		port: (req.app.locals.settings.smtp_host) ? Number(req.app.locals.settings.smtp_host.split(':')[1]) : 465,
-		secure: (req.app.locals.settings.smtp_secure === false) ? req.app.locals.settings.smtp_secure : true,
+		host: (req.app.locals.backendsettings[1].smtp_host) ? req.app.locals.backendsettings[1].smtp_host.split(':')[0] : 'smtp.gmail.com',
+		port: (req.app.locals.backendsettings[1].smtp_host) ? Number(req.app.locals.backendsettings[1].smtp_host.split(':')[1]) : 465,
+		secure: (req.app.locals.backendsettings[1].smtp_secure === false) ? req.app.locals.backendsettings[1].smtp_secure : true,
 		auth: {
-			user: req.app.locals.settings.email_username,
-			pass: req.app.locals.settings.email_password
-		},
-		tls: {
-			rejectUnauthorized: false
-		}	
-	}
+			user: req.app.locals.backendsettings[1].email_username,
+			pass: req.app.locals.backendsettings[1].email_password
+		}
+	};
 
 	var smtpTransport = nodemailer.createTransport(smtpConfig);
 
@@ -85,10 +83,10 @@ exports.createaccount = function(req,res) {
 					lastname:	req.body.lastname,
 					email:		req.body.email,
 					telephone:	req.body.telephone,
-					group_id:   1
+					group_id:   1 //todo: how will it be determined what company belongs the user during signup
 				}).then(function(new_customer){
 					login_data.create({
-						customer_id:			  new_customer.id,
+						customer_id:			  new_customer.id, //todo: saas:  how will it be determined what company belongs the user during signup
 						username:				  req.body.username,
 						salt:                     salt,
 						password:				  req.body.password,
@@ -127,7 +125,7 @@ exports.createaccount = function(req,res) {
 
 				email_templates.findOne({
                 attributes:['title','content'],
-                where: {template_id: 'new-account' }
+                where: {template_id: 'new-account' } //todo: saas:  how will it be determined what company belongs the user during signup
             }).then(function (result,err) {
             	if(!result){
                     res.render(path.resolve('modules/deviceapiv2/server/templates/new-account'), {
@@ -148,7 +146,7 @@ exports.createaccount = function(req,res) {
 		function(emailHTML, email, done) {
 			var mailOptions = {
 				to: email, //user.email,
-				from: req.app.locals.settings.email_address, //the from field matches the account username
+				from: req.app.locals.backendsettings[1].email_address, //the from field matches the account username
 				subject: 'Account confirmation',
 				html: emailHTML
 			};
@@ -171,6 +169,7 @@ exports.createaccount = function(req,res) {
 	});
 };
 
+//todo: saas: remember to take company_id into account
 exports.confirmNewAccountToken = function(req, res) {
 	login_data.find({
 		where: {
@@ -197,7 +196,7 @@ exports.confirmNewAccountToken = function(req, res) {
         // Loading Combo with All its packages
         Combo.findOne({
             where: {
-                product_id: "free_combo"
+                product_id: "free_combo", company_id: req.thisuser.company_id
             }, include: [{model:db.combo_packages,include:[db.package]}]
         }).then(function(combo) {
             if (!combo)

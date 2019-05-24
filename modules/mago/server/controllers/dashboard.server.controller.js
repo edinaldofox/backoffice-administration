@@ -14,7 +14,7 @@ exports.chartSalesReport = function(req, res) {
     db.sequelize.query(
         "SELECT COUNT(1) as 'count',DATE(DATE_FORMAT(saledate,'%Y-%m-%d')) as 'date' "+
         "FROM salesreport "+
-        "WHERE saledate >= DATE_SUB(NOW(), INTERVAL 30 DAY) "+
+        "WHERE saledate >= DATE_SUB(NOW(), INTERVAL 30 DAY) AND company_id = "+req.token.company_id+" "+
         "GROUP BY DATE_FORMAT(saledate,'%Y-%m-%d')",
         { type: db.sequelize.QueryTypes.SELECT})
         .then(function(result){
@@ -35,7 +35,7 @@ exports.chartsSubsExpires = function(req, res) {
     db.sequelize.query(
         "SELECT count(DISTINCT login_id) as 'count', MAX(end_date) as 'date' "+
         "FROM subscription "+
-        "WHERE end_date<=DATE_ADD(NOW(), INTERVAL 30 DAY) AND end_date>=now()",
+        "WHERE end_date<=DATE_ADD(NOW(), INTERVAL 30 DAY) AND end_date>=now() AND company_id = "+req.token.company_id+" ",
         { type: db.sequelize.QueryTypes.SELECT})
         .then(function(result){
             if (!result) {
@@ -57,7 +57,7 @@ exports.chartsSubsActive = function(req, res) {
     db.sequelize.query(
             "SELECT count(DISTINCT login_id) as 'count', MAX(end_date) as 'date' "+
             "FROM subscription "+
-            "WHERE end_date>=now()",
+            "WHERE end_date>=now() AND company_id = "+req.token.company_id+" ",
         { type: db.sequelize.QueryTypes.SELECT})
         .then(function(result){
             if (!result) {
@@ -81,7 +81,9 @@ exports.chartsgraph1 = function(req, res) {
     var d = new Date(); // Today!
     d.setDate(d.getDate() - 30); // last 30 days.
 
-    var thequery = "select saledate as label, count(id) as value from salesreport WHERE saledate > '" + moment(d).format('YYYY-MM-DD hh:mm:ss') + "' group by label order by label asc ";
+    var thequery = "select saledate as label, count(id) as value from salesreport WHERE saledate > '" + moment(d).format('YYYY-MM-DD hh:mm:ss') +
+        "  AND company_id = "+req.token.company_id+" "+
+        "' group by label order by label asc ";
     db.sequelize.query(
         thequery,
         { type: db.sequelize.QueryTypes.SELECT})
@@ -104,7 +106,9 @@ exports.chart_vis_sales = function(req, res) {
     var d = new Date(); // Today!
     d.setDate(d.getDate() - 90); // last 30 days.
 
-    var thequery = "select DATE_FORMAT(saledate,'%Y-%m-%d') as x, count(id) as y from salesreport WHERE saledate > '" + moment(d).format('YYYY-MM-DD hh:mm:ss') + "' group by x order by y asc ";
+    var thequery = "select DATE_FORMAT(saledate,'%Y-%m-%d') as x, count(id) as y from salesreport WHERE saledate > '" + moment(d).format('YYYY-MM-DD hh:mm:ss') +
+            " AND company_id = "+req.token.company_id+" "+
+        "' group by x order by y asc ";
     db.sequelize.query(
         thequery,
         { type: db.sequelize.QueryTypes.SELECT})
@@ -123,8 +127,8 @@ exports.chart_vis_sales = function(req, res) {
 
 exports.chartsgraph2 = function(req, res) {
     db.sequelize.query(
-            "SELECT  Count(salesreport.id), salesreport.combo_id, salesreport.saledate FROM salesreport GROUP BY " +
-                "salesreport.combo_id, salesreport.saledate",
+            "SELECT  Count(salesreport.id), salesreport.combo_id, salesreport.saledate FROM salesreport WHERE company_id = "+req.token.company_id+" "+
+            "GROUP BY salesreport.combo_id, salesreport.saledate",
         { type: db.sequelize.QueryTypes.SELECT})
         .then(function(results){
             res.json(results);
@@ -133,7 +137,9 @@ exports.chartsgraph2 = function(req, res) {
 };
 
 exports.salespiechart = function(req, res) {
-    db.sequelize.query("SELECT combo.`name` as 'key', Count(salesreport.id) as y FROM combo INNER JOIN salesreport ON salesreport.combo_id = combo.id GROUP BY combo.`name`",
+    db.sequelize.query("SELECT combo.`name` as 'key', Count(salesreport.id) as y FROM combo INNER JOIN salesreport ON salesreport.combo_id = combo.id "+
+            " WHERE company_id = "+req.token.company_id+" "+
+        " GROUP BY combo.`name`",
         { type: db.sequelize.QueryTypes.SELECT})
         .then(function(result){
             if (!result) {
@@ -145,7 +151,9 @@ exports.salespiechart = function(req, res) {
 };
 
 exports.salesbyproduct = function(req, res) {
-    db.sequelize.query("SELECT salesreport.saledate as 'key', Count(salesreport.id) as y FROM salesreport GROUP BY salesreport.saledate",
+    db.sequelize.query("SELECT salesreport.saledate as 'key', Count(salesreport.id) as y FROM salesreport "+
+            " WHERE company_id = "+req.token.company_id+" "+
+        " GROUP BY salesreport.saledate",
         { type: db.sequelize.QueryTypes.SELECT})
         .then(function(result){
             if (!result) {

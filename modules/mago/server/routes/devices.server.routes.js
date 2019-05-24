@@ -9,13 +9,16 @@ module.exports = function(app) {
 
     /* ===== devices ===== */
     app.route('/api/devices')
+        .all(policy.Authenticate)
         .get(devices.list);
 
     app.route('/api/devices')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(devices.create);
 
     app.route('/api/devices/:deviceId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(devices.read)
         .put(devices.update)

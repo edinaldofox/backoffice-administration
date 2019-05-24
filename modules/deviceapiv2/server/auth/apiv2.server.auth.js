@@ -107,8 +107,6 @@ exports.emptyCredentials = function(req, res, next) {
 
 exports.isAllowed = function(req, res, next) {
 
-
-
     if(req.body.auth){  //serach for auth
         var auth = decodeURIComponent(req.body.auth);
     }
@@ -126,11 +124,18 @@ exports.isAllowed = function(req, res, next) {
         auth = auth.replace("{","");
         auth = auth.replace("}","");
 
-        if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.settings.new_encryption_key),";","=")) === false){
-            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.settings.new_encryption_key),";","=");
+        //if language is not a body parameter, read it from header. It is used in API responses
+        if(!req.body.language){
+            if(querystring.parse(auth,",","=")[' language']) req.body.language = querystring.parse(auth,",","=")[' language']; //android apps add an extra space in the parameter names
+            else if (querystring.parse(auth,",","=")['language']) req.body.language = querystring.parse(auth,",","=")['language']; //ios apps do not add an extra space in the parameter names
+            else req.body.language = 'eng'; //the language parameter is missing, use english as default language
         }
-        else if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.settings.old_encryption_key),";","=")) === false && req.app.locals.settings.key_transition === true){
-            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.settings.old_encryption_key),";","=");
+
+        if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=")) === false){
+            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=");
+        }
+        else if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[1].key_transition === true){
+            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=");
         }
         else {
             response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
@@ -146,11 +151,11 @@ exports.isAllowed = function(req, res, next) {
             }
         }
         else{
-            if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.settings.new_encryption_key),";","=")) === false){
-                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.settings.new_encryption_key),";","=");
+            if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=")) === false){
+                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=");
             }
-            else if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.settings.old_encryption_key),";","=")) === false && req.app.locals.settings.key_transition === true){
-                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.settings.old_encryption_key),";","=");
+            else if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[1].key_transition === true){
+                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=");
             }
             else {
                 response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
@@ -168,7 +173,7 @@ exports.isAllowed = function(req, res, next) {
             response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TIMESTAMP', 'no-store');
         }
         else if(valid_appid(auth_obj) === true){
-            set_screensize(auth_obj);
+             set_screensize(auth_obj);
 
             if(req.empty_cred){
                 req.auth_obj = auth_obj;
@@ -182,15 +187,22 @@ exports.isAllowed = function(req, res, next) {
                     if(result) {
                         //the user is a normal client account. check user rights to make requests with his credentials
                         if(auth_obj.username !== 'guest'){
+
+                            //requests may come after login with account kit.
+                            var hashed_once = authenticationHandler.encryptPassword(result.username, result.salt); //encrypted username
+                            var identic_hashed_once = ( (hashed_once === auth_obj.password.replace(/ /g, "+"))  ) ? true : false; //login with account kit: password from app matches the encrypted username
+                            var identic_pass = authenticationHandler.authenticate(auth_obj.password, result.salt, result.password); //standard login: encrypted password from app matches the encrypted password in the database
+
                             if(result.account_lock) {
                                 response.send_res(req, res, [], 703, -1, 'ACCOUNT_LOCK_DESCRIPTION', 'ACCOUNT_LOCK_DATA', 'no-store');
                             }
-                            else if(authenticationHandler.authenticate(auth_obj.password, result.salt, result.password) === false) {
+                            else if(!identic_hashed_once && !identic_pass) { //check for requests from account kit or from standard login
                                 response.send_res(req, res, [], 704, -1, 'WRONG_PASSWORD_DESCRIPTION', 'WRONG_PASSWORD_DATA', 'no-store');
                             }
-                            else if( (result.resetPasswordExpires !== null ) && (result.resetPasswordExpires.length > 9 && result.resetPasswordExpires !== '0') ){
-                                response.send_res(req, res, [], 704, -1, 'EMAIL_NOT_CONFIRMED', 'EMAIL_NOT_CONFIRMED_DESC', 'no-store');
-                            }
+                            //todo: for requests with account kit, email confirmation ought to be ignored. for other requests it should be considered
+                            /*else if( (result.resetPasswordExpires !== null ) && (result.resetPasswordExpires.length > 9 && result.resetPasswordExpires !== '0') ){
+                             response.send_res(req, res, [], 704, -1, 'EMAIL_NOT_CONFIRMED', 'EMAIL_NOT_CONFIRMED_DESC', 'no-store');
+                             }*/
                             else {
                                 req.thisuser = result;
                                 req.auth_obj = auth_obj;
@@ -199,7 +211,7 @@ exports.isAllowed = function(req, res, next) {
                             }
                         }
                         //login as guest is enabled and the user is guest. allow request to be processed
-                        else if( (auth_obj.username === 'guest') && (req.app.locals.backendsettings.allow_guest_login === true) ){
+                        else if( (auth_obj.username === 'guest') && (req.app.locals.backendsettings[1].allow_guest_login === true) ){
                             req.thisuser = result;
                             req.auth_obj = auth_obj;
                             next();
@@ -255,8 +267,9 @@ function parse_plain_auth(auth){
     var final_auth = {};
     var auth_array = auth.split(";");
     for(var i=0; i<auth_array.length; i++){
-        var key = auth_array[i].split("=")[0];
-        var value = auth_array[i].split("=")[1];
+        let dl = auth_array[i].indexOf('=');
+        let key = auth_array[i].substring(0, dl);
+        var value = auth_array[i].substring(dl + 1, auth_array[i].length);
         final_auth[key] = value;
     }
     return final_auth;

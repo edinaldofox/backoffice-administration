@@ -23,6 +23,7 @@ var path = require('path'),
  */
 exports.create = function(req, res) {
 
+    req.body.company_id = req.token.company_id; //save record for this company
     DBModel.create(req.body).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
@@ -40,7 +41,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.salesReport);
+    if(req.salesReport.company_id === req.token.company_id) res.json(req.salesReport);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -55,7 +57,8 @@ exports.update = function(req, res) {
         if(result.status) {
             var updateData = req.salesReport;
             req.body.cancelation_date = Date.now();
-            req.body.cancelation_user = req.token.uid;
+            req.body.cancelation_user = req.token.id;
+            req.body.company_id = req.token.company_id; //save record for this company
             updateData.updateAttributes(req.body).then(function(result) {
                 //res.json(result);
                 res.status(200).send(result)
@@ -104,6 +107,8 @@ exports.annul = function(req, res) {
         return res.status(400).send({ message: 'No sale with these data exists' });
     }
 
+    salereport_where.company_id = req.token.company_id;
+
     async.auto({
         get_active_sale: function(callback) {
             db.salesreport.findOne({
@@ -126,7 +131,9 @@ exports.annul = function(req, res) {
         },
         get_user_subscription: ['get_active_sale', function(results, callback) {
             db.combo.findAll({
-                attributes: ['id', 'duration'], where: {id: results.get_active_sale.combo_id}, raw: true,
+                attributes: ['id', 'duration'],
+                where: {id: results.get_active_sale.combo_id, company_id: req.token.company_id},
+                raw: true,
                 include:[{
                     model: db.combo_packages, required: true, attributes: ['package_id'], include: [{
                         model: db.package, required: true, attributes: ['id'], include: [{
@@ -164,7 +171,7 @@ exports.annul = function(req, res) {
                         start_date:          startdate,
                         end_date:            enddate
                     },
-                    {where: {id: results.get_user_subscription[i]['combo_packages.package.subscriptions.id']}}
+                    {where: {id: results.get_user_subscription[i]['combo_packages.package.subscriptions.id'], company_id: req.token.company_id}}
                 ).then(function(result){
                     if (++updated == results.get_user_subscription.length) {
                         callback(null);
@@ -189,7 +196,7 @@ exports.annul = function(req, res) {
                     saledate:           dateFormat(Date.now(), 'yyyy-mm-dd HH:MM:ss'),
                     active:             false
                 },
-                {where: {id: results.get_active_sale.id}}
+                {where: {id: results.get_active_sale.id, company_id: req.token.company_id}}
             ).then(function(result){
                 response = {status: 200, message: 'Sale annuled successfully'};
                 callback(null);
@@ -220,7 +227,7 @@ exports.delete = function(req, res) {
     DBModel.destroy({
         where: {
             combo_id: req.body.combo_id,
-            login_data_id: req.body.login_data_id
+            login_data_id: req.body.login_data_id, company_id: req.token.company_id
         }
     }).then(function (result) {
         if(!result){
@@ -232,7 +239,8 @@ exports.delete = function(req, res) {
             db.subscriptions.update({
                 where: {
                     combo_id: req.body.combo_id,
-                    login_data_id: req.body.login_data_id
+                    login_data_id: req.body.login_data_id,
+                    company_id: req.token.company_id
                 }
             }).then(function (result) {
                 if(!result){
@@ -261,12 +269,17 @@ exports.delete = function(req, res) {
 
     ).then(function(result) {
         if (result) {
-            result.destroy().then(function() {
-                return res.json(result);
-            }).catch(function(err) {
-                winston.error(err);
-                return res.status(400).send({ message: errorHandler.getErrorMessage(err) });
-            });
+            if (result && (result.company_id === req.token.company_id)) {
+                result.destroy().then(function() {
+                    return res.json(result);
+                }).catch(function(err) {
+                    winston.error(err);
+                    return res.status(400).send({ message: errorHandler.getErrorMessage(err) });
+                });
+            }
+            else{
+                return res.status(400).send({message: 'Unable to find the Data'});
+            }
         } else {
             return res.status(400).send({
                 message: 'Unable to find the Data'
@@ -310,7 +323,9 @@ exports.list = function(req, res) {
     final_where.include = [
         {model: db.combo, required: true, attributes: ['name']},
         {model: db.users, required: true, attributes: ['username'], where: {username: distributor_filter}}
-    ]
+    ];
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(
         final_where
@@ -353,6 +368,7 @@ exports.sales_by_product = function(req, res) {
     final_where.include = [{model: db.combo, required: true, attributes: ['name', 'duration', 'value']}];
     final_where.group = ['combo_id'];
 
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(
         final_where
@@ -403,6 +419,8 @@ exports.sales_by_date = function(req, res) {
     final_where.group = [sequelize.fn('DATE', sequelize.col('saledate'))]; //group by date of sale (excluding time information)
 
     final_where.include = [{model: db.combo, required: true, attributes: [[sequelize.fn('sum', sequelize.col('value')), 'total_value']]}];
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(
         final_where
@@ -457,6 +475,8 @@ exports.sales_by_month = function(req, res) {
 
     ];
 
+    final_where.where.company_id = req.token.company_id; //return only records for this company
+
     DBModel.findAndCountAll(
         final_where
     ).then(function(results) {
@@ -490,7 +510,7 @@ exports.sales_by_month = function(req, res) {
  * @apiError (40x) {String} message Error message.
  */
 exports.sales_monthly_expiration = function(req, res) {
-    var expiration_frame = "WHERE `end_date` > NOW() ";
+    var expiration_frame = "WHERE `end_date` > NOW() and company_id = "+req.token.company_id+" ";
     var limit = "LIMIT "+req.query._start+", "+req.query._end+" ";
     var order = (req.query._orderDir) ? req.query._orderDir : "ASC";
 
@@ -564,6 +584,8 @@ exports.sales_by_expiration = function(req, res) {
     final_where.group = ['login_id'];
     final_where.order = [['end_date', 'DESC']];
 
+    final_where.where.company_id = req.token.company_id; //return only records for this company
+
     db.subscription.findAndCountAll(
         final_where
     ).then(function(results) {
@@ -589,7 +611,8 @@ exports.latest = function(req, res) {
         offset: offset_start,
         limit: records_limit,
         include: [db.combo, db.users],
-        order: [['createdAt','ASC']]
+        order: [['createdAt','ASC']],
+        where: {company_id: req.token.company_id}
     }).then(function(results) {
         if (!results) {
             return res.status(404).send({ message: 'No data found' });
@@ -638,6 +661,7 @@ exports.dataByID = function(req, res, next, id) {
 exports.invoice = function(req, res) {
 
     var invoice_query = {};
+    invoice_query.company_id = req.token.company_id;
     if(req.query.login_data_id) invoice_query.id = req.query.login_data_id;
     if(req.query.username) invoice_query.username = req.query.username;
 
@@ -702,7 +726,7 @@ exports.download_invoice = function(req, res) {
 
     DBModel.findOne({
         attributes: ['saledate'],
-        where: {id: req.params.invoiceID},
+        where: {id: req.params.invoiceID, company_id: req.token.company_id},
         include: [
             {model: db.users, attributes: ['username'], required: true},
             {model: db.combo, attributes: ['name'], required: true},
@@ -728,8 +752,8 @@ exports.download_invoice = function(req, res) {
         }).then(function (result,err) {
 
                 var compiled = ejs.compile(fs.readFileSync('modules/mago/server/templates/salesreport-invoice.html', 'utf8'));
-                var images = req.app.locals.settings.company_logo;
-                var url = req.app.locals.settings.assets_url;
+                var images = req.app.locals.backendsettings[req.token.company_id].company_logo;
+                var url = req.app.locals.backendsettings[req.token.company_id].assets_url;
 
 
                 if(!result){
@@ -809,6 +833,7 @@ exports.download_invoice = function(req, res) {
                 }
                 //./ if result is found in Adm System
             });
+            return null;
         }
     }).catch(function (err) {
         winston.error("Finding sale to generate invoice failed with error: ", err);

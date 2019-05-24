@@ -55,6 +55,13 @@
     "DEVICE_NOT_FOUND": "Nuk mund të gjehej asnje pajisje me specifikat e kërkuara",
     "NO_DATA_FOUND": "Lista e kërkuar është e bosh",
     "GUEST_LOGIN_DISABLED_DESCRIPTION": "GUEST_LOGIN_DISABLED",
-    "GUEST_LOGIN_DISABLED_DATA": "Identifikimi si vizitor nuk është aktiv"
+    "GUEST_LOGIN_DISABLED_DATA": "Identifikimi si vizitor nuk është aktiv",
+    "BUY": "Bli",
+    "PLAY": "Luaj",
+    "RELATED": "Të ngjashme",
+    "TRAILER": "Trailer",
+    "THUMBUP": "Pëlqe",
+    "THUMBDOWN": "Mos pëlqe",
+    "COMING_SOON": "Së shpejti"
   }
 }

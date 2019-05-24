@@ -7,7 +7,7 @@ export default function (nga, admin) {
         .batchActions([])
         .fields([
             nga.field('box_logo_url', 'file')
-                .label('Box Logo')
+                .label('Box Logo *')
                 .template('<div class="row">'+
                     '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_logo_url }}" height="40" width="40" /></div>'+
                     '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_logo_url"></ma-file-field></div>'+
@@ -25,7 +25,7 @@ export default function (nga, admin) {
                 }),
 
             nga.field('box_background_url', 'file')
-                .label('Box Background')
+                .label('Box Background *')
                 .template('<div class="row">'+
                     '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_background_url }}" height="40" width="40" /></div>'+
                     '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_background_url"></ma-file-field></div>'+
@@ -43,25 +43,44 @@ export default function (nga, admin) {
                 }),
 
             nga.field('mobile_background_url', 'file')
-                .label('Mobile Background')
+                .label('Landscape Background Mobile *')
                 .template('<div class="row">'+
                     '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_background_url }}" height="40" width="40" /></div>'+
                     '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_background_url"></ma-file-field></div>'+
                     '</div>'+
-                    '<div class="row"><small id="emailHelp" class="form-text text-muted">566x318 px, not larger than 1 MB</small></div>')
+                    '<div class="row"><small id="emailHelp" class="form-text text-muted">540x960 px, not larger than 1 MB</small></div>')
                 .uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_background_url','apifilename': 'result'})
                 .validation({ required: true, validator: function() {
                         var mobile_background_url = document.getElementById('mobile_background_url');
                         if (mobile_background_url.value.length > 0) {
                             if(mobile_background_url.files[0].size > 1048576 ){
-                                throw new Error('Your Mobile Background is too Big, not larger than 1 MB');
+                                throw new Error('Your Landscape Background Mobile is too Big, not larger than 1 MB');
+                            }
+                        }
+                    }
+                }),
+
+
+            nga.field('portrait_background_url', 'file')
+                .label('Portrait Background Mobile')
+                .template('<div class="row">'+
+                    '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.portrait_background_url }}" height="40" width="40" /></div>'+
+                    '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.portrait_background_url"></ma-file-field></div>'+
+                    '</div>'+
+                    '<div class="row"><small id="emailHelp" class="form-text text-muted">432x768 px, not larger than 1 MB</small></div>')
+                .uploadInformation({ 'url': '/file-upload/single-file/settings/portrait_background_url','apifilename': 'result'})
+                .validation({ required: true, validator: function() {
+                        var portrait_background_url = document.getElementById('portrait_background_url');
+                        if (portrait_background_url.value.length > 0) {
+                            if(portrait_background_url.files[0].size > 1048576 ){
+                                throw new Error('Your Portrait Background Mobile is too Big, not larger than 1 MB');
                             }
                         }
                     }
                 }),
 
             nga.field('mobile_logo_url', 'file')
-                .label('Mobile Logo')
+                .label('Mobile Logo *')
                 .template('<div class="row">'+
                     '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_logo_url }}" height="40" width="40" /></div>'+
                     '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_logo_url"></ma-file-field></div>'+
@@ -79,7 +98,7 @@ export default function (nga, admin) {
                 }),
 
             nga.field('vod_background_url', 'file')
-                .label('VOD Background')
+                .label('VOD Background *')
                 .template('<div class="row">'+
                     '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.vod_background_url }}" height="40" width="40" /></div>'+
                     '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.vod_background_url"></ma-file-field></div>'+
@@ -104,7 +123,7 @@ export default function (nga, admin) {
                     '<small id="emailHelp" class="form-text text-muted">Set your company name (By default - MAGOWARE)</small>'+
                     '</div>'),
             nga.field('company_logo', 'file')
-                .label('Company logo')
+                .label('Company logo *')
                 .template('<div class="row">'+
                     '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.company_logo }}" height="40" width="40" /></div>'+
                     '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.company_logo"></ma-file-field></div>'+

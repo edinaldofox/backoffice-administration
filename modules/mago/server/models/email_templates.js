@@ -9,6 +9,12 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1,
+            unique: 'templateid_language'
+        },
         template_id: {
             type: DataTypes.STRING(200),
             allowNull: false,
@@ -30,7 +36,10 @@ module.exports = function(sequelize, DataTypes) {
         }
     }, {
         tableName: 'email_templates',
-        timestamps: false
+        timestamps: false,
+        associate: function(models){
+            emailTemplates.belongsTo(models.settings, {foreignKey: 'company_id'});
+        }
     });
     return emailTemplates;
 };

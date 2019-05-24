@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         tv_show_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false
@@ -35,6 +40,7 @@ module.exports = function(sequelize, DataTypes) {
         associate: function(models) {
             t_tv_series_sales.belongsTo(models.tv_series, {foreignKey: 'tv_show_id'});
             t_tv_series_sales.belongsTo(models.login_data, {foreignKey: 'login_data_id'});
+            t_tv_series_sales.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return t_tv_series_sales;

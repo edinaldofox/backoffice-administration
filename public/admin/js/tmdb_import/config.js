@@ -134,7 +134,7 @@ export default function (nga, admin) {
                     return value.split("\n").join("<br/>");
                 })
                 .attributes({ placeholder: 'Movie actors' })
-                .validation({ required: true, maxlength: 1000})
+                .validation({ required: true })
                 .label('Starring'),
 
 

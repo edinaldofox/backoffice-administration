@@ -12,11 +12,13 @@ var path = require('path'),
 module.exports = function(app) {
     /* ===== device menus ===== */
     app.route('/api/appmanagement')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(appManagement.list)
         .post(appManagement.create);
 
     app.route('/api/appmanagement/:appManagementId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(appManagement.read)
         .put(appManagement.update)

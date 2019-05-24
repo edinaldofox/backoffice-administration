@@ -14,11 +14,13 @@ module.exports = function(app) {
 
     /* ===== package channels ===== */
     app.route('/api/packagechannels')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vod_vod_categories.list)
         .post(vod_vod_categories.create);
 
     app.route('/api/packagechannels/:packageChannelId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(vod_vod_categories.read)
         .put(vod_vod_categories.update)

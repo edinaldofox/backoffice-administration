@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         tv_season_id: {
             type: DataTypes.INTEGER(11),
             allowNull: true
@@ -173,6 +178,7 @@ module.exports = function(sequelize, DataTypes) {
             if(models.tv_episode_subtitles) tv_episode.hasMany(models.tv_episode_subtitles, {foreignKey: 'tv_episode_id'});
             if(models.tv_episode_stream) tv_episode.hasMany(models.tv_episode_stream, {foreignKey: 'tv_episode_id'});
             if(models.tv_episode_resume) tv_episode.hasMany(models.tv_episode_resume, {foreignKey: 'tv_episode_id'});
+            tv_episode.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return tv_episode;

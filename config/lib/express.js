@@ -348,7 +348,7 @@ module.exports.readCompanyConfigurations = function(app) {
 /**
  * Initialize the Express application
  */
-module.exports.init = function(db) {
+module.exports.init = function(db, redis) {
     // Initialize express app
     var app = express();
 

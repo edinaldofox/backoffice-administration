@@ -14,19 +14,22 @@ export default function (nga, admin) {
                             return entry.firstname + ' ' + entry.lastname;
                         })
                 )
+                .isDetailLink(false)
                 .cssClasses('hidden-xs')
                 .label('Customer'),
             nga.field('username')
-                .isDetailLink(true)
+                .isDetailLink(false)
                 .label('Username'),
             nga.field('channel_stream_source_id', 'reference')
                 .targetEntity(admin.getEntity('ChannelStreamSources'))
                 .targetField(nga.field('stream_source'))
+                .isDetailLink(false)
                 .cssClasses('hidden-xs')
                 .label('Channel Stream Source'),
             nga.field('vod_stream_source', 'reference')
                 .targetEntity(admin.getEntity('VodStreamSources'))
                 .targetField(nga.field('description'))
+                .isDetailLink(false)
                 .cssClasses('hidden-xs')
                 .label('VOD Stream Source'),
             nga.field('pin', 'string')
@@ -54,7 +57,7 @@ export default function (nga, admin) {
                 .label('Search for client account'),
             nga.field('q')
                 .label('')
-                .template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"></input><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>')
+                .template('<div class="input-group"><type="text" ng-model="value" placeholder="Search" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>')
                 .pinned(true)])
         .listActions(['edit'])
 
@@ -97,7 +100,6 @@ export default function (nga, admin) {
             .label('Password')
             .validation({ required: true, pattern: '.{4,}' }),
         nga.field('channel_stream_source_id', 'reference')
-            .defaultValue(1)
             .targetEntity(admin.getEntity('ChannelStreamSources'))
             .targetField(nga.field('stream_source'))
             .attributes({ placeholder: 'Choose from dropdown list channel stream source for this customer' })
@@ -110,7 +112,6 @@ export default function (nga, admin) {
                 }
             }),
         nga.field('vod_stream_source', 'reference')
-            .defaultValue(1)
             .targetEntity(admin.getEntity('VodStreamSources'))
             .targetField(nga.field('description'))
             .attributes({ placeholder: 'Choose from dropdown list VOD Stream Source for this customer' })
@@ -413,6 +414,7 @@ export default function (nga, admin) {
                     nga.field('package_id', 'reference')
                         .targetEntity(admin.getEntity('Packages'))
                         .targetField(nga.field('package_name'))
+                        .isDetailLink(false)
                         .label('Package'),
                     nga.field('package_id', 'reference')
                         .targetEntity(admin.getEntity('Packages'))
@@ -428,6 +430,7 @@ export default function (nga, admin) {
                                     return 'Vod small screen';
                                 }
                             }))
+                        .isDetailLink(false)
                         .label('Package Type'),
                     nga.field('start_date', 'date')
                         .cssClasses('hidden-xs')
@@ -501,11 +504,13 @@ export default function (nga, admin) {
                 nga.field('user_id', 'reference')
                     .targetEntity(admin.getEntity('Users'))
                     .targetField(nga.field('username'))
+                    .isDetailLink(false)
                     .cssClasses('hidden-xs')
                     .label('User'),
                 nga.field('on_behalf_id','reference')
                     .targetEntity(admin.getEntity('Users'))
                     .targetField(nga.field('username'))
+                    .isDetailLink(false)
                     .cssClasses('hidden-xs')
                     .label('On Behalf of'),
                 nga.field('saledate', 'date')
@@ -514,6 +519,7 @@ export default function (nga, admin) {
                 nga.field('combo_id', 'reference')
                     .targetEntity(admin.getEntity('Combos'))
                     .targetField(nga.field('name'))
+                    .isDetailLink(false)
                     .label('Product')
             ])
             .listActions(['<ma-edit-button entry="entry" entity="entity" label="Cancel Subscription" size="xs"></ma-edit-button><download-invoice post="entry"></download-invoice>']),

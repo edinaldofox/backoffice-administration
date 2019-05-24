@@ -55,6 +55,13 @@
     "DEVICE_NOT_FOUND": "Impossible de trouver un périphérique avec les spécifications requises",
     "NO_DATA_FOUND": "La liste d'articles demandée est vide",
     "GUEST_LOGIN_DISABLED_DESCRIPTION": "GUEST_LOGIN_DISABLED",
-    "GUEST_LOGIN_DISABLED_DATA": "La connexion invité a été désactivée"
+    "GUEST_LOGIN_DISABLED_DATA": "La connexion invité a été désactivée",
+    "BUY": "Achatez",
+    "PLAY": "Reproduisez",
+    "RELATED": "Similaire",
+    "TRAILER": "Trailer",
+    "THUMBUP": "Pouce en l'air",
+    "THUMBDOWN": "Pouce en bas",
+    "COMING_SOON": "Arrive bientôt"
   }
 }

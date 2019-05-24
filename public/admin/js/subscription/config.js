@@ -9,10 +9,12 @@ export default function (nga, admin){
 			nga.field('login_id', 'reference')
 				.targetEntity(admin.getEntity('LoginData'))
                 .targetField(nga.field('username'))
+				.isDetailLink(false)
 				.label('Login'),
 			nga.field('package_id', 'reference')
 				.targetEntity(admin.getEntity('Packages'))
                 .targetField(nga.field('package_name'))
+				.isDetailLink(false)
 				.label('Packages'),
 
 			nga.field('start_date', 'date')

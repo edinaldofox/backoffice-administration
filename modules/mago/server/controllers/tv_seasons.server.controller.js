@@ -21,11 +21,13 @@ exports.create = function(req, res) {
     if(!req.body.clicks) req.body.clicks = 0;
     if(!req.body.duration) req.body.duration = 0;
 
+    req.body.company_id = req.token.company_id; //save record for this company
+
     DBModel.create(req.body).then(function(result) {
         if (!result) {
             return res.status(400).send({message: 'fail create data'});
         } else {
-            logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
             return res.jsonp(result);
         }
     }).catch(function(err) {
@@ -41,7 +43,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.tv_season);
+    if(req.tv_season.company_id === req.token.company_id) res.json(req.tv_season);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -57,25 +60,30 @@ exports.update = function(req, res) {
         var deleteimage = path.resolve('./public'+updateData.image_url);
     }
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        if(deletefile) {
-            fs.unlink(deletefile, function (err) {
-                //todo: return some warning
+    if(req.tv_season.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            if(deletefile) {
+                fs.unlink(deletefile, function (err) {
+                    //todo: return some warning
+                });
+            }
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+            if(deleteimage) {
+                fs.unlink(deleteimage, function (err) {
+                    //todo: return some warning
+                });
+            }
+            return res.jsonp(result);
+        }).catch(function(err) {
+            winston.error(err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
             });
-        }
-        logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
-        if(deleteimage) {
-            fs.unlink(deleteimage, function (err) {
-                //todo: return some warning
-            });
-        }
-        return res.jsonp(result);
-    }).catch(function(err) {
-        winston.error(err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 
@@ -85,7 +93,7 @@ exports.update = function(req, res) {
 exports.delete = function(req, res) {
     return sequelize_t.sequelize.transaction(function (t) {
         return db.tv_episode.destroy({where: {tv_season_id: req.tv_season.id}}, {transaction: t}).then(function (removed_genres) {
-            return db.tv_season.destroy({where: {id: req.tv_season.id}}, {transaction: t});
+            return db.tv_season.destroy({where: {id: req.tv_season.id, company_id: req.token.company_id}}, {transaction: t});
         });
     }).then(function (result) {
         return res.json(result);
@@ -130,6 +138,8 @@ exports.list = function(req, res) {
         if(parseInt(query._end)) final_where.limit = parseInt(query._end)-parseInt(query._start);
     }
     if(query._orderBy) final_where.order = query._orderBy + ' ' + query._orderDir;
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(
         final_where

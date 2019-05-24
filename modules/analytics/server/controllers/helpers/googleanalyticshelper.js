@@ -22,7 +22,7 @@ function getipaddress(theip){
 function trackobject(object_data,req, cb) {
 
     object_data.v = 1;
-    object_data.tid = req.app.locals.settings.analytics_id; //analytics ID
+    object_data.tid = req.app.locals.backendsettings[1].analytics_id; //analytics ID
     object_data.ua  = req.headers["user-agent"];    //user agent
     object_data.cid = req.auth_obj.username;        //user ID
     object_data.uip = req.ip.replace('::ffff:', '');    // user ip
@@ -77,7 +77,11 @@ exports.trackscreen = function(req, res) {
         av:  req.body.appversion, //application version
         aid: req.body.appid, //application id
         cd:  req.body.screen_name || null, //screen name
-        sr: req.body.screensize
+        sr: req.body.screensize,
+
+        //screen resolution & bandwidht
+        cd1: req.body.stream_resolution || 'unknown',
+        cm1: req.body.stream_bandwidth * 1
     };
 
     trackobject(object_data, req, function (err) {

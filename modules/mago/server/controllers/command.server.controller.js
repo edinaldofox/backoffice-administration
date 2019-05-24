@@ -69,12 +69,13 @@ exports.create = function(req, res) {
 
         if(req.body.sendtoactivedevices) where.device_active = true; //if we only want to send push msgs to active devices, add condition
         where.appid = {in: device_types}; //filter devices by application id
+        where.company_id = req.token.company_id;
 
         DBDevices.findAll(
             {
                 attributes: ['googleappid', 'appid', 'app_version'],
                 where: where,
-                include: [{model: db.login_data, attributes: ['username'], required: true, raw: true, where: {get_messages: true}}]
+                include: [{model: db.login_data, attributes: ['username'], required: true, raw: true, where: {get_messages: true, company_id: req.token.company_id}}]
             }
         ).then(function(result) {
             if (!result || result.length === 0) {
@@ -91,7 +92,7 @@ exports.create = function(req, res) {
                     };
                     var message = new push_msg.ACTION_PUSH("Action", "Running action", '5', req.body.command, parameters);
                     for(var i=0; i<result.length; i++)
-                        push_msg.send_notification(result[i].googleappid, req.app.locals.settings.firebase_key, result[i].login_datum.id, message, 5000, false, false, function(result){});
+                        push_msg.send_notification(result[i].googleappid, req.app.locals.backendsettings[req.token.company_id].firebase_key, result[i].login_datum.id, message, 5000, false, false, function(result){});
                 }
                 else if(req.body.command === 'show_username'){
                     var fcm_tokens = [];
@@ -103,7 +104,7 @@ exports.create = function(req, res) {
                     };
                     var message = new push_msg.INFO_PUSH("Action", "Performing an action", '6', parameters);
                     for(var i=0; i<result.length; i++)
-                    push_msg.send_notification(result[i].googleappid, req.app.locals.settings.firebase_key, result[i].login_datum.id, message, 5000, true, false, function(result){});
+                        push_msg.send_notification(result[i].googleappid, req.app.locals.backendsettings[req.token.company_id].firebase_key, result[i].login_datum.id, message, 5000, true, false, function(result){});
                 }
                 else{
                     var fcm_tokens = [];
@@ -129,7 +130,7 @@ exports.create = function(req, res) {
                                 "parameter2": req.body.parameter2,
                                 "parameter3": req.body.parameter3
                             };
-                        push_msg.send_notification(result[i].googleappid, req.app.locals.settings.firebase_key, result[i].login_datum.id, message, req.body.timetolive, false, true, function(result){});
+                        push_msg.send_notification(result[i].googleappid, req.app.locals.backendsettings[req.token.company_id].firebase_key, result[i].login_datum.id, message, req.body.timetolive, false, true, function(result){});
                     }
                 }
                 return res.status(200).send({
@@ -154,6 +155,8 @@ exports.list = function(req, res) {
     query.include = [{model: db.login_data, attributes: ['username'], required: true, where: join_where}];
 
     query.where = where;
+
+    query.where.company_id = req.token.company_id; //return only records for this company
 
     DBModel.findAndCountAll(query).then(function(results) {
         if (!results) {

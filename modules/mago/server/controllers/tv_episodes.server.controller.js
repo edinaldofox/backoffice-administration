@@ -22,6 +22,8 @@ exports.create = function(req, res) {
     if(!req.body.duration) req.body.duration = 0;
     if (!req.body.original_title) req.body.original_title = req.body.title;
 
+    req.body.company_id = req.token.company_id; //save record for this company
+
     db.tv_season.findOne({
         attributes: ['id'], where: {tv_show_id: req.body.tv_show_id, season_number: req.body.season_number}
     }).then(function(tv_season){
@@ -30,7 +32,7 @@ exports.create = function(req, res) {
             if (!result) {
                 return res.status(400).send({message: 'fail create data'});
             } else {
-                logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+                logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
                 return res.jsonp(result);
             }
         }).catch(function(err) {
@@ -53,7 +55,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.tv_episode);
+    if(req.tv_episode.company_id === req.token.company_id) res.json(req.tv_episode);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -69,36 +72,42 @@ exports.update = function(req, res) {
         var deleteimage = path.resolve('./public'+updateData.image_url);
     }
 
-    db.tv_season.findOne({
-        attributes: ['id'], where: {tv_show_id: req.body.tv_season.tv_sery.tv_show_id, season_number: req.body.season_number}
-    }).then(function(tv_season){
-        req.body.tv_season_id = tv_season.id;
-        updateData.updateAttributes(req.body).then(function(result) {
-            if(deletefile) {
-                fs.unlink(deletefile, function (err) {
-                    //todo: return some warning
+
+    if(req.tv_episode.company_id === req.token.company_id){
+        db.tv_season.findOne({
+            attributes: ['id'], where: {tv_show_id: req.body.tv_season.tv_sery.tv_show_id, season_number: req.body.season_number}
+        }).then(function(tv_season){
+            req.body.tv_season_id = tv_season.id;
+            updateData.updateAttributes(req.body).then(function(result) {
+                if(deletefile) {
+                    fs.unlink(deletefile, function (err) {
+                        //todo: return some warning
+                    });
+                }
+                logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+                if(deleteimage) {
+                    fs.unlink(deleteimage, function (err) {
+                        //todo: return some warning
+                    });
+                }
+                return res.jsonp(result);
+            }).catch(function(err) {
+                winston.error(err);
+                return res.status(400).send({
+                    message: errorHandler.getErrorMessage(err)
                 });
-            }
-            logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
-            if(deleteimage) {
-                fs.unlink(deleteimage, function (err) {
-                    //todo: return some warning
-                });
-            }
-            return res.jsonp(result);
+            });
+            return null;
         }).catch(function(err) {
             winston.error(err);
             return res.status(400).send({
                 message: errorHandler.getErrorMessage(err)
             });
         });
-        return null;
-    }).catch(function(err) {
-        winston.error(err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-        });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
 };
 
 
@@ -111,7 +120,7 @@ exports.delete = function(req, res) {
         return db.tv_episode_resume.destroy({where: {tv_episode_id: req.tv_episode.id}}, {transaction: t}).then(function (removed_genres) {
             return db.tv_episode_stream.destroy({where: {tv_episode_id: req.tv_episode.id}}, {transaction: t}).then(function (removed_genres) {
                 return db.tv_episode_subtitles.destroy({where: {tv_episode_id: req.tv_episode.id}}, {transaction: t}).then(function (removed_subtitles) {
-                    return db.tv_episode.destroy({where: {id: req.tv_episode.id}}, {transaction: t});
+                    return db.tv_episode.destroy({where: {id: req.tv_episode.id, company_id: req.token.company_id}}, {transaction: t});
                 });
             });
         });
@@ -149,8 +158,15 @@ exports.list = function(req, res) {
     else if(query.updated_before) qwhere.createdAt = {lt: query.updated_before};
     else if(query.updated_after) qwhere.createdAt = {gt: query.updated_after};
     if(query.expiration_time) qwhere.expiration_time = query.expiration_time;
-    if(query.isavailable === 'true') qwhere.isavailable = true;
-    else if(query.isavailable === 'false') qwhere.isavailable = false;
+    if(query.is_available === 'true') qwhere.is_available = true;
+    else if(query.is_available === 'false') qwhere.is_available = false;
+    if(query.pin_protected === '1') qwhere.pin_protected = true;
+    else if(query.pin_protected === '0') qwhere.pin_protected = false;
+
+    if(query.season_number) qwhere.season_number = query.season_number;
+    if(query.tv_show_title){
+        final_where.include = [{model: db.tv_season, attributes: ['id'], include: [{model: db.tv_series, where: {title: {$like: '%'+query.tv_show_title+'%'}}}]}]
+    }
 
     //start building where
     final_where.where = qwhere;
@@ -160,6 +176,8 @@ exports.list = function(req, res) {
     }
     if(query._orderBy) final_where.order = query._orderBy + ' ' + query._orderDir;
     else final_where.order = [['createdAt', 'DESC']];
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     //end build final where
 

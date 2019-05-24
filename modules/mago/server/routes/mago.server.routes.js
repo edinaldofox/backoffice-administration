@@ -16,23 +16,28 @@ var multiparty = require('connect-multiparty'),
 module.exports = function(app) {
     /* ====== for file upload ===== */
     app.route('/file-upload/single-file/:model/:field')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(multipartyMiddleware, commonCtrl.upload_file);
 
     app.route('/file-upload/multi-file')
+        .all(policy.Authenticate)
         .post(policy.isAllowed, multipartyMiddleware, commonCtrl.upload_multi_files);
 
 
     /*========== chart ============ */
     app.route('/api/dash/chart/salesreports')
+        .all(policy.Authenticate)
       .all(policy.isAllowed)
       .get(dashboardController.chartSalesReport);
 
     app.route('/api/dash/chart/subsactive')
+        .all(policy.Authenticate)
       .all(policy.isAllowed)
       .get(dashboardController.chartsSubsActive);
 
     app.route('/api/dash/chart/subexpire')
+        .all(policy.Authenticate)
       .all(policy.isAllowed)
       .get(dashboardController.chartsSubsExpires);
 
@@ -41,11 +46,15 @@ module.exports = function(app) {
 
     /* ===== Reports ===== */
     app.route('/api/reports/subscribers')
+        .all(policy.Authenticate)
       .all(policy.isAllowed).get(reportsController.listOfSubscribers);
     app.route('/api/reports/sales')
+        .all(policy.Authenticate)
       .all(policy.isAllowed).get(reportsController.listOfSales);
     app.route('/api/reports/expiring')
+        .all(policy.Authenticate)
       .all(policy.isAllowed).get(reportsController.expiringNextWeek);
     app.route('/api/reports/product')
+        .all(policy.Authenticate)
       .all(policy.isAllowed).get(reportsController.listSalesByProduct);
 };

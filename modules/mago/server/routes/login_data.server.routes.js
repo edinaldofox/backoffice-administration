@@ -14,18 +14,22 @@ var path = require('path'),
 module.exports = function(app) {
     //dashboard
     app.route('/api/dash/logins')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(loginData.latest);
 
     /* ===== login data ===== */
     app.route('/api/logindata')
+        .all(policy.Authenticate)
         .get(loginData.list);
 
     app.route('/api/logindata')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(loginData.create);
 
     app.route('/api/logindata/:loginDataId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(loginData.read)
         .put(loginData.update)
@@ -35,13 +39,16 @@ module.exports = function(app) {
 
     /* =====Resellers login data ===== */
     app.route('/api/ResellersLoginData')
+        .all(policy.Authenticate)
         .get(loginData.list);
 
     app.route('/api/ResellersLoginData')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(loginData.create);
 
     app.route('/api/ResellersLoginData/:ResellersLoginDataId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(loginData.read)
         .put(loginData.update)

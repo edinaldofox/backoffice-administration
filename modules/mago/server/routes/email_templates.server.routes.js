@@ -12,11 +12,13 @@ var path = require('path'),
 module.exports = function(app) {
     /* ===== device menus ===== */
     app.route('/api/emailtemplate')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(emailTemplates.list)
         .post(emailTemplates.create);
 
     app.route('/api/emailtemplate/:emailTemplatesId')
+        .all(policy.Authenticate)
         .all(policy.isAllowed)
         .get(emailTemplates.read)
         .put(emailTemplates.update)

@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true,
             unique: true
         },
+        company_id: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false,
+            defaultValue: 1
+        },
         product_id:{
             type: DataTypes.STRING(32),
             allowNull: false,
@@ -39,6 +44,7 @@ module.exports = function(sequelize, DataTypes) {
             if(models.salesreport){
                 Combo.hasMany(models.salesreport, {foreignKey: 'combo_id'})
             }
+            Combo.belongsTo(models.settings, {foreignKey: 'company_id'});
         }
     });
     return Combo;

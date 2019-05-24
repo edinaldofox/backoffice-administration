@@ -55,6 +55,13 @@
         "DEVICE_NOT_FOUND": "Unable to find any device with the required specifications",
         "NO_DATA_FOUND": "The requested list of items was empty",
         "GUEST_LOGIN_DISABLED_DESCRIPTION": "GUEST_LOGIN_DISABLED",
-        "GUEST_LOGIN_DISABLED_DATA": "Guest login was disabled"
+        "GUEST_LOGIN_DISABLED_DATA": "Guest login was disabled",
+        "BUY": "Buy",
+        "PLAY": "Play",
+        "RELATED": "Related",
+        "TRAILER": "Trailer",
+        "THUMBUP": "Thumb-up",
+        "THUMBDOWN": "Thumb-down",
+        "COMING_SOON": "Coming soon"
     }
 }

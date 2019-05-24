@@ -7,6 +7,7 @@ var winston = require("winston");
 var path = require('path'),
     errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
     logHandler = require(path.resolve('./modules/mago/server/controllers/logs.server.controller')),
+    saas_functions = require(path.resolve('./custom_functions/saas_functions')),
     db = require(path.resolve('./config/lib/sequelize')).models,
     sequelize_t = require(path.resolve('./config/lib/sequelize')),
     DBModel = db.vod,
@@ -14,7 +15,7 @@ var path = require('path'),
     request = require("request"),
     fs = require('fs');
 
-function link_vod_with_genres(vod_id,array_category_ids, db_model) {
+function link_vod_with_genres(vod_id,array_category_ids, db_model, company_id) {
     var transactions_array = [];
     return db_model.update(
         {
@@ -23,7 +24,8 @@ function link_vod_with_genres(vod_id,array_category_ids, db_model) {
         {
             where: {
                 vod_id: vod_id,
-                category_id: {$notIn: array_category_ids}
+                category_id: {$notIn: array_category_ids},
+                company_id: company_id
             }
         }
     ).then(function (result) {
@@ -33,6 +35,7 @@ function link_vod_with_genres(vod_id,array_category_ids, db_model) {
                     db_model.upsert({
                         vod_id: vod_id,
                         category_id: array_category_ids[i],
+                        company_id: company_id,
                         is_available: true
                     }, {transaction: t}).catch(function(error){
                         winston.error(error)
@@ -52,12 +55,16 @@ function link_vod_with_genres(vod_id,array_category_ids, db_model) {
     })
 }
 
-function link_vod_with_packages(item_id, data_array, model_instance) {
+function link_vod_with_packages(item_id, data_array, model_instance, company_id) {
     var transactions_array = [];
     var destroy_where = (data_array.length > 0) ? {
         vod_id: item_id,
-        package_id: {$notIn: data_array}
-    } : {vod_id: item_id};
+        package_id: {$notIn: data_array},
+        company_id: company_id
+    } : {
+        vod_id: item_id,
+        company_id: company_id
+    };
 
     return model_instance.destroy({
         where: destroy_where
@@ -67,7 +74,8 @@ function link_vod_with_packages(item_id, data_array, model_instance) {
                 transactions_array.push(
                     model_instance.upsert({
                         vod_id: item_id,
-                        package_id: data_array[i]
+                        package_id: data_array[i],
+                        company_id: company_id
                     }, {transaction: t})
                 )
             }
@@ -98,32 +106,43 @@ exports.create = function(req, res) {
     var array_package_vod = req.body.package_vods || [];
     delete req.body.package_vods;
 
-    DBModel.create(req.body).then(function(result) {
-        if (!result) {
-            return res.status(400).send({message: 'fail create data'});
-        } else {
-            logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
-            return link_vod_with_genres(result.id,array_vod_vod_categories, db.vod_vod_categories).then(function(t_result) {
-                if (t_result.status) {
-                    return link_vod_with_packages(result.id, array_package_vod, db.package_vod).then(function(t_result) {
+    req.body.company_id = req.token.company_id; //save record for this company
+    var limit = req.app.locals.backendsettings[req.token.company_id].asset_limitations.vod_limit; //number of vod items that this company can create
+
+    saas_functions.check_limit('vod', limit).then(function(limit_reached){
+        if(limit_reached === true) return res.status(400).send({message: "You have reached the limit number of vod items you can create for this plan. "});
+        else{
+            DBModel.create(req.body).then(function(result) {
+                if (!result) {
+                    return res.status(400).send({message: 'fail create data'});
+                } else {
+                    logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
+                    return link_vod_with_genres(result.id,array_vod_vod_categories, db.vod_vod_categories, req.token.company_id).then(function(t_result) {
                         if (t_result.status) {
-                            return res.jsonp(result);
+                            return link_vod_with_packages(result.id, array_package_vod, db.package_vod, req.token.company_id).then(function(t_result) {
+                                if (t_result.status) {
+                                    return res.jsonp(result);
+                                }
+                                else {
+                                    return res.send(t_result);
+                                }
+                            })
                         }
                         else {
                             return res.send(t_result);
                         }
                     })
                 }
-                else {
-                    return res.send(t_result);
-                }
-            })
+            }).catch(function(err) {
+                winston.error(err);
+                return res.status(400).send({
+                    message: errorHandler.getErrorMessage(err)
+                });
+            });
         }
-    }).catch(function(err) {
-        winston.error(err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-        });
+    }).catch(function(error){
+        winston.error("Error checking for the limit number of vod items for company with id ",req.token.company_id," - ", error);
+        return res.status(400).send({message: "The limit number of vod items you can create for this plan could not be verified. Check your log file for more information."});
     });
 };
 
@@ -132,7 +151,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-    res.json(req.vod);
+    if(req.vod.company_id === req.token.company_id) res.json(req.vod);
+    else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -154,39 +174,45 @@ exports.update = function(req, res) {
     var array_package_vod = req.body.package_vods || [];
     delete req.body.package_vods;
 
-    updateData.updateAttributes(req.body).then(function(result) {
-        if(deletefile) {
-            fs.unlink(deletefile, function (err) {
-                //todo: return some warning
-            });
-        }
-        logHandler.add_log(req.token.uid, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body));
-        if(deleteimage) {
-            fs.unlink(deleteimage, function (err) {
-                //todo: return some warning
-            });
-        }
-        return link_vod_with_genres(req.body.id,array_vod_vod_categories, db.vod_vod_categories).then(function(t_result) {
-            if (t_result.status) {
-                return link_vod_with_packages(req.body.id, array_package_vod, db.package_vod).then(function(t_result) {
-                    if (t_result.status) {
-                        return res.jsonp(result);
-                    }
-                    else {
-                        return res.send(t_result);
-                    }
-                })
+    if(req.vod.company_id === req.token.company_id){
+        updateData.updateAttributes(req.body).then(function(result) {
+            if(deletefile) {
+                fs.unlink(deletefile, function (err) {
+                    //todo: return some warning
+                });
             }
-            else {
-                return res.send(t_result);
+            logHandler.add_log(req.token.id, req.ip.replace('::ffff:', ''), 'created', JSON.stringify(req.body), req.token.company_id);
+            if(deleteimage) {
+                fs.unlink(deleteimage, function (err) {
+                    //todo: return some warning
+                });
             }
-        })
-    }).catch(function(err) {
-        winston.error(err);
-        return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
+            return link_vod_with_genres(req.body.id,array_vod_vod_categories, db.vod_vod_categories, req.token.company_id).then(function(t_result) {
+                if (t_result.status) {
+                    return link_vod_with_packages(req.body.id, array_package_vod, db.package_vod, req.token.company_id).then(function(t_result) {
+                        if (t_result.status) {
+                            return res.jsonp(result);
+                        }
+                        else {
+                            return res.send(t_result);
+                        }
+                    })
+                }
+                else {
+                    return res.send(t_result);
+                }
+            })
+        }).catch(function(err) {
+            winston.error(err);
+            return res.status(400).send({
+                message: errorHandler.getErrorMessage(err)
+            });
         });
-    });
+    }
+    else{
+        res.status(404).send({message: 'User not authorized to access these data'});
+    }
+
 };
 
 
@@ -196,7 +222,7 @@ exports.update = function(req, res) {
 exports.delete = function(req, res) {
     //delete single vod item and it's dependencies, as long as the item doesn't belong to a package
     db.package_vod.findAll({
-        where: {vod_id: req.vod.id}
+        where: {vod_id: req.vod.id, company_id: req.token.company_id}
     }).then(function (delete_vod) {
         if (delete_vod && delete_vod.length > 0) {
             return res.status(400).send({message: 'This item belongs to at least one package. Please remove it from the packages and try again'});
@@ -206,7 +232,7 @@ exports.delete = function(req, res) {
                 return db.vod_vod_categories.destroy({where: {vod_id: req.vod.id}}, {transaction: t}).then(function (removed_genres) {
                     return db.vod_stream.destroy({where: {vod_id: req.vod.id}}, {transaction: t}).then(function (removed_genres) {
                         return db.vod_subtitles.destroy({where: {vod_id: req.vod.id}}, {transaction: t}).then(function (removed_subtitles) {
-                            return db.vod.destroy({where: {id: req.vod.id}}, {transaction: t});
+                            return db.vod.destroy({where: {id: req.vod.id, company_id: req.token.company_id}}, {transaction: t});
                         });
                     });
                 });
@@ -253,6 +279,8 @@ exports.list = function(req, res) {
     if(query.expiration_time) qwhere.expiration_time = query.expiration_time;
     if(query.isavailable === 'true') qwhere.isavailable = true;
     else if(query.isavailable === 'false') qwhere.isavailable = false;
+    if(query.pin_protected === '1') qwhere.pin_protected = true;
+    else if(query.pin_protected === '0') qwhere.pin_protected = false;
 
     //start building where
     final_where.where = qwhere;
@@ -289,6 +317,8 @@ exports.list = function(req, res) {
 
     final_where.distinct = true; //avoids wrong count number when using includes
     //end build final where
+
+    final_where.where.company_id = req.token.company_id; //return only records for this company
 
     if(query.not_id){
         db.package_vod.findAll({attributes: [ 'vod_id'], where: {package_id: query.not_id}}).then(function(excluded_vod_items){

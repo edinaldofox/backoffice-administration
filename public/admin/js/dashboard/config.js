@@ -12,15 +12,18 @@ export default function (nga, admin) {
 					nga.field('user_id', 'reference')
 						.targetEntity(admin.getEntity('Users'))
 		                .targetField(nga.field('username'))
+							.isDetailLink(false)
 		                .cssClasses('hidden-xs')
 						.label('User'),
 					nga.field('combo_id', 'reference')
 						.targetEntity(admin.getEntity('Combos'))
 		                .targetField(nga.field('name'))
+						.isDetailLink(false)
 						.label('Product'),
 					nga.field('user_username', 'reference')
                         .targetEntity(admin.getEntity('LoginData'))
                         .targetField(nga.field('username'))
+						.isDetailLink(false)
 						.label('Customers Username'),
 					nga.field('saledate', 'date')
 						.cssClasses('hidden-xs')
@@ -38,6 +41,7 @@ export default function (nga, admin) {
 		                .targetField(nga.field('firstname').map(function (value, entry) {
 							return entry.firstname + ' ' + entry.lastname;
 						}))
+						.isDetailLink(false)
 						.cssClasses('hidden-xs')
 						.label('Customer'),
 
@@ -62,7 +66,6 @@ export default function (nga, admin) {
                         .cssClasses('hidden-xs')
                         .label('Created At'),
                 ])
-                .listActions(['edit'])
                 .perPage(10)
         )
 

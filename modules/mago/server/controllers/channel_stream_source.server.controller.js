@@ -14,6 +14,7 @@ var path = require('path'),
  */
 exports.create = function(req, res) {
 
+  req.body.company_id = req.token.company_id; //save record for this company
   DBModel.create(req.body).then(function(result) {
     if (!result) {
       return res.status(400).send({message: 'fail create data'});
@@ -32,7 +33,8 @@ exports.create = function(req, res) {
  * Show current
  */
 exports.read = function(req, res) {
-  res.json(req.channelStreamSource);
+  if(req.channelStreamSource.company_id === req.token.company_id) res.json(req.channelStreamSource);
+  else return res.status(404).send({message: 'No data with that identifier has been found'});
 };
 
 /**
@@ -41,14 +43,20 @@ exports.read = function(req, res) {
 exports.update = function(req, res) {
   var updateData = req.channelStreamSource;
 
-  updateData.updateAttributes(req.body).then(function(result) {
-    res.json(result);
-  }).catch(function(err) {
-    winston.error("Updating channel stream source failed with error: ", err);
-    return res.status(400).send({
-      message: errorHandler.getErrorMessage(err)
+  if(req.channelStreamSource.company_id === req.token.company_id){
+    updateData.updateAttributes(req.body).then(function(result) {
+      res.json(result);
+    }).catch(function(err) {
+      winston.error("Updating channel stream source failed with error: ", err);
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
     });
-  });
+  }
+  else{
+    res.status(404).send({message: 'User not authorized to access these data'});
+  }
+
 };
 
 /**
@@ -60,16 +68,20 @@ exports.delete = function(req, res) {
   // Find the article
   DBModel.findById(deleteData.id).then(function(result) {
     if (result) {
-
-      // Delete the article
-      result.destroy().then(function() {
-        return res.json(result);
-      }).catch(function(err) {
-        winston.error("Deleting the channel stream source failed with error: ", err);
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
+      if (result && (result.company_id === req.token.company_id)) {
+        // Delete the article
+        result.destroy().then(function() {
+          return res.json(result);
+        }).catch(function(err) {
+          winston.error("Deleting the channel stream source failed with error: ", err);
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
         });
-      });
+      }
+      else{
+        return res.status(400).send({message: 'Unable to find the Data'});
+      }
     } else {
       return res.status(400).send({
         message: 'Unable to find the Data'
@@ -90,6 +102,7 @@ exports.delete = function(req, res) {
 exports.list = function(req, res) {
 
   DBModel.findAndCountAll({
+    where: {company_id: req.token.company_id}
   }).then(function(results) {
     if (!results) {
       return res.status(404).send({
