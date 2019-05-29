@@ -58,7 +58,8 @@ and login with username admin and password admin
 
 ## License
 
-You can download the player appliation on this URL https://github.com/MAGOWARE/backoffice-administration/blob/master/android_apk/magoware-2.8.15.apk
+You can download the player here:
+https://github.com/MAGOWARE/backoffice-administration/blob/master/android_apk/magoware-2.8.15.apk
 
 ---
 
