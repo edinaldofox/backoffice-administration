@@ -50,6 +50,15 @@ go to:
 ## http://YourDomain_or_IP/admin 
 and login with username admin and password admin
 
+## Screenshots
+
+![login 1](https://user-images.githubusercontent.com/27496920/35095606-51949b68-fc49-11e7-8b16-7be2c8ab11ae.png)
+![dashboard](https://user-images.githubusercontent.com/27496920/35095565-2cd728c2-fc49-11e7-8611-b84f989968a6.png)
+![ga_events-1024x489](https://user-images.githubusercontent.com/27496920/35095647-848ebca6-fc49-11e7-96ae-053a86a5f5fd.png)
+
+## License
+
+You can download the player appliation on this URL https://github.com/MAGOWARE/backoffice-administration/blob/master/android_apk/magoware-2.8.15.apk
 
 ---
 
@@ -74,9 +83,3 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-## Screenshots
-
-![login 1](https://user-images.githubusercontent.com/27496920/35095606-51949b68-fc49-11e7-8b16-7be2c8ab11ae.png)
-![dashboard](https://user-images.githubusercontent.com/27496920/35095565-2cd728c2-fc49-11e7-8611-b84f989968a6.png)
-![ga_events-1024x489](https://user-images.githubusercontent.com/27496920/35095647-848ebca6-fc49-11e7-96ae-053a86a5f5fd.png)
