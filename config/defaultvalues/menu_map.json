@@ -368,11 +368,11 @@
         "description": "System Configuration",
         "icon": "<span class='fa fa-cog fa-fw dashboard_icon'></span>",
         "children": [
-            {
-            "entity": "EmailSettings",
-            "title": "Email Settings",
-            "icon": "<span class='fa fa-envelope-o fa-fw dashboard_icon'></span>",
-            "link": "/EmailSettings/edit/1"
+          {
+            "entity": "Settings",
+            "title": "Company Settings",
+            "icon": "<span class='fa fa-cog fa-fw dashboard_icon'></span>",
+            "link": "/Settings/edit/1"
           },
           {
             "entity": "PlayerSettings",
@@ -403,12 +403,6 @@
             "icon": "<span class='fa fa-globe fa-fw dashboard_icon'></span>",
             "children": [],
             "link": "/geoip"
-          },
-          {
-            "entity": "Settings",
-            "title": "Other",
-            "icon": "<span class='fa fa-cog fa-fw dashboard_icon'></span>",
-            "link": "/Settings/edit/1"
           }
         ]
       },

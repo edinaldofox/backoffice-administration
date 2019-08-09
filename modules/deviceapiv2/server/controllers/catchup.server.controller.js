@@ -57,8 +57,17 @@ exports.catchup_events =  function(req, res) {
     var client_timezone = parseInt(req.body.device_timezone.replace(' ', '')); //offset of the client will be added to time - related info. converted to int and cleaned of spaces
     var client_time = (client_timezone >= 0 ) ? (24 - client_timezone) : (0 - client_timezone);
     var shift_direction = ( client_timezone >= 0 ) ? 0 : 1; //for negative offset, there should be a shift of 1 day more to the right
-    var current_human_time = dateFormat(Date.now()  + (req.body.day -1 + shift_direction)*3600000*24, "yyyy-mm-dd "+client_time+":00:00"); //start of the day for the user, in server time
-    var interval_end_human = dateFormat(Date.now()  + (req.body.day + shift_direction)*3600000*24, "yyyy-mm-dd "+client_time+":00:00");  //end of the day for the user, in server time
+    //var current_human_time = dateFormat(Date.now()  + (req.body.day -1 + shift_direction)*3600000*24, "yyyy-mm-dd "+client_time+":00:00"); //start of the day for the user, in server time
+    //var interval_end_human = dateFormat(Date.now()  + (req.body.day + shift_direction)*3600000*24, "yyyy-mm-dd "+client_time+":00:00");  //end of the day for the user, in server time
+
+    var d = new Date(); // Today!
+        d.setDate(d.getDate() - req.body.day); // search day.
+
+    var day_start = dateFormat(d, "yyyy-mm-dd 00:00:00"); //start of the day for the user, in server time
+    var day_end = dateFormat(d, "yyyy-mm-dd 23:59:00");  //end of the day for the user, in server time
+
+    console.log(day_start);
+    console.log(day_end);
 
     models.epg_data.findAll({
         attributes: [ 'id', 'title', 'short_description', 'short_name', 'duration_seconds', 'program_start', 'program_end', 'long_description' ],
@@ -74,7 +83,25 @@ exports.catchup_events =  function(req, res) {
                 where: {login_id: req.thisuser.id}
             }
         ],
-        where: {program_start: {lte: interval_end_human}, program_end: {gte: current_human_time}, company_id: req.thisuser.company_id}
+        //where: {program_start: {lte: interval_end_human},
+        //        program_end: {gte: current_human_time},
+        //        company_id: req.thisuser.company_id}
+        where: Sequelize.and(
+                            {company_id: req.thisuser.company_id},
+                            Sequelize.or(
+                                Sequelize.and(
+                                    {program_start:{gte:day_start}},
+                                    {program_start:{lte:day_end}}
+                                ),
+                                Sequelize.and(
+                                    {program_end: {gte:day_start}},
+                                    {program_end:{lte:day_end}}
+                                )
+                            )
+                        )
+
+
+
     }).then(function (result) {
         //todo: what if channel number is invalid and it finds no title???
         var raw_result = [];
@@ -110,7 +137,21 @@ exports.catchup_events =  function(req, res) {
 };
 
 
-// returns list of epg data for the given channel - GET METHOD
+
+/**
+ * @api {get} /apiv2/channels/catchup_events Get Channels Catchup Stream
+ * @apiName CatchupEvents
+ * @apiGroup Catchup
+ *
+ * @apiUse body_auth
+ * @apiParam {String} auth Encrypted authentication token string.
+ * @apiParam {Number} channelNumber Channel number
+ * @apiParam {Number} device_timezone Device timezone.
+ * @apiDescription Returns list of epg for current day
+
+ * Copy paste this auth for testing purposes
+ * auth=gPIfKkbN63B8ZkBWj+AjRNTfyLAsjpRdRU7JbdUUeBlk5Dw8DIJOoD+DGTDXBXaFji60z3ao66Qi6iDpGxAz0uyvIj/Lwjxw2Aq7J0w4C9hgXM9pSHD4UF7cQoKgJI/D
+ */
 exports.get_catchup_events =  function(req, res) {
     req.query.day = parseInt(req.query.day); //convert day to integer
     var client_timezone = parseInt(req.query.device_timezone.replace(' ', '')); //offset of the client will be added to time - related info. converted to int and cleaned of spaces
@@ -118,6 +159,13 @@ exports.get_catchup_events =  function(req, res) {
     var shift_direction = ( client_timezone >= 0 ) ? 0 : 1; //for negative offset, there should be a shift of 1 day more to the right
     var current_human_time = dateFormat(Date.now()  + (req.query.day -1 + shift_direction)*3600000*24, "yyyy-mm-dd "+client_time+":00:00"); //start of the day for the user, in server time
     var interval_end_human = dateFormat(Date.now()  + (req.query.day + shift_direction)*3600000*24, "yyyy-mm-dd "+client_time+":00:00");  //end of the day for the user, in server time
+
+    var d = new Date(); // Today!
+    d.setDate(d.getDate() - req.body.day); // search day.
+
+    var day_start = dateFormat(d, "yyyy-mm-dd 00:00:00"); //start of the day for the user, in server time
+    var day_end = dateFormat(d, "yyyy-mm-dd 23:59:00");  //end of the day for the user, in server time
+
 
     models.epg_data.findAll({
         attributes: [ 'id', 'title', 'short_description', 'short_name', 'duration_seconds', 'program_start', 'program_end', 'long_description' ],
@@ -133,7 +181,21 @@ exports.get_catchup_events =  function(req, res) {
                 where: {login_id: req.thisuser.id}
             }
         ],
-        where: {program_start: {lte: interval_end_human}, program_end: {gte: current_human_time}, company_id: req.thisuser.company_id}
+        where: Sequelize.and(
+            {company_id: req.thisuser.company_id},
+            Sequelize.or(
+                Sequelize.and(
+                    {program_start:{gte:day_start}},
+                    {program_start:{lte:day_end}}
+                ),
+                Sequelize.and(
+                    {program_end: {gte:day_start}},
+                    {program_end:{lte:day_end}}
+                )
+            )
+        )
+
+
     }).then(function (result) {
         //todo: what if channel number is invalid and it finds no title???
         var raw_result = [];

@@ -20,7 +20,12 @@ module.exports = function(app) {
         .all(policy.Authenticate)
         .all(policy.isAllowed)
         .post(users.createAndInvite);
-
+    
+    app.route('/api/users/reinvite')
+        .all(policy.Authenticate)
+        .all(policy.isAllowed)
+        .post(users.reInvite);
+        
     app.route('/api/users/:usersId')
         .all(policy.Authenticate)
         .get(users.read);

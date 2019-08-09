@@ -20,7 +20,7 @@ var winston = require("winston");
 exports.user_settings = function(req, res) {
     models.login_data.findOne({
         attributes:['id', 'customer_id', 'pin', 'show_adult', 'auto_timezone', 'timezone', 'player', 'get_messages'],
-        where: {username: req.auth_obj.username}
+        where: {username: req.auth_obj.username, company_id: req.thisuser.company_id}
     }).then(function (result) {
         result.timezone = (result.timezone<1) ? result.timezone : "+"+result.timezone;
         var response_data = [result];
@@ -35,7 +35,7 @@ exports.user_settings = function(req, res) {
 exports.user_settings_get = function(req, res) {
     models.login_data.findOne({
         attributes:['id', 'customer_id', 'pin', 'show_adult', 'auto_timezone', 'timezone', 'player', 'get_messages'],
-        where: {username: req.auth_obj.username}
+        where: {username: req.auth_obj.username, company_id: req.thisuser.company_id}
     }).then(function (result) {
         result.timezone = (result.timezone<1) ? result.timezone : "+"+result.timezone;
         var response_data = [result];
@@ -50,7 +50,7 @@ exports.user_settings_get = function(req, res) {
 exports.user_data = function(req, res) {
     models.login_data.findOne({
         attributes:['customer_id'],
-        where: {username: req.auth_obj.username}
+        where: {username: req.auth_obj.username, company_id: req.thisuser.company_id}
     }).then(function (result) {
         models.customer_data.findOne({
             attributes: ['firstname', 'lastname', 'email', 'address', 'city', 'country', 'telephone' ],
@@ -73,7 +73,7 @@ exports.user_data = function(req, res) {
 exports.user_data_get = function(req, res) {
     models.login_data.findOne({
         attributes:['customer_id'],
-        where: {username: req.auth_obj.username}
+        where: {username: req.auth_obj.username, company_id: req.thisuser.company_id}
     }).then(function (result) {
         models.customer_data.findOne({
             attributes: ['firstname', 'lastname', 'email', 'address', 'city', 'country', 'telephone' ],

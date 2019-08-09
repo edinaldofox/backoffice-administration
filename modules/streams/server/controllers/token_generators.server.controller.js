@@ -197,6 +197,32 @@ exports.akamai_token_v2_generator = function(req,res) {
     res.send(theresponse);
 };
 
+//returns the token as aditional query paramter
+exports.akamai_token_v2_generator_extraquery = function(req,res) {
+    var config = {
+        algorithm : 'SHA256',
+        acl : '*',
+        window : req.app.locals.streamtokens.AKAMAI.WINDOW,
+        key : req.app.locals.streamtokens.AKAMAI.TOKEN_KEY,
+        //ip: getClientIp(req),
+        ip: req.ip.replace('::ffff:', ''),
+        startTime:0,
+        url:'',
+        session:'',
+        data:req.auth_obj.username,
+        salt: req.app.locals.streamtokens.AKAMAI.SALT,
+        delimeter:'~',
+        escape_early:false,
+        name:'__token__'
+    };
+
+    var token = "&" + new akamai_token_generator.default(config).generateToken();
+    var theresponse = new responses.OK();
+    theresponse.extra_data = token;
+    res.send(theresponse);
+};
+
+
 exports.catchup_akamai_token_v2_generator = function(req,res) {
     var config = {
         algorithm : 'SHA256',
@@ -220,34 +246,6 @@ exports.catchup_akamai_token_v2_generator = function(req,res) {
     theresponse.extra_data = token;
     res.send(theresponse);
 };
-
-
-
-exports.akamai_token_v2_generator_tibo_mobile = function(req,res) {
-    var config = {
-        algorithm : 'SHA256',
-        acl : '*',
-        window : req.app.locals.streamtokens.AKAMAI.WINDOW,
-        key : "BB4D383893D0EE64",
-        //ip: getClientIp(req),
-        ip: req.ip.replace('::ffff:', ''),
-        startTime:0,
-        url:'',
-        session:'',
-        data:req.auth_obj.username,
-        salt: req.app.locals.streamtokens.AKAMAI.SALT,
-        delimeter:'~',
-        escape_early:false,
-        name:'__token__'
-    };
-
-    var token = "?" + new akamai_token_generator.default(config).generateToken();
-    var theresponse = new responses.OK();
-    theresponse.extra_data = token;
-    res.send(theresponse);
-};
-
-
 
 exports.flussonic_token_generator =  function(req, res) {
     var token_key = req.app.locals.streamtokens.FLUSSONIC.TOKEN_KEY; //server side only
@@ -316,7 +314,7 @@ exports.nimble_token_generator =  function(req, res) {
 
     var urlsignature = "server_time=" + today  + "&hash_value=" + base64hash + "&validminutes=" + validminutes;
 
-    var base64urlsignature = new Buffer(urlsignature).toString('base64');
+    var base64urlsignature = new Buffer(urlsignature).toString('base64'); //todo: new buffer eshte depricated dhe duhet zevendesuar.
 
     var signedurlwithvalidinterval = "?wmsAuthSign=" + base64urlsignature;
 

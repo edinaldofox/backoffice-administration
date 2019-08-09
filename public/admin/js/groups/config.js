@@ -25,12 +25,6 @@ export default function (nga, admin) {
 			}])
 			.title('<h4>User groups <i class="fa fa-angle-right" aria-hidden="true"></i> Create: User groups</h4>')
 			.fields([
-				nga.field('company_id', 'reference')
-						.targetEntity(admin.getEntity('Settings'))
-						.targetField(nga.field('company_name'))
-						.attributes({ placeholder: 'Choose company from dropdown list' })
-						.perPage(-1)
-						.label('Company'),
 				nga.field('name', 'string')
 						.attributes({ placeholder: 'Group name' })
 						.validation({ required: true })

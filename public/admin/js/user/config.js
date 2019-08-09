@@ -5,7 +5,7 @@ export default function (nga, admin) {
 	user.listView()
 		.title('<h4>Users <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>')
 		.batchActions([])
-        .actions(['<roles post="entry"></roles>', 'filter', 'export','create','<invite type="invite_users" selection="selection"></invite>'])
+        .actions(['<roles post="entry"></roles>', 'filter', 'export','<invite type="invite_users" selection="selection"></invite>'])
 		.fields([
 			nga.field('group_id', 'reference')
 				.targetEntity(admin.getEntity('Groups'))
@@ -25,10 +25,12 @@ export default function (nga, admin) {
 			nga.field('telephone', 'string')
 				.cssClasses('hidden-xs')
 				.label('Telephone'),
+            nga.field('updatedAt','date')
+                .label('UpdatedAt'),
             nga.field('last_login_ip', 'string')
                 .map(function truncate(value) {
                     if (!value) {
-                        return '';
+                        return 'Invitation Pending';
                     }
                     return value.length > 14 ? value.substr(0, 14) + '...' : value;
                 })
@@ -41,12 +43,16 @@ export default function (nga, admin) {
                 .label('')
                 .template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>')
                 .pinned(true),
+            nga.field('company_id', 'reference')
+                .targetEntity(admin.getEntity('Settings'))
+                .targetField(nga.field('company_name'))
+                .label('Company'),
             nga.field('group_id', 'reference')
                 .targetEntity(admin.getEntity('Groups'))
                 .targetField(nga.field('name'))
                 .label('Group'),
 		])
-		.listActions(['edit'])
+		.listActions(['edit','<approve-invitation size="xs" review="entry"></approve-invitation>'])
         .exportFields([
          user.listView().fields(),
         ]);
@@ -67,12 +73,6 @@ export default function (nga, admin) {
 				.permanentFilters({exclude_group: 'superadmin'})
                 .attributes({ placeholder: 'Select group' })
 				.label('Group *'),
-			nga.field('company_id', 'reference')
-					.targetEntity(admin.getEntity('Settings'))
-					.targetField(nga.field('company_name'))
-					.attributes({ placeholder: 'Choose company from dropdown list' })
-					.perPage(-1)
-					.label('Company'),
 			nga.field('username', 'string')
 				.attributes({ placeholder: 'Username must be at least 3 character long' })
 				.validation({ required: true, minlength: 3 })
@@ -128,7 +128,7 @@ export default function (nga, admin) {
 					.attributes({ placeholder: 'Select group' })
 					.label('Group *'),
 			nga.field('username', 'string')
-					.attributes({ placeholder: 'Username must be at least 3 character long' })
+					.attributes({ placeholder: 'Username must be at least 3 character long' , readOnly: true })
 					.validation({ required: true, minlength: 3 })
 					.label('Username'),
 			nga.field('hashedpassword', 'password')

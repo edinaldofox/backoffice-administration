@@ -107,6 +107,11 @@ exports.emptyCredentials = function(req, res, next) {
 
 exports.isAllowed = function(req, res, next) {
 
+    //IF COMPANY ID IS MISSING, THEN ASSIGN THE DEFAULT ONE: company_id = 1
+    let COMPANY_ID = 1;
+    if(req.headers.company_id) COMPANY_ID = req.headers.company_id * 1;
+
+
     if(req.body.auth){         //serach for auth
         var auth = decodeURIComponent(req.body.auth);
     }
@@ -131,11 +136,11 @@ exports.isAllowed = function(req, res, next) {
             else req.body.language = 'eng'; //the language parameter is missing, use english as default language
         }
 
-        if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=")) === false){
-            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=");
+        if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","=")) === false){
+            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","=");
         }
-        else if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[1].key_transition === true){
-            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=");
+        else if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[COMPANY_ID].key_transition === true){
+            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","=");
         }
         else {
             response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
@@ -151,11 +156,11 @@ exports.isAllowed = function(req, res, next) {
             }
         }
         else{
-            if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=")) === false){
-                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=");
+            if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","=")) === false){
+                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","=");
             }
-            else if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[1].key_transition === true){
-                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=");
+            else if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[COMPANY_ID].key_transition === true){
+                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","=");
             }
             else {
                 response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
@@ -183,7 +188,7 @@ exports.isAllowed = function(req, res, next) {
             else{
                 //reading client data
                 models.login_data.findOne({
-                    where: {username: auth_obj.username}
+                    where: {username: auth_obj.username, company_id: COMPANY_ID}
                 }).then(function (result) {
                     if(result) {
                         //the user is a normal client account. check user rights to make requests with his credentials
@@ -205,7 +210,7 @@ exports.isAllowed = function(req, res, next) {
                             }
                         }
                         //login as guest is enabled and the user is guest. allow request to be processed
-                        else if( (auth_obj.username === 'guest') && (req.app.locals.backendsettings[1].allow_guest_login === true) ){
+                        else if( (auth_obj.username === 'guest') && (req.app.locals.backendsettings[COMPANY_ID].allow_guest_login === true) ){
                             req.thisuser = result;
                             req.auth_obj = auth_obj;
                             next();

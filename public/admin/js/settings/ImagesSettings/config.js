@@ -14,11 +14,16 @@ export default function (nga, admin) {
                     '</div>'+
                     '<div class="row"><small id="emailHelp" class="form-text text-muted">1988x318 px,not larger than 600 KB</small></div>')
                 .uploadInformation({ 'url': '/file-upload/single-file/settings/box_logo_url','apifilename': 'result'})
-                .validation({ required: true, validator: function() {
-                        var box_logo_url = document.getElementById('box_logo_url');
-                        if (box_logo_url.value.length > 0) {
-                            if(box_logo_url.files[0].size > 614400 ){
-                                throw new Error('Your Box Logo is too Big, not larger than 600 KB');
+                .validation({
+                    validator: function(value) {
+                        if (value === null){
+                            throw new Error('Please, choose Box Logo');
+                        } else {
+                            var box_logo_url = document.getElementById('box_logo_url');
+                            if (box_logo_url.value.length > 0) {
+                                if(box_logo_url.files[0].size > 614400 ){
+                                    throw new Error('Your Box Logo is too Big, not larger than 600 KB');
+                                }
                             }
                         }
                     }
@@ -32,11 +37,16 @@ export default function (nga, admin) {
                     '</div>'+
                     '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1.3 MB</small></div>')
                 .uploadInformation({ 'url': '/file-upload/single-file/settings/box_background_url','apifilename': 'result'})
-                .validation({ required: true, validator: function() {
-                        var box_background_url = document.getElementById('box_background_url');
-                        if (box_background_url.value.length > 0) {
-                            if(box_background_url.files[0].size > 1572864 ){
-                                throw new Error('Your Box Background is too Big, not larger than 1.3 MB');
+                .validation({
+                    validator: function(value) {
+                        if(value == null){
+                            throw new Error('Please, choose Box Background');
+                        }else{
+                            var box_background_url = document.getElementById('box_background_url');
+                            if (box_background_url.value.length > 0) {
+                                if(box_background_url.files[0].size > 1572864 ){
+                                    throw new Error('Your Box Background is too Big, not larger than 1.3 MB');
+                                }
                             }
                         }
                     }
@@ -50,13 +60,21 @@ export default function (nga, admin) {
                     '</div>'+
                     '<div class="row"><small id="emailHelp" class="form-text text-muted">540x960 px, not larger than 1 MB</small></div>')
                 .uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_background_url','apifilename': 'result'})
-                .validation({ required: true, validator: function() {
-                        var mobile_background_url = document.getElementById('mobile_background_url');
-                        if (mobile_background_url.value.length > 0) {
-                            if(mobile_background_url.files[0].size > 1048576 ){
-                                throw new Error('Your Landscape Background Mobile is too Big, not larger than 1 MB');
+                .validation({
+                    validator: function(value) {
+
+                        if(value == null){
+                            throw new Error('Please, choose Landscape Background Mobile');
+                        }else{
+                            var mobile_background_url = document.getElementById('mobile_background_url');
+                            if (mobile_background_url.value.length > 0) {
+                                if(mobile_background_url.files[0].size > 1048576 ){
+                                    throw new Error('Your Landscape Background Mobile is too Big, not larger than 1 MB');
+                                }
                             }
                         }
+
+
                     }
                 }),
 
@@ -69,13 +87,21 @@ export default function (nga, admin) {
                     '</div>'+
                     '<div class="row"><small id="emailHelp" class="form-text text-muted">432x768 px, not larger than 1 MB</small></div>')
                 .uploadInformation({ 'url': '/file-upload/single-file/settings/portrait_background_url','apifilename': 'result'})
-                .validation({ required: true, validator: function() {
-                        var portrait_background_url = document.getElementById('portrait_background_url');
-                        if (portrait_background_url.value.length > 0) {
-                            if(portrait_background_url.files[0].size > 1048576 ){
-                                throw new Error('Your Portrait Background Mobile is too Big, not larger than 1 MB');
+                .validation({
+                    validator: function(value) {
+
+                        if(value == null){
+                            throw new Error('Please, choose Portrait Background Mobile');
+                        }else{
+                            var portrait_background_url = document.getElementById('portrait_background_url');
+                            if (portrait_background_url.value.length > 0) {
+                                if(portrait_background_url.files[0].size > 1048576 ){
+                                    throw new Error('Your Portrait Background Mobile is too Big, not larger than 1 MB');
+                                }
                             }
                         }
+
+
                     }
                 }),
 
@@ -87,13 +113,21 @@ export default function (nga, admin) {
                     '</div>'+
                     '<div class="row"><small id="emailHelp" class="form-text text-muted">240x38 px, not larger than 600 KB</small></div>')
                 .uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_logo_url','apifilename': 'result'})
-                .validation({ required: true, validator: function() {
-                        var mobile_logo_url = document.getElementById('mobile_logo_url');
-                        if (mobile_logo_url.value.length > 0) {
-                            if(mobile_logo_url.files[0].size > 614400 ){
-                                throw new Error('Your Mobile Logo is too Big, not larger than 600 KB');
+                .validation({
+                    validator: function(value) {
+
+                        if(value == null){
+                            throw new Error('Please, choose Mobile Logo');
+                        }else{
+                            var mobile_logo_url = document.getElementById('mobile_logo_url');
+                            if (mobile_logo_url.value.length > 0) {
+                                if(mobile_logo_url.files[0].size > 614400 ){
+                                    throw new Error('Your Mobile Logo is too Big, not larger than 600 KB');
+                                }
                             }
                         }
+
+
                     }
                 }),
 
@@ -105,20 +139,38 @@ export default function (nga, admin) {
                     '</div>'+
                     '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>')
                 .uploadInformation({ 'url': '/file-upload/single-file/settings/vod_background_url','apifilename': 'result'})
-                .validation({ required: true, validator: function() {
-                        var vod_background_url = document.getElementById('vod_background_url');
-                        if (vod_background_url.value.length > 0) {
-                            if(vod_background_url.files[0].size > 1048576 ){
-                                throw new Error('Your VOD Background is too Big, not larger than 1 MB');
+                .validation({
+                    validator: function(value) {
+
+                        if(value == null){
+                            throw new Error('Please, choose VOD Background');
+                        }else{
+                            var vod_background_url = document.getElementById('vod_background_url');
+                            if (vod_background_url.value.length > 0) {
+                                if(vod_background_url.files[0].size > 1048576 ){
+                                    throw new Error('Your VOD Background is too Big, not larger than 1 MB');
+                                }
                             }
                         }
+
+
                     }
                 }),
+
+            nga.field('background_video_url', 'string')
+                .validation({ required: false })
+                .attributes({ placeholder: 'Background Video Url' })
+                .label('Background Video Url'),
+
+            nga.field('background_video_duration','number')
+                .validation({ required: false })
+                .attributes({ placeholder: 'Background Video Duration' })
+                .label('Background Video Duration'),
 
             nga.field('company_name', 'string')
                 .validation({ required: true })
                 .label('Company name')
-                .template('<div class="form-group">'+
+                .template('<div>'+
                     '<ma-input-field field="field" value="entry.values.company_name"></ma-input-field>'+
                     '<small id="emailHelp" class="form-text text-muted">Set your company name (By default - MAGOWARE)</small>'+
                     '</div>'),
@@ -130,20 +182,27 @@ export default function (nga, admin) {
                     '</div>'+
                     '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>')
                 .uploadInformation({ 'url': '/file-upload/single-file/settings/company_logo','apifilename': 'result'})
-                .validation({ required: true, validator: function() {
-                        var company_logo = document.getElementById('company_logo');
-                        if (company_logo.value.length > 0) {
-                            if(company_logo.files[0].size > 1048576 ){
-                                throw new Error('Your company logo is too Big, not larger than 1 MB');
+                .validation({
+                    validator: function(value) {
+                        if(value == null){
+                            throw new Error('Please, choose Company logo');
+                        }else{
+                            var company_logo = document.getElementById('company_logo');
+                            if (company_logo.value.length > 0) {
+                                if(company_logo.files[0].size > 1048576 ){
+                                    throw new Error('Your company logo is too Big, not larger than 1 MB');
+                                }
                             }
                         }
+
+
                     }
                 }),
 
             nga.field('locale', 'string')
                 .validation({ required: true })
                 .label('Locale')
-                .template('<div class="form-group">'+
+                .template('<div>'+
                     '<ma-input-field field="field" value="entry.values.locale"></ma-input-field>'+
                     '<small id="emailHelp" class="form-text text-muted">User interface language (not in use).</small>'+
                     '</div>'),

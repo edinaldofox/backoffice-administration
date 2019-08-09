@@ -9,7 +9,7 @@ body{
 .login_form {
     margin-top: 34%;
 }
-#username,#password {
+#username,#password,#company_name,#telephone_number,#email_address {
     background: #fff;
     height: 50px;
     border-radius: 25px;
@@ -20,11 +20,11 @@ body{
     border:none;
     box-shadow: 1px 4px 5px 1px rgba(0,0,0,0.15);
 }
-#username:focus,#password:focus{
+#username:focus,#password:focus,#company_name:focus,#telephone_number:focus,#email_address:focus{
     box-shadow: 1px 4px 5px 1px rgba(0,0,0,0.1);
 }
 
-#submit_button{
+#submit_button,#signUpButton{
     height: 50px;
     border-radius: 25px;
     font-size: 15px;
@@ -38,7 +38,7 @@ body{
     -o-transition:  0.5s ;
     transition:  0.5s ;
 }
-#submit_button:hover {
+#submit_button:hover,#signUpButton:hover {
     background: #00c292;
     color: white;
     -webkit-transition:  0.5s ;
@@ -46,7 +46,7 @@ body{
     -o-transition: 0.5s ;
     transition:  0.5s ;
 }
-#submit_button:focus {
+#submit_button:focus,#signUpButton:focus {
     outline:0;
 }
 .forgot_password p {
@@ -67,7 +67,9 @@ body{
 .footer_text {
     color: #3333339e;
     font-weight: 900;
-    margin-top: 17%;
+    position: fixed;
+    left: 43%;
+    bottom: 0;
 }
 .google-button {
     height: 50px;
@@ -111,4 +113,14 @@ body{
     font-size: 15px;
     font-weight: bold;
 
+}
+.customVisible {
+    display: block;
+    opacity: 1;
+    transition: opacity 1s linear;
+}
+.customHidden {
+    display: none;
+    opacity: 0;
+    transition: visibility 0s 2s, opacity 2s linear;
 }

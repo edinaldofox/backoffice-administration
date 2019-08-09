@@ -20,6 +20,8 @@ var path = require('path'),
 	sitesController = require(path.resolve('./modules/deviceapiv2/server/controllers/sites.server.controller')),
 	headerController = require(path.resolve('./modules/deviceapiv2/server/controllers/header.server.controller')),
     deviceepgController = require(path.resolve('./modules/deviceapiv2/server/controllers/deviceepg.server.controller')),
+    thisrequestController = require(path.resolve('./modules/deviceapiv2/server/controllers/_this_request.server.controller')),
+    geoipLogic = require(path.resolve('./modules/geoip/server/controllers/geoip_logic.server.controller')),
     cache = require('apicache'),
     winston = require(path.resolve('./config/lib/winston'));
 
@@ -32,12 +34,18 @@ module.exports = function(app) {
         next();
     });
 
+    /* ===== company list ===== */
+    app.route('/apiv2/credentials/company_list')
+        .all(authpolicy.isAuthTokenValid)
+        .post(credentialsController.company_list);
+
 
     /* ===== login data credentials===== */
     app.route('/apiv2/credentials/login')
         .all(authpolicy.plainAuth)
         .all(authpolicy.isAllowed)
-        .post(credentialsController.login);
+        .post(thisrequestController.read_company_advanced_settings)
+        .post(credentialsController.loginv2);
 
     /* ===== login data credentials===== */
     app.route('/apiv2/credentials/login_account_kit')
@@ -48,6 +56,7 @@ module.exports = function(app) {
     app.route('/apiv2/credentials/logout')
         .all(authpolicy.isAllowed)
         .post(credentialsController.logout);
+
     app.route('/apiv2/credentials/logout_user')
         .all(authpolicy.plainAuth)
         .all(authpolicy.isAllowed)
@@ -110,6 +119,7 @@ module.exports = function(app) {
     //settings
     app.route('/apiv2/settings/settings')
         .all(authpolicy.isAllowed)
+        .all(geoipLogic.middleware)
         .post(settingsController.settings)
         .get(settingsController.get_settings);
 
@@ -266,7 +276,7 @@ module.exports = function(app) {
     /* ===== weather widget ===== */
 
     app.route('/apiv2/weather_widget')
-        // .all(authpolicy.isAllowed)
+        .all(authpolicy.isAllowed)
         .get(mainController.get_weather_widget);
 
     /* ===== WELCOME MESSAGE ===== */
@@ -281,7 +291,7 @@ module.exports = function(app) {
 
     //LOGIN FORM TEMPLATE
     app.route('/apiv2/htmlContent/remotedeviceloginform')
-    // .all(authpolicy.isAllowed)
+     // .all(authpolicy.isAllowed)
         .get(mainController.getloginform);
 
     app.route('/apiv2/remotedevicelogin')

@@ -17,13 +17,14 @@ var path = require('path'),
 
 
 exports.createaccount = function(req,res) {
+	let company_id = req.headers.company_id ? req.headers.company_id : 1;
 	var smtpConfig = {
-		host: (req.app.locals.backendsettings[1].smtp_host) ? req.app.locals.backendsettings[1].smtp_host.split(':')[0] : 'smtp.gmail.com',
-		port: (req.app.locals.backendsettings[1].smtp_host) ? Number(req.app.locals.backendsettings[1].smtp_host.split(':')[1]) : 465,
-		secure: (req.app.locals.backendsettings[1].smtp_secure === false) ? req.app.locals.backendsettings[1].smtp_secure : true,
+		host: (req.app.locals.backendsettings[company_id].smtp_host) ? req.app.locals.backendsettings[company_id].smtp_host.split(':')[0] : 'smtp.gmail.com',
+		port: (req.app.locals.backendsettings[company_id].smtp_host) ? Number(req.app.locals.backendsettings[company_id].smtp_host.split(':')[1]) : 465,
+		secure: (req.app.locals.backendsettings[company_id].smtp_secure === false) ? req.app.locals.backendsettings[company_id].smtp_secure : true,
 		auth: {
-			user: req.app.locals.backendsettings[1].email_username,
-			pass: req.app.locals.backendsettings[1].email_password
+			user: req.app.locals.backendsettings[company_id].email_username,
+			pass: req.app.locals.backendsettings[company_id].email_password
 		}
 	};
 
@@ -40,7 +41,7 @@ exports.createaccount = function(req,res) {
 		// check if username exists
 		function(token,done) {
 			login_data.findOne({
-				where: {username: req.body.username.toLowerCase()}
+				where: {username: req.body.username.toLowerCase(), company_id: COMPANY_ID}
 			}).then(function (login_record) {
 				if (login_record) {
 					response.send_res(req, res, [], 803, -1, 'REGISTRATION_ERROR_DESCRIPTION', 'USERNAME_TAKEN', 'no-store');
@@ -87,6 +88,7 @@ exports.createaccount = function(req,res) {
 				}).then(function(new_customer){
 					login_data.create({
 						customer_id:			  new_customer.id, //todo: saas:  how will it be determined what company belongs the user during signup
+						company_id: 			  COMPANY_ID,
 						username:				  req.body.username,
 						salt:                     salt,
 						password:				  req.body.password,
@@ -125,7 +127,7 @@ exports.createaccount = function(req,res) {
 
 				email_templates.findOne({
                 attributes:['title','content'],
-                where: {template_id: 'new-account' } //todo: saas:  how will it be determined what company belongs the user during signup
+                where: {template_id: 'new-account', company_id: COMPANY_ID } //todo: saas:  how will it be determined what company belongs the user during signup
             }).then(function (result,err) {
             	if(!result){
                     res.render(path.resolve('modules/deviceapiv2/server/templates/new-account'), {
@@ -146,7 +148,7 @@ exports.createaccount = function(req,res) {
 		function(emailHTML, email, done) {
 			var mailOptions = {
 				to: email, //user.email,
-				from: req.app.locals.backendsettings[1].email_address, //the from field matches the account username
+				from: req.app.locals.backendsettings[company_id].email_address, //the from field matches the account username
 				subject: 'Account confirmation',
 				html: emailHTML
 			};
@@ -171,6 +173,9 @@ exports.createaccount = function(req,res) {
 
 //todo: saas: remember to take company_id into account
 exports.confirmNewAccountToken = function(req, res) {
+
+	let COMPANY_ID = req.get("company_id") || 1;
+
 	login_data.find({
 		where: {
 			resetPasswordToken: req.params.token,
@@ -196,7 +201,7 @@ exports.confirmNewAccountToken = function(req, res) {
         // Loading Combo with All its packages
         Combo.findOne({
             where: {
-                product_id: "free_combo", company_id: req.thisuser.company_id
+                product_id: "free_combo", company_id: COMPANY_ID
             }, include: [{model:db.combo_packages,include:[db.package]}]
         }).then(function(combo) {
             if (!combo)

@@ -1546,7 +1546,7 @@ exports.get_vod_list = function(req, res) {
                         else if(query.updated_after) vod_final_where.where.updatedAt = {gt: query.updated_after};
 
                         vod_final_where.offset = isNaN(parseInt(query._start)) ? 0:parseInt(query._start);
-                        vod_final_where.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.backendsettings[1].vod_subset_nr: parseInt(query._end) - vod_final_where.offset;
+                        vod_final_where.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr: parseInt(query._end) - vod_final_where.offset;
 
                         if(query._orderBy === 'createdAt'){
                             vod_final_where.order = 'dataadded' + ' ' + query._orderDir;
@@ -1628,7 +1628,7 @@ exports.get_vod_list = function(req, res) {
                         else if(query.updated_after) tv_shows_final_where.where.updatedAt = {gt: query.updated_after};
 
                         tv_shows_final_where.offset = isNaN(parseInt(query._start)) ? 0:parseInt(query._start);
-                        tv_shows_final_where.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.backendsettings[1].vod_subset_nr: parseInt(query._end) - tv_shows_final_where.offset;
+                        tv_shows_final_where.limit =  isNaN(parseInt(query._end)) ?  req.app.locals.backendsettings[req.thisuser.company_id].vod_subset_nr: parseInt(query._end) - tv_shows_final_where.offset;
 
                         if(query._orderBy === 'createdAt'){
                             tv_shows_final_where.order = 'dataadded' + ' ' + query._orderDir;
@@ -1640,8 +1640,8 @@ exports.get_vod_list = function(req, res) {
                         tv_shows_final_where.attributes = ['id', 'title', 'pin_protected', 'rate', 'clicks', [db.sequelize.fn('YEAR', db.sequelize.col('release_date')), "year"],
                             [db.sequelize.fn('concat', db.sequelize.col('tv_series.description'), '<p><strong>Director:</strong> ', db.sequelize.col('director'),
                                 '</p><p><strong>Starring:</strong> ', db.sequelize.col('cast'), '</p>'), 'description'],
-                            [db.sequelize.fn('concat', req.app.locals.backendsettings[1].assets_url, db.sequelize.col('tv_series.icon_url')), 'icon'],
-                            [db.sequelize.fn('concat', req.app.locals.backendsettings[1].assets_url, db.sequelize.col('image_url')), 'largeimage'],
+                            [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('tv_series.icon_url')), 'icon'],
+                            [db.sequelize.fn('concat', req.app.locals.backendsettings[req.thisuser.company_id].assets_url, db.sequelize.col('image_url')), 'largeimage'],
                             [db.sequelize.fn('UNIX_TIMESTAMP', db.sequelize.col('tv_series.createdAt')), 'dataadded']
                         ];
                         tv_shows_final_where.include = [

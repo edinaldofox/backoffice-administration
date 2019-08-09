@@ -298,7 +298,7 @@
                     "playback_policy": {
                         "limit": false,
                         "persistent": true,
-                        "duration": 0,
+                        "duration": 172800,
                         "expire_date": ""
                     },
                     "security_policy": {

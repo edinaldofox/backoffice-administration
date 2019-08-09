@@ -45,7 +45,7 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 	__webpack_require__(1);
-	module.exports = __webpack_require__(242);
+	module.exports = __webpack_require__(250);
 
 
 /***/ }),
@@ -55,7 +55,7 @@
 	'use strict';
 	var myApp = angular.module('myApp', ['ng-admin', 'ng-admin.jwt-auth', 'ngVis', 'pascalprecht.translate', 'ngCookies', 'dndLists']);
 
-	myApp.controller('envVariablesCtrl', ['$scope', '$http', function ($scope, $http) {
+	myApp.controller('envVariablesCtrl', ['$scope', '$http', 'notification', function ($scope, $http, notification) {
 	    var config = { method: 'GET', url: '../api/env_settings' };
 	    if (localStorage.userToken) config.headers = { 'Authorization': localStorage.userToken }; //user token should be included as a header in this request
 	    $http(config).then(function (response) {
@@ -67,6 +67,57 @@
 	    $scope.googlelogin = function () {
 	        location.replace("/api/auth/google");
 	    };
+
+	    $scope.signUpFields = function () {
+	        angular.element(document.querySelector('#loginView')).removeClass('customVisible');
+	        angular.element(document.querySelector('#loginView')).addClass('customHidden');
+	        angular.element(document.querySelector('#signUpView')).removeClass('customHidden');
+	        angular.element(document.querySelector('#signUpView')).addClass('customVisible');
+	    };
+
+	    $scope.loginFields = function () {
+	        angular.element(document.querySelector('#signUpView')).removeClass('customVisible');
+	        angular.element(document.querySelector('#loginView')).removeClass('customHidden');
+	        angular.element(document.querySelector('#signUpView')).addClass('customHidden');
+	        angular.element(document.querySelector('#loginView')).addClass('customVisible');
+	    };
+
+	    //loginEmail
+	    $scope.loginEmail = function () {
+
+	        if (!$scope.company_name) {
+	            notification.log('Company Name should not be empty', { addnCls: 'humane-flatty-info' });
+	        } else if (!$scope.phone) {
+	            notification.log('Phone Number should not be empty', { addnCls: 'humane-flatty-info' });
+	        } else if (!$scope.email_address) {
+	            notification.log('Email Address should not be empty', { addnCls: 'humane-flatty-info' });
+	        } else {
+
+	            var postData = {
+	                "company_name": $scope.company_name,
+	                "email": $scope.email_address,
+	                "telephone": $scope.phone
+	            };
+
+	            $http.post('../api/company', postData).then(function successCallback(response) {
+	                if (response.status === 200) {
+	                    notification.log(response.data.message, { addnCls: 'humane-flatty-success' });
+
+	                    angular.element(document.querySelector('#signUpView')).removeClass('customVisible');
+	                    angular.element(document.querySelector('#loginView')).removeClass('customHidden');
+	                    angular.element(document.querySelector('#signUpView')).addClass('customHidden');
+	                    angular.element(document.querySelector('#loginView')).addClass('customVisible');
+	                }
+	            }, function errorCallback(response) {
+	                if (response.status === 400) {
+	                    notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                } else {
+	                    notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                }
+	            });
+	        }
+	    };
+	    //./loginEmail
 	}]);
 
 	myApp.controller('main', function ($scope, $rootScope, $location, notification) {
@@ -383,40 +434,48 @@
 
 	myApp.run(['Restangular', '$location', 'notification', function (Restangular, $location, notification) {
 	    Restangular.setErrorInterceptor(function (response, deferred, responseHandler) {
-	        if (response.status > 200) {
+	        if (response.status > 200 && response.status !== 402) {
 
 	            deferred.reject("Server not responding to [some address]. It could be down, or this could be the wrong url.");
 	            notification.log('Error: ' + ' ( ' + response.data.message + ' )', { addnCls: 'humane-flatty-error' });
 
 	            return false;
+	        } else if (response.status === 402) {
+	            //if payment is required , show message then do logout (included logout trick by js)
+	            notification.log(response.statusText, { addnCls: 'humane-flatty-error' });
+	            setInterval(function () {
+	                localStorage.clear();
+	                location.reload();
+	            }, 5000);
 	        }
 	    });
 	}]);
 
 	// Dashboard Directives
 	myApp.directive('dashboardSummary', __webpack_require__(4));
-	myApp.directive('resellersdashboardSummary', __webpack_require__(132));
-	myApp.directive('graph', __webpack_require__(134));
-	myApp.directive('sendpush', __webpack_require__(136));
-	myApp.directive('sale', __webpack_require__(137));
-	myApp.directive('vod', __webpack_require__(138));
-	myApp.directive('move', __webpack_require__(139));
-	myApp.directive('generate', __webpack_require__(140));
-	myApp.directive('roles', __webpack_require__(141));
-	myApp.directive('allowMenu', __webpack_require__(142));
-	myApp.directive('invite', __webpack_require__(143));
-	myApp.directive('importchannelLogs', __webpack_require__(144));
-	myApp.directive('importvodLogs', __webpack_require__(145));
+	myApp.directive('resellersdashboardSummary', __webpack_require__(136));
+	myApp.directive('graph', __webpack_require__(138));
+	myApp.directive('sendpush', __webpack_require__(140));
+	myApp.directive('sale', __webpack_require__(141));
+	myApp.directive('vod', __webpack_require__(142));
+	myApp.directive('move', __webpack_require__(143));
+	myApp.directive('generate', __webpack_require__(144));
+	myApp.directive('roles', __webpack_require__(145));
+	myApp.directive('allowMenu', __webpack_require__(146));
+	myApp.directive('invite', __webpack_require__(147));
+	myApp.directive('approveInvitation', __webpack_require__(148));
+	myApp.directive('importchannelLogs', __webpack_require__(149));
+	myApp.directive('importvodLogs', __webpack_require__(150));
 
 	//myApp.directive('roles', require('./grouprights/radioRoles'));
 
 	// personal config
-	myApp.config(['$stateProvider', __webpack_require__(146)]);
-	myApp.config(['$stateProvider', __webpack_require__(148)]);
-	myApp.config(['$stateProvider', __webpack_require__(150)]);
-	myApp.config(['$stateProvider', __webpack_require__(152)]);
-	myApp.config(['$stateProvider', __webpack_require__(154)]);
-	myApp.config(['$stateProvider', __webpack_require__(156)]);
+	myApp.config(['$stateProvider', __webpack_require__(151)]);
+	myApp.config(['$stateProvider', __webpack_require__(153)]);
+	myApp.config(['$stateProvider', __webpack_require__(155)]);
+	myApp.config(['$stateProvider', __webpack_require__(157)]);
+	myApp.config(['$stateProvider', __webpack_require__(159)]);
+	myApp.config(['$stateProvider', __webpack_require__(161)]);
 
 	myApp.config(['NgAdminConfigurationProvider', function (nga) {
 
@@ -501,25 +560,20 @@
 	    admin.addEntity(nga.entity('htmlContent'));
 	    admin.addEntity(nga.entity('tmdbvods'));
 	    admin.addEntity(nga.entity('tmdbseries'));
-
-	    //test
-
 	    admin.addEntity(nga.entity('import_channel'));
 	    admin.addEntity(nga.entity('import_vod'));
 
-	    //Config
-	    __webpack_require__(158)(nga, admin);
-	    __webpack_require__(159)(nga, admin);
+	    admin.addEntity(nga.entity('assetsMaster'));
+	    admin.addEntity(nga.entity('assetsCategory'));
+	    admin.addEntity(nga.entity('assetsDetails'));
 
-	    __webpack_require__(160)(nga, admin);
+	    //Config
 	    __webpack_require__(163)(nga, admin);
-	    __webpack_require__(164)(nga, admin);
 	    __webpack_require__(165)(nga, admin);
 	    __webpack_require__(166)(nga, admin);
 	    __webpack_require__(167)(nga, admin);
 	    __webpack_require__(168)(nga, admin);
 	    __webpack_require__(169)(nga, admin);
-	    __webpack_require__(170)(nga, admin);
 	    __webpack_require__(171)(nga, admin);
 	    __webpack_require__(172)(nga, admin);
 	    __webpack_require__(173)(nga, admin);
@@ -548,18 +602,18 @@
 	    __webpack_require__(196)(nga, admin);
 	    __webpack_require__(197)(nga, admin);
 	    __webpack_require__(198)(nga, admin);
+	    __webpack_require__(199)(nga, admin);
 	    __webpack_require__(200)(nga, admin);
 	    __webpack_require__(201)(nga, admin);
 	    __webpack_require__(202)(nga, admin);
 	    __webpack_require__(203)(nga, admin);
+	    __webpack_require__(204)(nga, admin);
+	    __webpack_require__(205)(nga, admin);
 	    __webpack_require__(206)(nga, admin);
-	    __webpack_require__(207)(nga, admin);
 	    __webpack_require__(208)(nga, admin);
 	    __webpack_require__(209)(nga, admin);
 	    __webpack_require__(210)(nga, admin);
 	    __webpack_require__(211)(nga, admin);
-	    __webpack_require__(212)(nga, admin);
-	    __webpack_require__(213)(nga, admin);
 	    __webpack_require__(214)(nga, admin);
 	    __webpack_require__(215)(nga, admin);
 	    __webpack_require__(216)(nga, admin);
@@ -581,28 +635,36 @@
 	    __webpack_require__(232)(nga, admin);
 	    __webpack_require__(233)(nga, admin);
 	    __webpack_require__(234)(nga, admin);
+	    __webpack_require__(235)(nga, admin);
+	    __webpack_require__(236)(nga, admin);
+	    __webpack_require__(237)(nga, admin);
+	    __webpack_require__(238)(nga, admin);
+	    __webpack_require__(239)(nga, admin);
+	    __webpack_require__(240)(nga, admin);
+	    __webpack_require__(241)(nga, admin);
+	    __webpack_require__(242)(nga, admin);
 
 	    // Menu / Header / Dashboard / Layout
 
 	    if (localStorage.userRole === 'resellers') {
-	        admin.dashboard(__webpack_require__(235)(nga, admin));
+	        admin.dashboard(__webpack_require__(243)(nga, admin));
 	    } else {
-	        admin.dashboard(__webpack_require__(237)(nga, admin));
+	        admin.dashboard(__webpack_require__(245)(nga, admin));
 	    }
 
-	    admin.header(__webpack_require__(239));
+	    admin.header(__webpack_require__(247));
 
 	    var menu = localStorage.getItem("menuObject");
 
 	    if (!menu) {
-	        var menujson = __webpack_require__(240);
+	        var menujson = __webpack_require__(248);
 	    } else {
 	        var obj = JSON.parse(menu);
 	        menujson = obj;
 	    }
 
 	    // var menujson = require('./menuobject.js');
-	    admin.menu(__webpack_require__(241)(nga, admin, menujson));
+	    admin.menu(__webpack_require__(249)(nga, admin, menujson));
 
 	    nga.configure(admin);
 	}]);
@@ -866,7 +928,7 @@
 
 	var _moment2 = _interopRequireDefault(_moment);
 
-	var _dashboardSummaryHtml = __webpack_require__(131);
+	var _dashboardSummaryHtml = __webpack_require__(135);
 
 	var _dashboardSummaryHtml2 = _interopRequireDefault(_dashboardSummaryHtml);
 
@@ -2058,22 +2120,36 @@
 	    function createDate (y, m, d, h, M, s, ms) {
 	        // can't just apply() to create a date:
 	        // https://stackoverflow.com/q/181348
-	        var date = new Date(y, m, d, h, M, s, ms);
-
+	        var date;
 	        // the date constructor remaps years 0-99 to 1900-1999
-	        if (y < 100 && y >= 0 && isFinite(date.getFullYear())) {
-	            date.setFullYear(y);
+	        if (y < 100 && y >= 0) {
+	            // preserve leap years using a full 400 year cycle, then reset
+	            date = new Date(y + 400, m, d, h, M, s, ms);
+	            if (isFinite(date.getFullYear())) {
+	                date.setFullYear(y);
+	            }
+	        } else {
+	            date = new Date(y, m, d, h, M, s, ms);
 	        }
+
 	        return date;
 	    }
 
 	    function createUTCDate (y) {
-	        var date = new Date(Date.UTC.apply(null, arguments));
-
+	        var date;
 	        // the Date.UTC function remaps years 0-99 to 1900-1999
-	        if (y < 100 && y >= 0 && isFinite(date.getUTCFullYear())) {
-	            date.setUTCFullYear(y);
+	        if (y < 100 && y >= 0) {
+	            var args = Array.prototype.slice.call(arguments);
+	            // preserve leap years using a full 400 year cycle, then reset
+	            args[0] = y + 400;
+	            date = new Date(Date.UTC.apply(null, args));
+	            if (isFinite(date.getUTCFullYear())) {
+	                date.setUTCFullYear(y);
+	            }
+	        } else {
+	            date = new Date(Date.UTC.apply(null, arguments));
 	        }
+
 	        return date;
 	    }
 
@@ -2175,7 +2251,7 @@
 
 	    var defaultLocaleWeek = {
 	        dow : 0, // Sunday is the first day of the week.
-	        doy : 6  // The week that contains Jan 1st is the first week of the year.
+	        doy : 6  // The week that contains Jan 6th is the first week of the year.
 	    };
 
 	    function localeFirstDayOfWeek () {
@@ -2284,25 +2360,28 @@
 	    }
 
 	    // LOCALES
+	    function shiftWeekdays (ws, n) {
+	        return ws.slice(n, 7).concat(ws.slice(0, n));
+	    }
 
 	    var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_');
 	    function localeWeekdays (m, format) {
-	        if (!m) {
-	            return isArray(this._weekdays) ? this._weekdays :
-	                this._weekdays['standalone'];
-	        }
-	        return isArray(this._weekdays) ? this._weekdays[m.day()] :
-	            this._weekdays[this._weekdays.isFormat.test(format) ? 'format' : 'standalone'][m.day()];
+	        var weekdays = isArray(this._weekdays) ? this._weekdays :
+	            this._weekdays[(m && m !== true && this._weekdays.isFormat.test(format)) ? 'format' : 'standalone'];
+	        return (m === true) ? shiftWeekdays(weekdays, this._week.dow)
+	            : (m) ? weekdays[m.day()] : weekdays;
 	    }
 
 	    var defaultLocaleWeekdaysShort = 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_');
 	    function localeWeekdaysShort (m) {
-	        return (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
+	        return (m === true) ? shiftWeekdays(this._weekdaysShort, this._week.dow)
+	            : (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
 	    }
 
 	    var defaultLocaleWeekdaysMin = 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_');
 	    function localeWeekdaysMin (m) {
-	        return (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
+	        return (m === true) ? shiftWeekdays(this._weekdaysMin, this._week.dow)
+	            : (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
 	    }
 
 	    function handleStrictParse$1(weekdayName, format, strict) {
@@ -3051,13 +3130,13 @@
 	                    weekdayOverflow = true;
 	                }
 	            } else if (w.e != null) {
-	                // local weekday -- counting starts from begining of week
+	                // local weekday -- counting starts from beginning of week
 	                weekday = w.e + dow;
 	                if (w.e < 0 || w.e > 6) {
 	                    weekdayOverflow = true;
 	                }
 	            } else {
-	                // default to begining of week
+	                // default to beginning of week
 	                weekday = dow;
 	            }
 	        }
@@ -3651,7 +3730,7 @@
 	            years = normalizedInput.year || 0,
 	            quarters = normalizedInput.quarter || 0,
 	            months = normalizedInput.month || 0,
-	            weeks = normalizedInput.week || 0,
+	            weeks = normalizedInput.week || normalizedInput.isoWeek || 0,
 	            days = normalizedInput.day || 0,
 	            hours = normalizedInput.hour || 0,
 	            minutes = normalizedInput.minute || 0,
@@ -3955,7 +4034,7 @@
 	                ms : toInt(absRound(match[MILLISECOND] * 1000)) * sign // the millisecond decimal point is included in the match
 	            };
 	        } else if (!!(match = isoRegex.exec(input))) {
-	            sign = (match[1] === '-') ? -1 : (match[1] === '+') ? 1 : 1;
+	            sign = (match[1] === '-') ? -1 : 1;
 	            duration = {
 	                y : parseIso(match[2], sign),
 	                M : parseIso(match[3], sign),
@@ -3997,7 +4076,7 @@
 	    }
 
 	    function positiveMomentsDifference(base, other) {
-	        var res = {milliseconds: 0, months: 0};
+	        var res = {};
 
 	        res.months = other.month() - base.month() +
 	            (other.year() - base.year()) * 12;
@@ -4106,7 +4185,7 @@
 	        if (!(this.isValid() && localInput.isValid())) {
 	            return false;
 	        }
-	        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
+	        units = normalizeUnits(units) || 'millisecond';
 	        if (units === 'millisecond') {
 	            return this.valueOf() > localInput.valueOf();
 	        } else {
@@ -4119,7 +4198,7 @@
 	        if (!(this.isValid() && localInput.isValid())) {
 	            return false;
 	        }
-	        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
+	        units = normalizeUnits(units) || 'millisecond';
 	        if (units === 'millisecond') {
 	            return this.valueOf() < localInput.valueOf();
 	        } else {
@@ -4128,9 +4207,14 @@
 	    }
 
 	    function isBetween (from, to, units, inclusivity) {
+	        var localFrom = isMoment(from) ? from : createLocal(from),
+	            localTo = isMoment(to) ? to : createLocal(to);
+	        if (!(this.isValid() && localFrom.isValid() && localTo.isValid())) {
+	            return false;
+	        }
 	        inclusivity = inclusivity || '()';
-	        return (inclusivity[0] === '(' ? this.isAfter(from, units) : !this.isBefore(from, units)) &&
-	            (inclusivity[1] === ')' ? this.isBefore(to, units) : !this.isAfter(to, units));
+	        return (inclusivity[0] === '(' ? this.isAfter(localFrom, units) : !this.isBefore(localFrom, units)) &&
+	            (inclusivity[1] === ')' ? this.isBefore(localTo, units) : !this.isAfter(localTo, units));
 	    }
 
 	    function isSame (input, units) {
@@ -4139,7 +4223,7 @@
 	        if (!(this.isValid() && localInput.isValid())) {
 	            return false;
 	        }
-	        units = normalizeUnits(units || 'millisecond');
+	        units = normalizeUnits(units) || 'millisecond';
 	        if (units === 'millisecond') {
 	            return this.valueOf() === localInput.valueOf();
 	        } else {
@@ -4149,11 +4233,11 @@
 	    }
 
 	    function isSameOrAfter (input, units) {
-	        return this.isSame(input, units) || this.isAfter(input,units);
+	        return this.isSame(input, units) || this.isAfter(input, units);
 	    }
 
 	    function isSameOrBefore (input, units) {
-	        return this.isSame(input, units) || this.isBefore(input,units);
+	        return this.isSame(input, units) || this.isBefore(input, units);
 	    }
 
 	    function diff (input, units, asFloat) {
@@ -4330,62 +4414,130 @@
 	        return this._locale;
 	    }
 
+	    var MS_PER_SECOND = 1000;
+	    var MS_PER_MINUTE = 60 * MS_PER_SECOND;
+	    var MS_PER_HOUR = 60 * MS_PER_MINUTE;
+	    var MS_PER_400_YEARS = (365 * 400 + 97) * 24 * MS_PER_HOUR;
+
+	    // actual modulo - handles negative numbers (for dates before 1970):
+	    function mod$1(dividend, divisor) {
+	        return (dividend % divisor + divisor) % divisor;
+	    }
+
+	    function localStartOfDate(y, m, d) {
+	        // the date constructor remaps years 0-99 to 1900-1999
+	        if (y < 100 && y >= 0) {
+	            // preserve leap years using a full 400 year cycle, then reset
+	            return new Date(y + 400, m, d) - MS_PER_400_YEARS;
+	        } else {
+	            return new Date(y, m, d).valueOf();
+	        }
+	    }
+
+	    function utcStartOfDate(y, m, d) {
+	        // Date.UTC remaps years 0-99 to 1900-1999
+	        if (y < 100 && y >= 0) {
+	            // preserve leap years using a full 400 year cycle, then reset
+	            return Date.UTC(y + 400, m, d) - MS_PER_400_YEARS;
+	        } else {
+	            return Date.UTC(y, m, d);
+	        }
+	    }
+
 	    function startOf (units) {
+	        var time;
 	        units = normalizeUnits(units);
-	        // the following switch intentionally omits break keywords
-	        // to utilize falling through the cases.
+	        if (units === undefined || units === 'millisecond' || !this.isValid()) {
+	            return this;
+	        }
+
+	        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
 	        switch (units) {
 	            case 'year':
-	                this.month(0);
-	                /* falls through */
+	                time = startOfDate(this.year(), 0, 1);
+	                break;
 	            case 'quarter':
+	                time = startOfDate(this.year(), this.month() - this.month() % 3, 1);
+	                break;
 	            case 'month':
-	                this.date(1);
-	                /* falls through */
+	                time = startOfDate(this.year(), this.month(), 1);
+	                break;
 	            case 'week':
+	                time = startOfDate(this.year(), this.month(), this.date() - this.weekday());
+	                break;
 	            case 'isoWeek':
+	                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1));
+	                break;
 	            case 'day':
 	            case 'date':
-	                this.hours(0);
-	                /* falls through */
+	                time = startOfDate(this.year(), this.month(), this.date());
+	                break;
 	            case 'hour':
-	                this.minutes(0);
-	                /* falls through */
+	                time = this._d.valueOf();
+	                time -= mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR);
+	                break;
 	            case 'minute':
-	                this.seconds(0);
-	                /* falls through */
+	                time = this._d.valueOf();
+	                time -= mod$1(time, MS_PER_MINUTE);
+	                break;
 	            case 'second':
-	                this.milliseconds(0);
+	                time = this._d.valueOf();
+	                time -= mod$1(time, MS_PER_SECOND);
+	                break;
 	        }
 
-	        // weeks are a special case
-	        if (units === 'week') {
-	            this.weekday(0);
-	        }
-	        if (units === 'isoWeek') {
-	            this.isoWeekday(1);
-	        }
-
-	        // quarters are also special
-	        if (units === 'quarter') {
-	            this.month(Math.floor(this.month() / 3) * 3);
-	        }
-
+	        this._d.setTime(time);
+	        hooks.updateOffset(this, true);
 	        return this;
 	    }
 
 	    function endOf (units) {
+	        var time;
 	        units = normalizeUnits(units);
-	        if (units === undefined || units === 'millisecond') {
+	        if (units === undefined || units === 'millisecond' || !this.isValid()) {
 	            return this;
 	        }
 
-	        // 'date' is an alias for 'day', so it should be considered as such.
-	        if (units === 'date') {
-	            units = 'day';
+	        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
+	        switch (units) {
+	            case 'year':
+	                time = startOfDate(this.year() + 1, 0, 1) - 1;
+	                break;
+	            case 'quarter':
+	                time = startOfDate(this.year(), this.month() - this.month() % 3 + 3, 1) - 1;
+	                break;
+	            case 'month':
+	                time = startOfDate(this.year(), this.month() + 1, 1) - 1;
+	                break;
+	            case 'week':
+	                time = startOfDate(this.year(), this.month(), this.date() - this.weekday() + 7) - 1;
+	                break;
+	            case 'isoWeek':
+	                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1) + 7) - 1;
+	                break;
+	            case 'day':
+	            case 'date':
+	                time = startOfDate(this.year(), this.month(), this.date() + 1) - 1;
+	                break;
+	            case 'hour':
+	                time = this._d.valueOf();
+	                time += MS_PER_HOUR - mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR) - 1;
+	                break;
+	            case 'minute':
+	                time = this._d.valueOf();
+	                time += MS_PER_MINUTE - mod$1(time, MS_PER_MINUTE) - 1;
+	                break;
+	            case 'second':
+	                time = this._d.valueOf();
+	                time += MS_PER_SECOND - mod$1(time, MS_PER_SECOND) - 1;
+	                break;
 	        }
 
-	        return this.startOf(units).add(1, (units === 'isoWeek' ? 'week' : units)).subtract(1, 'ms');
+	        this._d.setTime(time);
+	        hooks.updateOffset(this, true);
+	        return this;
 	    }
 
 	    function valueOf () {
@@ -5091,10 +5243,14 @@
 
 	        units = normalizeUnits(units);
 
-	        if (units === 'month' || units === 'year') {
-	            days   = this._days   + milliseconds / 864e5;
+	        if (units === 'month' || units === 'quarter' || units === 'year') {
+	            days = this._days + milliseconds / 864e5;
 	            months = this._months + daysToMonths(days);
-	            return units === 'month' ? months : months / 12;
+	            switch (units) {
+	                case 'month':   return months;
+	                case 'quarter': return months / 3;
+	                case 'year':    return months / 12;
+	            }
 	        } else {
 	            // handle milliseconds separately because of floating point math errors (issue #1867)
 	            days = this._days + Math.round(monthsToDays(this._months));
@@ -5137,6 +5293,7 @@
 	    var asDays         = makeAs('d');
 	    var asWeeks        = makeAs('w');
 	    var asMonths       = makeAs('M');
+	    var asQuarters     = makeAs('Q');
 	    var asYears        = makeAs('y');
 
 	    function clone$1 () {
@@ -5328,6 +5485,7 @@
 	    proto$2.asDays         = asDays;
 	    proto$2.asWeeks        = asWeeks;
 	    proto$2.asMonths       = asMonths;
+	    proto$2.asQuarters     = asQuarters;
 	    proto$2.asYears        = asYears;
 	    proto$2.valueOf        = valueOf$1;
 	    proto$2._bubble        = bubble;
@@ -5372,7 +5530,7 @@
 	    // Side effect imports
 
 
-	    hooks.version = '2.22.2';
+	    hooks.version = '2.24.0';
 
 	    setHookCallback(createLocal);
 
@@ -5413,7 +5571,7 @@
 	        TIME: 'HH:mm',                                  // <input type="time" />
 	        TIME_SECONDS: 'HH:mm:ss',                       // <input type="time" step="1" />
 	        TIME_MS: 'HH:mm:ss.SSS',                        // <input type="time" step="0.001" />
-	        WEEK: 'YYYY-[W]WW',                             // <input type="week" />
+	        WEEK: 'GGGG-[W]WW',                             // <input type="week" />
 	        MONTH: 'YYYY-MM'                                // <input type="month" />
 	    };
 
@@ -5496,200 +5654,208 @@
 		"./dv.js": 32,
 		"./el": 33,
 		"./el.js": 33,
-		"./en-au": 34,
-		"./en-au.js": 34,
-		"./en-ca": 35,
-		"./en-ca.js": 35,
-		"./en-gb": 36,
-		"./en-gb.js": 36,
-		"./en-ie": 37,
-		"./en-ie.js": 37,
-		"./en-il": 38,
-		"./en-il.js": 38,
-		"./en-nz": 39,
-		"./en-nz.js": 39,
-		"./eo": 40,
-		"./eo.js": 40,
-		"./es": 41,
-		"./es-do": 42,
-		"./es-do.js": 42,
-		"./es-us": 43,
-		"./es-us.js": 43,
-		"./es.js": 41,
-		"./et": 44,
-		"./et.js": 44,
-		"./eu": 45,
-		"./eu.js": 45,
-		"./fa": 46,
-		"./fa.js": 46,
-		"./fi": 47,
-		"./fi.js": 47,
-		"./fo": 48,
-		"./fo.js": 48,
-		"./fr": 49,
-		"./fr-ca": 50,
-		"./fr-ca.js": 50,
-		"./fr-ch": 51,
-		"./fr-ch.js": 51,
-		"./fr.js": 49,
-		"./fy": 52,
-		"./fy.js": 52,
-		"./gd": 53,
-		"./gd.js": 53,
-		"./gl": 54,
-		"./gl.js": 54,
-		"./gom-latn": 55,
-		"./gom-latn.js": 55,
-		"./gu": 56,
-		"./gu.js": 56,
-		"./he": 57,
-		"./he.js": 57,
-		"./hi": 58,
-		"./hi.js": 58,
-		"./hr": 59,
-		"./hr.js": 59,
-		"./hu": 60,
-		"./hu.js": 60,
-		"./hy-am": 61,
-		"./hy-am.js": 61,
-		"./id": 62,
-		"./id.js": 62,
-		"./is": 63,
-		"./is.js": 63,
-		"./it": 64,
-		"./it.js": 64,
-		"./ja": 65,
-		"./ja.js": 65,
-		"./jv": 66,
-		"./jv.js": 66,
-		"./ka": 67,
-		"./ka.js": 67,
-		"./kk": 68,
-		"./kk.js": 68,
-		"./km": 69,
-		"./km.js": 69,
-		"./kn": 70,
-		"./kn.js": 70,
-		"./ko": 71,
-		"./ko.js": 71,
-		"./ky": 72,
-		"./ky.js": 72,
-		"./lb": 73,
-		"./lb.js": 73,
-		"./lo": 74,
-		"./lo.js": 74,
-		"./lt": 75,
-		"./lt.js": 75,
-		"./lv": 76,
-		"./lv.js": 76,
-		"./me": 77,
-		"./me.js": 77,
-		"./mi": 78,
-		"./mi.js": 78,
-		"./mk": 79,
-		"./mk.js": 79,
-		"./ml": 80,
-		"./ml.js": 80,
-		"./mn": 81,
-		"./mn.js": 81,
-		"./mr": 82,
-		"./mr.js": 82,
-		"./ms": 83,
-		"./ms-my": 84,
-		"./ms-my.js": 84,
-		"./ms.js": 83,
-		"./mt": 85,
-		"./mt.js": 85,
-		"./my": 86,
-		"./my.js": 86,
-		"./nb": 87,
-		"./nb.js": 87,
-		"./ne": 88,
-		"./ne.js": 88,
-		"./nl": 89,
-		"./nl-be": 90,
-		"./nl-be.js": 90,
-		"./nl.js": 89,
-		"./nn": 91,
-		"./nn.js": 91,
-		"./pa-in": 92,
-		"./pa-in.js": 92,
-		"./pl": 93,
-		"./pl.js": 93,
-		"./pt": 94,
-		"./pt-br": 95,
-		"./pt-br.js": 95,
-		"./pt.js": 94,
-		"./ro": 96,
-		"./ro.js": 96,
-		"./ru": 97,
-		"./ru.js": 97,
-		"./sd": 98,
-		"./sd.js": 98,
-		"./se": 99,
-		"./se.js": 99,
-		"./si": 100,
-		"./si.js": 100,
-		"./sk": 101,
-		"./sk.js": 101,
-		"./sl": 102,
-		"./sl.js": 102,
-		"./sq": 103,
-		"./sq.js": 103,
-		"./sr": 104,
-		"./sr-cyrl": 105,
-		"./sr-cyrl.js": 105,
-		"./sr.js": 104,
-		"./ss": 106,
-		"./ss.js": 106,
-		"./sv": 107,
-		"./sv.js": 107,
-		"./sw": 108,
-		"./sw.js": 108,
-		"./ta": 109,
-		"./ta.js": 109,
-		"./te": 110,
-		"./te.js": 110,
-		"./tet": 111,
-		"./tet.js": 111,
-		"./tg": 112,
-		"./tg.js": 112,
-		"./th": 113,
-		"./th.js": 113,
-		"./tl-ph": 114,
-		"./tl-ph.js": 114,
-		"./tlh": 115,
-		"./tlh.js": 115,
-		"./tr": 116,
-		"./tr.js": 116,
-		"./tzl": 117,
-		"./tzl.js": 117,
-		"./tzm": 118,
-		"./tzm-latn": 119,
-		"./tzm-latn.js": 119,
-		"./tzm.js": 118,
-		"./ug-cn": 120,
-		"./ug-cn.js": 120,
-		"./uk": 121,
-		"./uk.js": 121,
-		"./ur": 122,
-		"./ur.js": 122,
-		"./uz": 123,
-		"./uz-latn": 124,
-		"./uz-latn.js": 124,
-		"./uz.js": 123,
-		"./vi": 125,
-		"./vi.js": 125,
-		"./x-pseudo": 126,
-		"./x-pseudo.js": 126,
-		"./yo": 127,
-		"./yo.js": 127,
-		"./zh-cn": 128,
-		"./zh-cn.js": 128,
-		"./zh-hk": 129,
-		"./zh-hk.js": 129,
-		"./zh-tw": 130,
-		"./zh-tw.js": 130
+		"./en-SG": 34,
+		"./en-SG.js": 34,
+		"./en-au": 35,
+		"./en-au.js": 35,
+		"./en-ca": 36,
+		"./en-ca.js": 36,
+		"./en-gb": 37,
+		"./en-gb.js": 37,
+		"./en-ie": 38,
+		"./en-ie.js": 38,
+		"./en-il": 39,
+		"./en-il.js": 39,
+		"./en-nz": 40,
+		"./en-nz.js": 40,
+		"./eo": 41,
+		"./eo.js": 41,
+		"./es": 42,
+		"./es-do": 43,
+		"./es-do.js": 43,
+		"./es-us": 44,
+		"./es-us.js": 44,
+		"./es.js": 42,
+		"./et": 45,
+		"./et.js": 45,
+		"./eu": 46,
+		"./eu.js": 46,
+		"./fa": 47,
+		"./fa.js": 47,
+		"./fi": 48,
+		"./fi.js": 48,
+		"./fo": 49,
+		"./fo.js": 49,
+		"./fr": 50,
+		"./fr-ca": 51,
+		"./fr-ca.js": 51,
+		"./fr-ch": 52,
+		"./fr-ch.js": 52,
+		"./fr.js": 50,
+		"./fy": 53,
+		"./fy.js": 53,
+		"./ga": 54,
+		"./ga.js": 54,
+		"./gd": 55,
+		"./gd.js": 55,
+		"./gl": 56,
+		"./gl.js": 56,
+		"./gom-latn": 57,
+		"./gom-latn.js": 57,
+		"./gu": 58,
+		"./gu.js": 58,
+		"./he": 59,
+		"./he.js": 59,
+		"./hi": 60,
+		"./hi.js": 60,
+		"./hr": 61,
+		"./hr.js": 61,
+		"./hu": 62,
+		"./hu.js": 62,
+		"./hy-am": 63,
+		"./hy-am.js": 63,
+		"./id": 64,
+		"./id.js": 64,
+		"./is": 65,
+		"./is.js": 65,
+		"./it": 66,
+		"./it-ch": 67,
+		"./it-ch.js": 67,
+		"./it.js": 66,
+		"./ja": 68,
+		"./ja.js": 68,
+		"./jv": 69,
+		"./jv.js": 69,
+		"./ka": 70,
+		"./ka.js": 70,
+		"./kk": 71,
+		"./kk.js": 71,
+		"./km": 72,
+		"./km.js": 72,
+		"./kn": 73,
+		"./kn.js": 73,
+		"./ko": 74,
+		"./ko.js": 74,
+		"./ku": 75,
+		"./ku.js": 75,
+		"./ky": 76,
+		"./ky.js": 76,
+		"./lb": 77,
+		"./lb.js": 77,
+		"./lo": 78,
+		"./lo.js": 78,
+		"./lt": 79,
+		"./lt.js": 79,
+		"./lv": 80,
+		"./lv.js": 80,
+		"./me": 81,
+		"./me.js": 81,
+		"./mi": 82,
+		"./mi.js": 82,
+		"./mk": 83,
+		"./mk.js": 83,
+		"./ml": 84,
+		"./ml.js": 84,
+		"./mn": 85,
+		"./mn.js": 85,
+		"./mr": 86,
+		"./mr.js": 86,
+		"./ms": 87,
+		"./ms-my": 88,
+		"./ms-my.js": 88,
+		"./ms.js": 87,
+		"./mt": 89,
+		"./mt.js": 89,
+		"./my": 90,
+		"./my.js": 90,
+		"./nb": 91,
+		"./nb.js": 91,
+		"./ne": 92,
+		"./ne.js": 92,
+		"./nl": 93,
+		"./nl-be": 94,
+		"./nl-be.js": 94,
+		"./nl.js": 93,
+		"./nn": 95,
+		"./nn.js": 95,
+		"./pa-in": 96,
+		"./pa-in.js": 96,
+		"./pl": 97,
+		"./pl.js": 97,
+		"./pt": 98,
+		"./pt-br": 99,
+		"./pt-br.js": 99,
+		"./pt.js": 98,
+		"./ro": 100,
+		"./ro.js": 100,
+		"./ru": 101,
+		"./ru.js": 101,
+		"./sd": 102,
+		"./sd.js": 102,
+		"./se": 103,
+		"./se.js": 103,
+		"./si": 104,
+		"./si.js": 104,
+		"./sk": 105,
+		"./sk.js": 105,
+		"./sl": 106,
+		"./sl.js": 106,
+		"./sq": 107,
+		"./sq.js": 107,
+		"./sr": 108,
+		"./sr-cyrl": 109,
+		"./sr-cyrl.js": 109,
+		"./sr.js": 108,
+		"./ss": 110,
+		"./ss.js": 110,
+		"./sv": 111,
+		"./sv.js": 111,
+		"./sw": 112,
+		"./sw.js": 112,
+		"./ta": 113,
+		"./ta.js": 113,
+		"./te": 114,
+		"./te.js": 114,
+		"./tet": 115,
+		"./tet.js": 115,
+		"./tg": 116,
+		"./tg.js": 116,
+		"./th": 117,
+		"./th.js": 117,
+		"./tl-ph": 118,
+		"./tl-ph.js": 118,
+		"./tlh": 119,
+		"./tlh.js": 119,
+		"./tr": 120,
+		"./tr.js": 120,
+		"./tzl": 121,
+		"./tzl.js": 121,
+		"./tzm": 122,
+		"./tzm-latn": 123,
+		"./tzm-latn.js": 123,
+		"./tzm.js": 122,
+		"./ug-cn": 124,
+		"./ug-cn.js": 124,
+		"./uk": 125,
+		"./uk.js": 125,
+		"./ur": 126,
+		"./ur.js": 126,
+		"./uz": 127,
+		"./uz-latn": 128,
+		"./uz-latn.js": 128,
+		"./uz.js": 127,
+		"./vi": 129,
+		"./vi.js": 129,
+		"./x-pseudo": 130,
+		"./x-pseudo.js": 130,
+		"./yo": 131,
+		"./yo.js": 131,
+		"./zh-cn": 132,
+		"./zh-cn.js": 132,
+		"./zh-hk": 133,
+		"./zh-hk.js": 133,
+		"./zh-tw": 134,
+		"./zh-tw.js": 134
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -5912,7 +6078,7 @@
 	        },
 	        week : {
 	            dow : 6, // Saturday is the first day of the week.
-	            doy : 12  // The week that contains Jan 1st is the first week of the year.
+	            doy : 12  // The week that contains Jan 12th is the first week of the year.
 	        }
 	    });
 
@@ -5975,7 +6141,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 4  // The week that contains Jan 1st is the first week of the year.
+	            doy : 4  // The week that contains Jan 4th is the first week of the year.
 	        }
 	    });
 
@@ -6038,7 +6204,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 12  // The week that contains Jan 1st is the first week of the year.
+	            doy : 12  // The week that contains Jan 12th is the first week of the year.
 	        }
 	    });
 
@@ -6164,7 +6330,7 @@
 	        },
 	        week : {
 	            dow : 6, // Saturday is the first day of the week.
-	            doy : 12  // The week that contains Jan 1st is the first week of the year.
+	            doy : 12  // The week that contains Jan 12th is the first week of the year.
 	        }
 	    });
 
@@ -6227,7 +6393,7 @@
 	        },
 	        week : {
 	            dow : 6, // Saturday is the first day of the week.
-	            doy : 12  // The week that contains Jan 1st is the first week of the year.
+	            doy : 12  // The week that contains Jan 12th is the first week of the year.
 	        }
 	    });
 
@@ -6335,7 +6501,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -6507,7 +6673,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -6643,7 +6809,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -6737,7 +6903,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -6922,7 +7088,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -7045,7 +7211,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -7312,7 +7478,7 @@
 	        ordinal : '%d.',
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -7428,6 +7594,12 @@
 
 	    var months = 'leden_únor_březen_duben_květen_červen_červenec_srpen_září_říjen_listopad_prosinec'.split('_'),
 	        monthsShort = 'led_úno_bře_dub_kvě_čvn_čvc_srp_zář_říj_lis_pro'.split('_');
+
+	    var monthsParse = [/^led/i, /^úno/i, /^bře/i, /^dub/i, /^kvě/i, /^(čvn|červen$|června)/i, /^(čvc|červenec|července)/i, /^srp/i, /^zář/i, /^říj/i, /^lis/i, /^pro/i];
+	    // NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.
+	    // Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.
+	    var monthsRegex = /^(leden|únor|březen|duben|květen|červenec|července|červen|června|srpen|září|říjen|listopad|prosinec|led|úno|bře|dub|kvě|čvn|čvc|srp|zář|říj|lis|pro)/i;
+
 	    function plural(n) {
 	        return (n > 1) && (n < 5) && (~~(n / 10) !== 1);
 	    }
@@ -7494,28 +7666,15 @@
 	    var cs = moment.defineLocale('cs', {
 	        months : months,
 	        monthsShort : monthsShort,
-	        monthsParse : (function (months, monthsShort) {
-	            var i, _monthsParse = [];
-	            for (i = 0; i < 12; i++) {
-	                // use custom parser to solve problem with July (červenec)
-	                _monthsParse[i] = new RegExp('^' + months[i] + '$|^' + monthsShort[i] + '$', 'i');
-	            }
-	            return _monthsParse;
-	        }(months, monthsShort)),
-	        shortMonthsParse : (function (monthsShort) {
-	            var i, _shortMonthsParse = [];
-	            for (i = 0; i < 12; i++) {
-	                _shortMonthsParse[i] = new RegExp('^' + monthsShort[i] + '$', 'i');
-	            }
-	            return _shortMonthsParse;
-	        }(monthsShort)),
-	        longMonthsParse : (function (months) {
-	            var i, _longMonthsParse = [];
-	            for (i = 0; i < 12; i++) {
-	                _longMonthsParse[i] = new RegExp('^' + months[i] + '$', 'i');
-	            }
-	            return _longMonthsParse;
-	        }(months)),
+	        monthsRegex : monthsRegex,
+	        monthsShortRegex : monthsRegex,
+	        // NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.
+	        // Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.
+	        monthsStrictRegex : /^(leden|ledna|února|únor|březen|března|duben|dubna|květen|května|červenec|července|červen|června|srpen|srpna|září|říjen|října|listopadu|listopad|prosinec|prosince)/i,
+	        monthsShortStrictRegex : /^(led|úno|bře|dub|kvě|čvn|čvc|srp|zář|říj|lis|pro)/i,
+	        monthsParse : monthsParse,
+	        longMonthsParse : monthsParse,
+	        shortMonthsParse : monthsParse,
 	        weekdays : 'neděle_pondělí_úterý_středa_čtvrtek_pátek_sobota'.split('_'),
 	        weekdaysShort : 'ne_po_út_st_čt_pá_so'.split('_'),
 	        weekdaysMin : 'ne_po_út_st_čt_pá_so'.split('_'),
@@ -7654,7 +7813,7 @@
 	        ordinal : '%d-мӗш',
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -8145,7 +8304,7 @@
 	        },
 	        week : {
 	            dow : 7,  // Sunday is the first day of the week.
-	            doy : 12  // The week that contains Jan 1st is the first week of the year.
+	            doy : 12  // The week that contains Jan 12th is the first week of the year.
 	        }
 	    });
 
@@ -8271,6 +8430,77 @@
 	}(this, (function (moment) { 'use strict';
 
 
+	    var enSG = moment.defineLocale('en-SG', {
+	        months : 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),
+	        monthsShort : 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_'),
+	        weekdays : 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_'),
+	        weekdaysShort : 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_'),
+	        weekdaysMin : 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_'),
+	        longDateFormat : {
+	            LT : 'HH:mm',
+	            LTS : 'HH:mm:ss',
+	            L : 'DD/MM/YYYY',
+	            LL : 'D MMMM YYYY',
+	            LLL : 'D MMMM YYYY HH:mm',
+	            LLLL : 'dddd, D MMMM YYYY HH:mm'
+	        },
+	        calendar : {
+	            sameDay : '[Today at] LT',
+	            nextDay : '[Tomorrow at] LT',
+	            nextWeek : 'dddd [at] LT',
+	            lastDay : '[Yesterday at] LT',
+	            lastWeek : '[Last] dddd [at] LT',
+	            sameElse : 'L'
+	        },
+	        relativeTime : {
+	            future : 'in %s',
+	            past : '%s ago',
+	            s : 'a few seconds',
+	            ss : '%d seconds',
+	            m : 'a minute',
+	            mm : '%d minutes',
+	            h : 'an hour',
+	            hh : '%d hours',
+	            d : 'a day',
+	            dd : '%d days',
+	            M : 'a month',
+	            MM : '%d months',
+	            y : 'a year',
+	            yy : '%d years'
+	        },
+	        dayOfMonthOrdinalParse: /\d{1,2}(st|nd|rd|th)/,
+	        ordinal : function (number) {
+	            var b = number % 10,
+	                output = (~~(number % 100 / 10) === 1) ? 'th' :
+	                (b === 1) ? 'st' :
+	                (b === 2) ? 'nd' :
+	                (b === 3) ? 'rd' : 'th';
+	            return number + output;
+	        },
+	        week : {
+	            dow : 1, // Monday is the first day of the week.
+	            doy : 4  // The week that contains Jan 4th is the first week of the year.
+	        }
+	    });
+
+	    return enSG;
+
+	})));
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	//! moment.js locale configuration
+
+	;(function (global, factory) {
+	    true ? factory(__webpack_require__(5)) :
+	   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+	   factory(global.moment)
+	}(this, (function (moment) { 'use strict';
+
+
 	    var enAu = moment.defineLocale('en-au', {
 	        months : 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),
 	        monthsShort : 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_'),
@@ -8330,7 +8560,7 @@
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -8397,7 +8627,7 @@
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -8468,7 +8698,7 @@
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -8489,7 +8719,7 @@
 	        longDateFormat : {
 	            LT : 'HH:mm',
 	            LTS : 'HH:mm:ss',
-	            L : 'DD-MM-YYYY',
+	            L : 'DD/MM/YYYY',
 	            LL : 'D MMMM YYYY',
 	            LLL : 'D MMMM YYYY HH:mm',
 	            LLLL : 'dddd D MMMM YYYY HH:mm'
@@ -8539,7 +8769,7 @@
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -8605,7 +8835,7 @@
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -8676,7 +8906,7 @@
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -8741,7 +8971,7 @@
 	        ordinal : '%da',
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -8751,7 +8981,7 @@
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -8847,7 +9077,7 @@
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -8943,7 +9173,7 @@
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -8958,6 +9188,9 @@
 	    var monthsShortDot = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split('_'),
 	        monthsShort = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_');
 
+	    var monthsParse = [/^ene/i, /^feb/i, /^mar/i, /^abr/i, /^may/i, /^jun/i, /^jul/i, /^ago/i, /^sep/i, /^oct/i, /^nov/i, /^dic/i];
+	    var monthsRegex = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i;
+
 	    var esUs = moment.defineLocale('es-us', {
 	        months : 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
 	        monthsShort : function (m, format) {
@@ -8969,7 +9202,13 @@
 	                return monthsShortDot[m.month()];
 	            }
 	        },
-	        monthsParseExact : true,
+	        monthsRegex: monthsRegex,
+	        monthsShortRegex: monthsRegex,
+	        monthsStrictRegex: /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i,
+	        monthsShortStrictRegex: /^(ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i,
+	        monthsParse: monthsParse,
+	        longMonthsParse: monthsParse,
+	        shortMonthsParse: monthsParse,
 	        weekdays : 'domingo_lunes_martes_miércoles_jueves_viernes_sábado'.split('_'),
 	        weekdaysShort : 'dom._lun._mar._mié._jue._vie._sáb.'.split('_'),
 	        weekdaysMin : 'do_lu_ma_mi_ju_vi_sá'.split('_'),
@@ -8978,9 +9217,9 @@
 	            LT : 'h:mm A',
 	            LTS : 'h:mm:ss A',
 	            L : 'MM/DD/YYYY',
-	            LL : 'MMMM [de] D [de] YYYY',
-	            LLL : 'MMMM [de] D [de] YYYY h:mm A',
-	            LLLL : 'dddd, MMMM [de] D [de] YYYY h:mm A'
+	            LL : 'D [de] MMMM [de] YYYY',
+	            LLL : 'D [de] MMMM [de] YYYY h:mm A',
+	            LLLL : 'dddd, D [de] MMMM [de] YYYY h:mm A'
 	        },
 	        calendar : {
 	            sameDay : function () {
@@ -9020,7 +9259,7 @@
 	        ordinal : '%dº',
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -9030,7 +9269,7 @@
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9114,7 +9353,7 @@
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9174,7 +9413,7 @@
 	        ordinal : '%d.',
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -9184,7 +9423,7 @@
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9284,7 +9523,7 @@
 	        ordinal : '%dم',
 	        week : {
 	            dow : 6, // Saturday is the first day of the week.
-	            doy : 12 // The week that contains Jan 1st is the first week of the year.
+	            doy : 12 // The week that contains Jan 12th is the first week of the year.
 	        }
 	    });
 
@@ -9294,7 +9533,7 @@
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9407,7 +9646,7 @@
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9446,13 +9685,13 @@
 	            past : '%s síðani',
 	            s : 'fá sekund',
 	            ss : '%d sekundir',
-	            m : 'ein minutt',
+	            m : 'ein minuttur',
 	            mm : '%d minuttir',
 	            h : 'ein tími',
 	            hh : '%d tímar',
 	            d : 'ein dagur',
 	            dd : '%d dagar',
-	            M : 'ein mánaði',
+	            M : 'ein mánaður',
 	            MM : '%d mánaðir',
 	            y : 'eitt ár',
 	            yy : '%d ár'
@@ -9471,7 +9710,7 @@
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9558,7 +9797,7 @@
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9636,7 +9875,7 @@
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9718,7 +9957,7 @@
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9797,7 +10036,88 @@
 
 
 /***/ }),
-/* 53 */
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	//! moment.js locale configuration
+
+	;(function (global, factory) {
+	    true ? factory(__webpack_require__(5)) :
+	   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+	   factory(global.moment)
+	}(this, (function (moment) { 'use strict';
+
+
+
+	    var months = [
+	        'Eanáir', 'Feabhra', 'Márta', 'Aibreán', 'Bealtaine', 'Méitheamh', 'Iúil', 'Lúnasa', 'Meán Fómhair', 'Deaireadh Fómhair', 'Samhain', 'Nollaig'
+	    ];
+
+	    var monthsShort = ['Eaná', 'Feab', 'Márt', 'Aibr', 'Beal', 'Méit', 'Iúil', 'Lúna', 'Meán', 'Deai', 'Samh', 'Noll'];
+
+	    var weekdays = ['Dé Domhnaigh', 'Dé Luain', 'Dé Máirt', 'Dé Céadaoin', 'Déardaoin', 'Dé hAoine', 'Dé Satharn'];
+
+	    var weekdaysShort = ['Dom', 'Lua', 'Mái', 'Céa', 'Déa', 'hAo', 'Sat'];
+
+	    var weekdaysMin = ['Do', 'Lu', 'Má', 'Ce', 'Dé', 'hA', 'Sa'];
+
+	    var ga = moment.defineLocale('ga', {
+	        months: months,
+	        monthsShort: monthsShort,
+	        monthsParseExact: true,
+	        weekdays: weekdays,
+	        weekdaysShort: weekdaysShort,
+	        weekdaysMin: weekdaysMin,
+	        longDateFormat: {
+	            LT: 'HH:mm',
+	            LTS: 'HH:mm:ss',
+	            L: 'DD/MM/YYYY',
+	            LL: 'D MMMM YYYY',
+	            LLL: 'D MMMM YYYY HH:mm',
+	            LLLL: 'dddd, D MMMM YYYY HH:mm'
+	        },
+	        calendar: {
+	            sameDay: '[Inniu ag] LT',
+	            nextDay: '[Amárach ag] LT',
+	            nextWeek: 'dddd [ag] LT',
+	            lastDay: '[Inné aig] LT',
+	            lastWeek: 'dddd [seo caite] [ag] LT',
+	            sameElse: 'L'
+	        },
+	        relativeTime: {
+	            future: 'i %s',
+	            past: '%s ó shin',
+	            s: 'cúpla soicind',
+	            ss: '%d soicind',
+	            m: 'nóiméad',
+	            mm: '%d nóiméad',
+	            h: 'uair an chloig',
+	            hh: '%d uair an chloig',
+	            d: 'lá',
+	            dd: '%d lá',
+	            M: 'mí',
+	            MM: '%d mí',
+	            y: 'bliain',
+	            yy: '%d bliain'
+	        },
+	        dayOfMonthOrdinalParse: /\d{1,2}(d|na|mh)/,
+	        ordinal: function (number) {
+	            var output = number === 1 ? 'd' : number % 10 === 2 ? 'na' : 'mh';
+	            return number + output;
+	        },
+	        week: {
+	            dow: 1, // Monday is the first day of the week.
+	            doy: 4  // The week that contains Jan 4th is the first week of the year.
+	        }
+	    });
+
+	    return ga;
+
+	})));
+
+
+/***/ }),
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9877,7 +10197,7 @@
 
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9958,7 +10278,7 @@
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -9976,8 +10296,8 @@
 	            'ss': [number + ' secondanim', number + ' second'],
 	            'm': ['eka mintan', 'ek minute'],
 	            'mm': [number + ' mintanim', number + ' mintam'],
-	            'h': ['eka horan', 'ek hor'],
-	            'hh': [number + ' horanim', number + ' horam'],
+	            'h': ['eka voran', 'ek vor'],
+	            'hh': [number + ' voranim', number + ' voram'],
 	            'd': ['eka disan', 'ek dis'],
 	            'dd': [number + ' disanim', number + ' dis'],
 	            'M': ['eka mhoinean', 'ek mhoino'],
@@ -10085,7 +10405,7 @@
 
 
 /***/ }),
-/* 56 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -10203,7 +10523,7 @@
 	        },
 	        week: {
 	            dow: 0, // Sunday is the first day of the week.
-	            doy: 6 // The week that contains Jan 1st is the first week of the year.
+	            doy: 6 // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -10213,7 +10533,7 @@
 
 
 /***/ }),
-/* 57 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -10314,7 +10634,7 @@
 
 
 /***/ }),
-/* 58 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -10432,7 +10752,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -10442,7 +10762,7 @@
 
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -10590,7 +10910,7 @@
 	        ordinal : '%d.',
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -10600,7 +10920,7 @@
 
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -10714,7 +11034,7 @@
 
 
 /***/ }),
-/* 61 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -10803,7 +11123,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -10813,7 +11133,7 @@
 
 
 /***/ }),
-/* 62 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -10889,7 +11209,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -10899,7 +11219,7 @@
 
 
 /***/ }),
-/* 63 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11035,7 +11355,7 @@
 
 
 /***/ }),
-/* 64 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11108,7 +11428,80 @@
 
 
 /***/ }),
-/* 65 */
+/* 67 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	//! moment.js locale configuration
+
+	;(function (global, factory) {
+	    true ? factory(__webpack_require__(5)) :
+	   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+	   factory(global.moment)
+	}(this, (function (moment) { 'use strict';
+
+
+	    var itCh = moment.defineLocale('it-ch', {
+	        months : 'gennaio_febbraio_marzo_aprile_maggio_giugno_luglio_agosto_settembre_ottobre_novembre_dicembre'.split('_'),
+	        monthsShort : 'gen_feb_mar_apr_mag_giu_lug_ago_set_ott_nov_dic'.split('_'),
+	        weekdays : 'domenica_lunedì_martedì_mercoledì_giovedì_venerdì_sabato'.split('_'),
+	        weekdaysShort : 'dom_lun_mar_mer_gio_ven_sab'.split('_'),
+	        weekdaysMin : 'do_lu_ma_me_gi_ve_sa'.split('_'),
+	        longDateFormat : {
+	            LT : 'HH:mm',
+	            LTS : 'HH:mm:ss',
+	            L : 'DD.MM.YYYY',
+	            LL : 'D MMMM YYYY',
+	            LLL : 'D MMMM YYYY HH:mm',
+	            LLLL : 'dddd D MMMM YYYY HH:mm'
+	        },
+	        calendar : {
+	            sameDay: '[Oggi alle] LT',
+	            nextDay: '[Domani alle] LT',
+	            nextWeek: 'dddd [alle] LT',
+	            lastDay: '[Ieri alle] LT',
+	            lastWeek: function () {
+	                switch (this.day()) {
+	                    case 0:
+	                        return '[la scorsa] dddd [alle] LT';
+	                    default:
+	                        return '[lo scorso] dddd [alle] LT';
+	                }
+	            },
+	            sameElse: 'L'
+	        },
+	        relativeTime : {
+	            future : function (s) {
+	                return ((/^[0-9].+$/).test(s) ? 'tra' : 'in') + ' ' + s;
+	            },
+	            past : '%s fa',
+	            s : 'alcuni secondi',
+	            ss : '%d secondi',
+	            m : 'un minuto',
+	            mm : '%d minuti',
+	            h : 'un\'ora',
+	            hh : '%d ore',
+	            d : 'un giorno',
+	            dd : '%d giorni',
+	            M : 'un mese',
+	            MM : '%d mesi',
+	            y : 'un anno',
+	            yy : '%d anni'
+	        },
+	        dayOfMonthOrdinalParse : /\d{1,2}º/,
+	        ordinal: '%dº',
+	        week : {
+	            dow : 1, // Monday is the first day of the week.
+	            doy : 4  // The week that contains Jan 4th is the first week of the year.
+	        }
+	    });
+
+	    return itCh;
+
+	})));
+
+
+/***/ }),
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11121,7 +11514,7 @@
 
 
 	    var ja = moment.defineLocale('ja', {
-	        months : '1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月'.split('_'),
+	        months : '一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月'.split('_'),
 	        monthsShort : '1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月'.split('_'),
 	        weekdays : '日曜日_月曜日_火曜日_水曜日_木曜日_金曜日_土曜日'.split('_'),
 	        weekdaysShort : '日_月_火_水_木_金_土'.split('_'),
@@ -11204,7 +11597,7 @@
 
 
 /***/ }),
-/* 66 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11280,7 +11673,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -11290,7 +11683,7 @@
 
 
 /***/ }),
-/* 67 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11383,7 +11776,7 @@
 
 
 /***/ }),
-/* 68 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11464,7 +11857,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -11474,7 +11867,7 @@
 
 
 /***/ }),
-/* 69 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11588,7 +11981,7 @@
 
 
 /***/ }),
-/* 70 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11708,7 +12101,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -11718,7 +12111,7 @@
 
 
 /***/ }),
-/* 71 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11803,7 +12196,130 @@
 
 
 /***/ }),
-/* 72 */
+/* 75 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	//! moment.js locale configuration
+
+	;(function (global, factory) {
+	    true ? factory(__webpack_require__(5)) :
+	   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+	   factory(global.moment)
+	}(this, (function (moment) { 'use strict';
+
+
+	    var symbolMap = {
+	        '1': '١',
+	        '2': '٢',
+	        '3': '٣',
+	        '4': '٤',
+	        '5': '٥',
+	        '6': '٦',
+	        '7': '٧',
+	        '8': '٨',
+	        '9': '٩',
+	        '0': '٠'
+	    }, numberMap = {
+	        '١': '1',
+	        '٢': '2',
+	        '٣': '3',
+	        '٤': '4',
+	        '٥': '5',
+	        '٦': '6',
+	        '٧': '7',
+	        '٨': '8',
+	        '٩': '9',
+	        '٠': '0'
+	    },
+	    months = [
+	        'کانونی دووەم',
+	        'شوبات',
+	        'ئازار',
+	        'نیسان',
+	        'ئایار',
+	        'حوزەیران',
+	        'تەمموز',
+	        'ئاب',
+	        'ئەیلوول',
+	        'تشرینی یەكەم',
+	        'تشرینی دووەم',
+	        'كانونی یەکەم'
+	    ];
+
+
+	    var ku = moment.defineLocale('ku', {
+	        months : months,
+	        monthsShort : months,
+	        weekdays : 'یه‌كشه‌ممه‌_دووشه‌ممه‌_سێشه‌ممه‌_چوارشه‌ممه‌_پێنجشه‌ممه‌_هه‌ینی_شه‌ممه‌'.split('_'),
+	        weekdaysShort : 'یه‌كشه‌م_دووشه‌م_سێشه‌م_چوارشه‌م_پێنجشه‌م_هه‌ینی_شه‌ممه‌'.split('_'),
+	        weekdaysMin : 'ی_د_س_چ_پ_ه_ش'.split('_'),
+	        weekdaysParseExact : true,
+	        longDateFormat : {
+	            LT : 'HH:mm',
+	            LTS : 'HH:mm:ss',
+	            L : 'DD/MM/YYYY',
+	            LL : 'D MMMM YYYY',
+	            LLL : 'D MMMM YYYY HH:mm',
+	            LLLL : 'dddd, D MMMM YYYY HH:mm'
+	        },
+	        meridiemParse: /ئێواره‌|به‌یانی/,
+	        isPM: function (input) {
+	            return /ئێواره‌/.test(input);
+	        },
+	        meridiem : function (hour, minute, isLower) {
+	            if (hour < 12) {
+	                return 'به‌یانی';
+	            } else {
+	                return 'ئێواره‌';
+	            }
+	        },
+	        calendar : {
+	            sameDay : '[ئه‌مرۆ كاتژمێر] LT',
+	            nextDay : '[به‌یانی كاتژمێر] LT',
+	            nextWeek : 'dddd [كاتژمێر] LT',
+	            lastDay : '[دوێنێ كاتژمێر] LT',
+	            lastWeek : 'dddd [كاتژمێر] LT',
+	            sameElse : 'L'
+	        },
+	        relativeTime : {
+	            future : 'له‌ %s',
+	            past : '%s',
+	            s : 'چه‌ند چركه‌یه‌ك',
+	            ss : 'چركه‌ %d',
+	            m : 'یه‌ك خوله‌ك',
+	            mm : '%d خوله‌ك',
+	            h : 'یه‌ك كاتژمێر',
+	            hh : '%d كاتژمێر',
+	            d : 'یه‌ك ڕۆژ',
+	            dd : '%d ڕۆژ',
+	            M : 'یه‌ك مانگ',
+	            MM : '%d مانگ',
+	            y : 'یه‌ك ساڵ',
+	            yy : '%d ساڵ'
+	        },
+	        preparse: function (string) {
+	            return string.replace(/[١٢٣٤٥٦٧٨٩٠]/g, function (match) {
+	                return numberMap[match];
+	            }).replace(/،/g, ',');
+	        },
+	        postformat: function (string) {
+	            return string.replace(/\d/g, function (match) {
+	                return symbolMap[match];
+	            }).replace(/,/g, '،');
+	        },
+	        week : {
+	            dow : 6, // Saturday is the first day of the week.
+	            doy : 12 // The week that contains Jan 12th is the first week of the year.
+	        }
+	    });
+
+	    return ku;
+
+	})));
+
+
+/***/ }),
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -11856,8 +12372,8 @@
 	            sameDay : '[Бүгүн саат] LT',
 	            nextDay : '[Эртең саат] LT',
 	            nextWeek : 'dddd [саат] LT',
-	            lastDay : '[Кече саат] LT',
-	            lastWeek : '[Өткен аптанын] dddd [күнү] [саат] LT',
+	            lastDay : '[Кечээ саат] LT',
+	            lastWeek : '[Өткөн аптанын] dddd [күнү] [саат] LT',
 	            sameElse : 'L'
 	        },
 	        relativeTime : {
@@ -11884,7 +12400,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -11894,7 +12410,7 @@
 
 
 /***/ }),
-/* 73 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12034,7 +12550,7 @@
 
 
 /***/ }),
-/* 74 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12108,7 +12624,7 @@
 
 
 /***/ }),
-/* 75 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12230,7 +12746,7 @@
 
 
 /***/ }),
-/* 76 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12331,7 +12847,7 @@
 
 
 /***/ }),
-/* 77 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12437,7 +12953,7 @@
 	        ordinal : '%d.',
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -12447,7 +12963,7 @@
 
 
 /***/ }),
-/* 78 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12515,7 +13031,7 @@
 
 
 /***/ }),
-/* 79 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12599,7 +13115,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -12609,7 +13125,7 @@
 
 
 /***/ }),
-/* 80 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12694,7 +13210,7 @@
 
 
 /***/ }),
-/* 81 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12802,7 +13318,7 @@
 
 
 /***/ }),
-/* 82 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -12956,7 +13472,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -12966,7 +13482,7 @@
 
 
 /***/ }),
-/* 83 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13042,7 +13558,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -13052,7 +13568,7 @@
 
 
 /***/ }),
-/* 84 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13128,7 +13644,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -13138,7 +13654,7 @@
 
 
 /***/ }),
-/* 85 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13202,7 +13718,7 @@
 
 
 /***/ }),
-/* 86 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13289,7 +13805,7 @@
 	        },
 	        week: {
 	            dow: 1, // Monday is the first day of the week.
-	            doy: 4 // The week that contains Jan 1st is the first week of the year.
+	            doy: 4 // The week that contains Jan 4th is the first week of the year.
 	        }
 	    });
 
@@ -13299,7 +13815,7 @@
 
 
 /***/ }),
-/* 87 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13365,7 +13881,7 @@
 
 
 /***/ }),
-/* 88 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13482,7 +13998,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -13492,7 +14008,7 @@
 
 
 /***/ }),
-/* 89 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13508,7 +14024,7 @@
 	        monthsShortWithoutDots = 'jan_feb_mrt_apr_mei_jun_jul_aug_sep_okt_nov_dec'.split('_');
 
 	    var monthsParse = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
-	    var monthsRegex = /^(januari|februari|maart|april|mei|april|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
+	    var monthsRegex = /^(januari|februari|maart|april|mei|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
 
 	    var nl = moment.defineLocale('nl', {
 	        months : 'januari_februari_maart_april_mei_juni_juli_augustus_september_oktober_november_december'.split('_'),
@@ -13524,7 +14040,7 @@
 
 	        monthsRegex: monthsRegex,
 	        monthsShortRegex: monthsRegex,
-	        monthsStrictRegex: /^(januari|februari|maart|mei|ju[nl]i|april|augustus|september|oktober|november|december)/i,
+	        monthsStrictRegex: /^(januari|februari|maart|april|mei|ju[nl]i|augustus|september|oktober|november|december)/i,
 	        monthsShortStrictRegex: /^(jan\.?|feb\.?|mrt\.?|apr\.?|mei|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i,
 
 	        monthsParse : monthsParse,
@@ -13583,7 +14099,7 @@
 
 
 /***/ }),
-/* 90 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13599,7 +14115,7 @@
 	        monthsShortWithoutDots = 'jan_feb_mrt_apr_mei_jun_jul_aug_sep_okt_nov_dec'.split('_');
 
 	    var monthsParse = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
-	    var monthsRegex = /^(januari|februari|maart|april|mei|april|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
+	    var monthsRegex = /^(januari|februari|maart|april|mei|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
 
 	    var nlBe = moment.defineLocale('nl-be', {
 	        months : 'januari_februari_maart_april_mei_juni_juli_augustus_september_oktober_november_december'.split('_'),
@@ -13615,7 +14131,7 @@
 
 	        monthsRegex: monthsRegex,
 	        monthsShortRegex: monthsRegex,
-	        monthsStrictRegex: /^(januari|februari|maart|mei|ju[nl]i|april|augustus|september|oktober|november|december)/i,
+	        monthsStrictRegex: /^(januari|februari|maart|april|mei|ju[nl]i|augustus|september|oktober|november|december)/i,
 	        monthsShortStrictRegex: /^(jan\.?|feb\.?|mrt\.?|apr\.?|mei|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i,
 
 	        monthsParse : monthsParse,
@@ -13674,7 +14190,7 @@
 
 
 /***/ }),
-/* 91 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13738,7 +14254,7 @@
 
 
 /***/ }),
-/* 92 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13776,7 +14292,7 @@
 	    };
 
 	    var paIn = moment.defineLocale('pa-in', {
-	        // There are months name as per Nanakshahi Calender but they are not used as rigidly in modern Punjabi.
+	        // There are months name as per Nanakshahi Calendar but they are not used as rigidly in modern Punjabi.
 	        months : 'ਜਨਵਰੀ_ਫ਼ਰਵਰੀ_ਮਾਰਚ_ਅਪ੍ਰੈਲ_ਮਈ_ਜੂਨ_ਜੁਲਾਈ_ਅਗਸਤ_ਸਤੰਬਰ_ਅਕਤੂਬਰ_ਨਵੰਬਰ_ਦਸੰਬਰ'.split('_'),
 	        monthsShort : 'ਜਨਵਰੀ_ਫ਼ਰਵਰੀ_ਮਾਰਚ_ਅਪ੍ਰੈਲ_ਮਈ_ਜੂਨ_ਜੁਲਾਈ_ਅਗਸਤ_ਸਤੰਬਰ_ਅਕਤੂਬਰ_ਨਵੰਬਰ_ਦਸੰਬਰ'.split('_'),
 	        weekdays : 'ਐਤਵਾਰ_ਸੋਮਵਾਰ_ਮੰਗਲਵਾਰ_ਬੁਧਵਾਰ_ਵੀਰਵਾਰ_ਸ਼ੁੱਕਰਵਾਰ_ਸ਼ਨੀਚਰਵਾਰ'.split('_'),
@@ -13856,7 +14372,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -13866,7 +14382,7 @@
 
 
 /***/ }),
-/* 93 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -13996,7 +14512,7 @@
 
 
 /***/ }),
-/* 94 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -14009,8 +14525,8 @@
 
 
 	    var pt = moment.defineLocale('pt', {
-	        months : 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split('_'),
-	        monthsShort : 'jan_fev_mar_abr_mai_jun_jul_ago_set_out_nov_dez'.split('_'),
+	        months : 'Janeiro_Fevereiro_Março_Abril_Maio_Junho_Julho_Agosto_Setembro_Outubro_Novembro_Dezembro'.split('_'),
+	        monthsShort : 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),
 	        weekdays : 'Domingo_Segunda-feira_Terça-feira_Quarta-feira_Quinta-feira_Sexta-feira_Sábado'.split('_'),
 	        weekdaysShort : 'Dom_Seg_Ter_Qua_Qui_Sex_Sáb'.split('_'),
 	        weekdaysMin : 'Do_2ª_3ª_4ª_5ª_6ª_Sá'.split('_'),
@@ -14065,7 +14581,7 @@
 
 
 /***/ }),
-/* 95 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -14078,8 +14594,8 @@
 
 
 	    var ptBr = moment.defineLocale('pt-br', {
-	        months : 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split('_'),
-	        monthsShort : 'jan_fev_mar_abr_mai_jun_jul_ago_set_out_nov_dez'.split('_'),
+	        months : 'Janeiro_Fevereiro_Março_Abril_Maio_Junho_Julho_Agosto_Setembro_Outubro_Novembro_Dezembro'.split('_'),
+	        monthsShort : 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),
 	        weekdays : 'Domingo_Segunda-feira_Terça-feira_Quarta-feira_Quinta-feira_Sexta-feira_Sábado'.split('_'),
 	        weekdaysShort : 'Dom_Seg_Ter_Qua_Qui_Sex_Sáb'.split('_'),
 	        weekdaysMin : 'Do_2ª_3ª_4ª_5ª_6ª_Sá'.split('_'),
@@ -14130,7 +14646,7 @@
 
 
 /***/ }),
-/* 96 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -14199,7 +14715,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -14209,7 +14725,7 @@
 
 
 /***/ }),
-/* 97 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -14395,7 +14911,7 @@
 
 
 /***/ }),
-/* 98 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -14497,7 +15013,7 @@
 
 
 /***/ }),
-/* 99 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -14561,7 +15077,7 @@
 
 
 /***/ }),
-/* 100 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -14636,7 +15152,7 @@
 
 
 /***/ }),
-/* 101 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -14796,7 +15312,7 @@
 
 
 /***/ }),
-/* 102 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -14821,7 +15337,7 @@
 	                } else if (number < 5) {
 	                    result += withoutSuffix || isFuture ? 'sekunde' : 'sekundah';
 	                } else {
-	                    result += withoutSuffix || isFuture ? 'sekund' : 'sekund';
+	                    result += 'sekund';
 	                }
 	                return result;
 	            case 'm':
@@ -14963,7 +15479,7 @@
 	        ordinal : '%d.',
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -14973,7 +15489,7 @@
 
 
 /***/ }),
-/* 103 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15045,7 +15561,7 @@
 
 
 /***/ }),
-/* 104 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15150,7 +15666,7 @@
 	        ordinal : '%d.',
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -15160,7 +15676,7 @@
 
 
 /***/ }),
-/* 105 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15265,7 +15781,7 @@
 	        ordinal : '%d.',
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -15275,7 +15791,7 @@
 
 
 /***/ }),
-/* 106 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15367,7 +15883,7 @@
 
 
 /***/ }),
-/* 107 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15440,7 +15956,7 @@
 
 
 /***/ }),
-/* 108 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15493,7 +16009,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -15503,7 +16019,7 @@
 
 
 /***/ }),
-/* 109 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15626,7 +16142,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -15636,7 +16152,7 @@
 
 
 /***/ }),
-/* 110 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15649,8 +16165,8 @@
 
 
 	    var te = moment.defineLocale('te', {
-	        months : 'జనవరి_ఫిబ్రవరి_మార్చి_ఏప్రిల్_మే_జూన్_జూలై_ఆగస్టు_సెప్టెంబర్_అక్టోబర్_నవంబర్_డిసెంబర్'.split('_'),
-	        monthsShort : 'జన._ఫిబ్ర._మార్చి_ఏప్రి._మే_జూన్_జూలై_ఆగ._సెప్._అక్టో._నవ._డిసె.'.split('_'),
+	        months : 'జనవరి_ఫిబ్రవరి_మార్చి_ఏప్రిల్_మే_జూన్_జులై_ఆగస్టు_సెప్టెంబర్_అక్టోబర్_నవంబర్_డిసెంబర్'.split('_'),
+	        monthsShort : 'జన._ఫిబ్ర._మార్చి_ఏప్రి._మే_జూన్_జులై_ఆగ._సెప్._అక్టో._నవ._డిసె.'.split('_'),
 	        monthsParseExact : true,
 	        weekdays : 'ఆదివారం_సోమవారం_మంగళవారం_బుధవారం_గురువారం_శుక్రవారం_శనివారం'.split('_'),
 	        weekdaysShort : 'ఆది_సోమ_మంగళ_బుధ_గురు_శుక్ర_శని'.split('_'),
@@ -15719,7 +16235,7 @@
 	        },
 	        week : {
 	            dow : 0, // Sunday is the first day of the week.
-	            doy : 6  // The week that contains Jan 1st is the first week of the year.
+	            doy : 6  // The week that contains Jan 6th is the first week of the year.
 	        }
 	    });
 
@@ -15729,7 +16245,7 @@
 
 
 /***/ }),
-/* 111 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15800,7 +16316,7 @@
 
 
 /***/ }),
-/* 112 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15920,7 +16436,7 @@
 
 
 /***/ }),
-/* 113 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -15991,7 +16507,7 @@
 
 
 /***/ }),
-/* 114 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -16057,7 +16573,7 @@
 
 
 /***/ }),
-/* 115 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -16183,7 +16699,7 @@
 
 
 /***/ }),
-/* 116 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	
@@ -16271,7 +16787,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -16281,7 +16797,7 @@
 
 
 /***/ }),
-/* 117 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -16376,7 +16892,7 @@
 
 
 /***/ }),
-/* 118 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -16428,7 +16944,7 @@
 	        },
 	        week : {
 	            dow : 6, // Saturday is the first day of the week.
-	            doy : 12  // The week that contains Jan 1st is the first week of the year.
+	            doy : 12  // The week that contains Jan 12th is the first week of the year.
 	        }
 	    });
 
@@ -16438,7 +16954,7 @@
 
 
 /***/ }),
-/* 119 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -16490,7 +17006,7 @@
 	        },
 	        week : {
 	            dow : 6, // Saturday is the first day of the week.
-	            doy : 12  // The week that contains Jan 1st is the first week of the year.
+	            doy : 12  // The week that contains Jan 12th is the first week of the year.
 	        }
 	    });
 
@@ -16500,7 +17016,7 @@
 
 
 /***/ }),
-/* 120 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js language configuration
@@ -16623,7 +17139,7 @@
 
 
 /***/ }),
-/* 121 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -16665,6 +17181,9 @@
 	            'genitive': 'неділі_понеділка_вівторка_середи_четверга_п’ятниці_суботи'.split('_')
 	        };
 
+	        if (m === true) {
+	            return weekdays['nominative'].slice(1, 7).concat(weekdays['nominative'].slice(0, 1));
+	        }
 	        if (!m) {
 	            return weekdays['nominative'];
 	        }
@@ -16768,7 +17287,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -16778,7 +17297,7 @@
 
 
 /***/ }),
-/* 122 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -16880,7 +17399,7 @@
 
 
 /***/ }),
-/* 123 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -16942,7 +17461,7 @@
 
 
 /***/ }),
-/* 124 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -16994,7 +17513,7 @@
 	        },
 	        week : {
 	            dow : 1, // Monday is the first day of the week.
-	            doy : 7  // The week that contains Jan 1st is the first week of the year.
+	            doy : 7  // The week that contains Jan 7th is the first week of the year.
 	        }
 	    });
 
@@ -17004,7 +17523,7 @@
 
 
 /***/ }),
-/* 125 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -17087,7 +17606,7 @@
 
 
 /***/ }),
-/* 126 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -17159,7 +17678,7 @@
 
 
 /***/ }),
-/* 127 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -17223,7 +17742,7 @@
 
 
 /***/ }),
-/* 128 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -17337,7 +17856,7 @@
 
 
 /***/ }),
-/* 129 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -17444,7 +17963,7 @@
 
 
 /***/ }),
-/* 130 */
+/* 134 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -17551,13 +18070,13 @@
 
 
 /***/ }),
-/* 131 */
+/* 135 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"row\">\r\n  <div class=\"col-lg-12\">\r\n    <uib-alert type=\"info\" close=\"dismissAlert()\" ng-show=\"!has_seen_alert\">\r\n      <span ng-app=\"myApp\" ng-controller=\"envVariablesCtrl\">Welcome to {{company_name}} - Administration System</span>\r\n    </uib-alert>\r\n  </div>\r\n</div>\r\n<div class=\"row\">\r\n  <div class=\"col-lg-3\">\r\n    <div class=\"panel theme\">\r\n      <div class=\"panel-heading\">\r\n        <div class=\"row\">\r\n          <div class=\"col-xs-3\">\r\n            <i class=\"fa fa-user fa-5x\" id=\"loginaccount_logo\"></i>\r\n          </div>\r\n          <div class=\"col-xs-9 text-right\">\r\n            <div class=\"huge\">{{ stats.logindata | number:0 }}</div>\r\n            <div class=\"titles_in_dashboard\">Login Accounts</div>\r\n          </div>\r\n        </div>\r\n      </div>\r\n      <a ui-sref=\"list({entity:'LoginData'})\">\r\n        <div class=\"panel-footer\" id=\"footer1\">\r\n          <span class=\"pull-left\">View Details</span>\r\n          <span class=\"pull-right\"><i class=\"fa fa-arrow-circle-right\"></i></span>\r\n          <div class=\"clearfix\"></div>\r\n        </div>\r\n      </a>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"col-lg-3\">\r\n    <div class=\"panel theme\">\r\n      <div class=\"panel-heading\">\r\n        <div class=\"row\">\r\n          <div class=\"col-xs-3\">\r\n            <i class=\"fa fa-tv fa-5x\" id=\"channels_logo\"></i>\r\n          </div>\r\n          <div class=\"col-xs-9 text-right\">\r\n            <div class=\"huge\">{{ stats.channels }}</div>\r\n            <div class=\"titles_in_dashboard\">Channels</div>\r\n          </div>\r\n        </div>\r\n      </div>\r\n      <a ui-sref=\"list({entity:'Channels'})\">\r\n        <div class=\"panel-footer\" id=\"footer2\">\r\n          <span class=\"pull-left\">View Details</span>\r\n          <span class=\"pull-right\"><i class=\"fa fa-arrow-circle-right\"></i></span>\r\n          <div class=\"clearfix\"></div>\r\n        </div>\r\n      </a>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"col-lg-3\">\r\n    <div class=\"panel theme\">\r\n      <div class=\"panel-heading\">\r\n        <div class=\"row\">\r\n          <div class=\"col-xs-3\">\r\n            <i class=\"fa fa-film fa-5x\" id=\"vod_logo\"></i>\r\n          </div>\r\n          <div class=\"col-xs-9 text-right\">\r\n            <div class=\"huge\">{{ stats.vods }}</div>\r\n            <div class=\"titles_in_dashboard\">VOD Movies</div>\r\n          </div>\r\n        </div>\r\n      </div>\r\n      <a ui-sref=\"list({entity:'Vods'})\">\r\n        <div class=\"panel-footer\" id=\"footer3\">\r\n          <span class=\"pull-left\">View Details</span>\r\n          <span class=\"pull-right\"><i class=\"fa fa-arrow-circle-right\"></i></span>\r\n          <div class=\"clearfix\"></div>\r\n        </div>\r\n      </a>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"col-lg-3\">\r\n    <div class=\"panel theme\">\r\n      <div class=\"panel-heading\">\r\n        <div class=\"row\">\r\n          <div class=\"col-xs-3\">\r\n            <i class=\"fa fa-outdent fa-5x\" id=\"device_logo\"></i>\r\n          </div>\r\n          <div class=\"col-xs-9 text-right\">\r\n            <div class=\"huge\">{{ stats.devices }}</div>\r\n            <div class=\"titles_in_dashboard\">Devices</div>\r\n          </div>\r\n        </div>\r\n      </div>\r\n      <a ui-sref=\"list({entity:'Devices'})\">\r\n        <div class=\"panel-footer\" id=\"footer4\">\r\n          <span class=\"pull-left\">View Details</span>\r\n          <span class=\"pull-right\"><i class=\"fa fa-arrow-circle-right\"></i></span>\r\n          <div class=\"clearfix\"></div>\r\n        </div>\r\n      </a>\r\n    </div>\r\n  </div>\r\n\r\n</div>\r\n";
 
 /***/ }),
-/* 132 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17572,7 +18091,7 @@
 
 	var _moment2 = _interopRequireDefault(_moment);
 
-	var _resellers_dashboardSummaryHtml = __webpack_require__(133);
+	var _resellers_dashboardSummaryHtml = __webpack_require__(137);
 
 	var _resellers_dashboardSummaryHtml2 = _interopRequireDefault(_resellers_dashboardSummaryHtml);
 
@@ -17683,13 +18202,13 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 133 */
+/* 137 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"row\">\r\n    <div class=\"col-lg-12\">\r\n        <uib-alert type=\"info\" close=\"dismissAlert()\" ng-show=\"!has_seen_alert\">\r\n            <span ng-app=\"myApp\" ng-controller=\"envVariablesCtrl\">Welcome to {{company_name}} - Administration System</span>\r\n        </uib-alert>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"row\">\r\n    <!--My Sales This Month-->\r\n    <div class=\"col-lg-3\">\r\n        <div class=\"panel panel-default theme\">\r\n            <div class=\"panel-heading\">\r\n                <div class=\"row\">\r\n                    <div class=\"col-xs-3\">\r\n                        <i class=\"fa fa-shopping-cart fa-5x\" id=\"loginaccount_logo\"></i>\r\n                    </div>\r\n                    <div class=\"col-xs-9 text-right\">\r\n                        <div class=\"huge\">{{ stats.this_month }}</div>\r\n                        <div class=\"titles_in_dashboard\">My Sales This Month</div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <!-- code below, maybe used later -->\r\n            <!--<a ui-sref=\"list({entity:'LoginData'})\">-->\r\n                <!--<div class=\"panel-footer\">-->\r\n                    <!--<span class=\"pull-left\">View Details</span>-->\r\n                    <!--<span class=\"pull-right\"><i class=\"fa fa-arrow-circle-right\"></i></span>-->\r\n                    <!--<div class=\"clearfix\"></div>-->\r\n                <!--</div>-->\r\n            <!--</a>-->\r\n        </div>\r\n    </div>\r\n    <!--My Sales This Month-->\r\n\r\n    <!--My Sales Last Month-->\r\n    <div class=\"col-lg-3\">\r\n        <div class=\"panel panel-default theme\">\r\n            <div class=\"panel-heading\">\r\n                <div class=\"row\">\r\n                    <div class=\"col-xs-3\">\r\n                        <i class=\"fa fa-user-plus fa-5x\" id=\"channels_logo\"></i>\r\n                    </div>\r\n                    <div class=\"col-xs-9 text-right\">\r\n                        <div class=\"huge\">{{ stats.last_month }}</div>\r\n                        <div class=\"titles_in_dashboard\">My Sales Last Month</div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <!-- code below, maybe used later -->\r\n            <!--<a ui-sref=\"list({entity:'Channels'})\">-->\r\n                <!--<div class=\"panel-footer\">-->\r\n                    <!--<span class=\"pull-left\">View Details</span>-->\r\n                    <!--<span class=\"pull-right\"><i class=\"fa fa-arrow-circle-right\"></i></span>-->\r\n                    <!--<div class=\"clearfix\"></div>-->\r\n                <!--</div>-->\r\n            <!--</a>-->\r\n        </div>\r\n    </div>\r\n    <!--My Sales Last Month-->\r\n\r\n    <!--My Sales This Year-->\r\n    <div class=\"col-lg-3\">\r\n        <div class=\"panel panel-default theme\">\r\n            <div class=\"panel-heading\">\r\n                <div class=\"row\">\r\n                    <div class=\"col-xs-3\">\r\n                        <i class=\"fa fa-user-plus fa-5x\" id=\"vod_logo\"></i>\r\n                    </div>\r\n                    <div class=\"col-xs-9 text-right\">\r\n                        <div class=\"huge\">{{ stats.this_year }}</div>\r\n                        <div class=\"titles_in_dashboard\">My Sales This Year</div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <!-- code below, maybe used later -->\r\n            <!--<a ui-sref=\"list({entity:'Vods'})\">-->\r\n                <!--<div class=\"panel-footer\">-->\r\n                    <!--<span class=\"pull-left\">View Details</span>-->\r\n                    <!--<span class=\"pull-right\"><i class=\"fa fa-arrow-circle-right\"></i></span>-->\r\n                    <!--<div class=\"clearfix\"></div>-->\r\n                <!--</div>-->\r\n            <!--</a>-->\r\n        </div>\r\n    </div>\r\n    <!--My Sales This Year-->\r\n\r\n    <!--My Sales Last Year-->\r\n    <div class=\"col-lg-3\">\r\n        <div class=\"panel panel-default theme\">\r\n            <div class=\"panel-heading\">\r\n                <div class=\"row\">\r\n                    <div class=\"col-xs-3\">\r\n                        <i class=\"fa fa-user-plus fa-5x\" id=\"device_logo\"></i>\r\n                    </div>\r\n                    <div class=\"col-xs-9 text-right\">\r\n                        <div class=\"huge\">{{ stats.last_year }}</div>\r\n                        <div class=\"titles_in_dashboard\">My Sales Last Year</div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <!-- code below, maybe used later -->\r\n            <!--<a ui-sref=\"list({entity:'Devices'})\">-->\r\n                <!--<div class=\"panel-footer\">-->\r\n                    <!--<span class=\"pull-left\">View Details</span>-->\r\n                    <!--<span class=\"pull-right\"><i class=\"fa fa-arrow-circle-right\"></i></span>-->\r\n                    <!--<div class=\"clearfix\"></div>-->\r\n                <!--</div>-->\r\n            <!--</a>-->\r\n        </div>\r\n    </div>\r\n    <!--My Sales Last Year-->\r\n\r\n</div><!--row-->\r\n";
 
 /***/ }),
-/* 134 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17700,7 +18219,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _graphsHtml = __webpack_require__(135);
+	var _graphsHtml = __webpack_require__(139);
 
 	var _graphsHtml2 = _interopRequireDefault(_graphsHtml);
 
@@ -17758,13 +18277,13 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 135 */
+/* 139 */
 /***/ (function(module, exports) {
 
 	module.exports = "\r\n<vis-graph2d data=\"data\" options=\"options\"></vis-graph2d>\r\n<vis-timeline data=\"data_timeline\" options=\"options\" events=\"events\"></vis-timeline>\r\n";
 
 /***/ }),
-/* 136 */
+/* 140 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -17844,7 +18363,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 137 */
+/* 141 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -17920,7 +18439,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 138 */
+/* 142 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -17995,7 +18514,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 139 */
+/* 143 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -18016,6 +18535,11 @@
 	        },
 	        link: function link(scope, element, attrs) {
 
+	            scope.myFunction = function () {
+	                var spanDropdown = document.querySelectorAll('span.btn-group')[0];
+	                spanDropdown.classList.add("open");
+	            };
+
 	            scope.icon = 'glyphicon-list';
 	            if (attrs.type == 'move_to_package') scope.button = 'Move to Package';
 	            var vods_array = [];
@@ -18031,6 +18555,10 @@
 	            var newarray = [];
 
 	            scope.moveto = function () {
+
+	                var spanDropdown = document.querySelectorAll('span.btn-group')[0];
+	                spanDropdown.classList.remove("open");
+
 	                var array_of_selection_vod = scope.selection;
 
 	                scope.change = function (name, id) {
@@ -18056,7 +18584,7 @@
 	                };
 	            };
 	        },
-	        template: '<div class="btn-group" uib-dropdown is-open="status.isopen"> ' + '<button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle ng-disabled="disabled">' + '<span class="glyphicon {{icon}}"></span> {{button}} <span class="caret"></span>' + '</button>' + '<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">' + '<li role="menuitem" ng-click="change(choice.name,choice.id)"  ng-repeat="choice in list_of_vods">' + '<p id="paragraph_vod" ng-click="moveto()">{{choice.name}}</p>' + '</li>' + '</ul>' + '</div>'
+	        template: '<div class="btn-group" uib-dropdown is-open="status.isopen"> ' + '<button ng-click="myFunction()" id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle ng-disabled="disabled">' + '<span class="glyphicon {{icon}}"></span> {{button}} <span class="caret"></span>' + '</button>' + '<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">' + '<li role="menuitem" ng-click="change(choice.name,choice.id)"  ng-repeat="choice in list_of_vods">' + '<p id="paragraph_vod" ng-click="moveto()">{{choice.name}}</p>' + '</li>' + '</ul>' + '</div>'
 	    };
 	}
 
@@ -18066,7 +18594,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 140 */
+/* 144 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -18104,7 +18632,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 141 */
+/* 145 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -18134,7 +18662,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 142 */
+/* 146 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -18199,7 +18727,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 143 */
+/* 147 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -18296,7 +18824,47 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 144 */
+/* 148 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+	function approveInvitation(Restangular, $uibModal, $q, notification, $state, $http) {
+	    'use strict';
+
+	    return {
+	        restrict: 'E',
+	        scope: {
+	            review: "&",
+	            size: "@"
+	        },
+	        link: function link(scope, element, attrs) {
+	            scope.review = scope.review();
+	            scope.reInvite = function () {
+
+	                var data = { 'user_id': scope.review.values.id };
+	                $http.post("../api/users/reinvite", data).then(function successCallback(response) {
+	                    notification.log(response.data.message, { addnCls: 'humane-flatty-success' });
+	                }, function errorCallback(response) {
+	                    notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                });
+	            };
+	        },
+
+	        template: '<a ng-if="review.values.invite_pending === true" class="btn btn-default btn-xs" ng-click="reInvite()"><i class="fa fa-paper-plane fa-lg"></i>&nbsp;Reinvite</a>'
+	    };
+	}
+
+	approveInvitation.$inject = ['Restangular', '$uibModal', '$q', 'notification', '$state', '$http'];
+
+	exports['default'] = approveInvitation;
+	module.exports = exports['default'];
+
+/***/ }),
+/* 149 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -18339,7 +18907,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 145 */
+/* 150 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -18382,7 +18950,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 146 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18393,51 +18961,68 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _userDetailsHtml = __webpack_require__(147);
+	var _userDetailsHtml = __webpack_require__(152);
 
 	var _userDetailsHtml2 = _interopRequireDefault(_userDetailsHtml);
 
-	function details($stateProvider) {
+	function userDetails($stateProvider) {
 
 	    $stateProvider.state('personal', {
 	        parent: 'main',
 	        url: '/personal',
 	        headers: { "Content-Type": "application/json;charset=UTF-8" },
-	        controller: ['Restangular', '$scope', 'notification', function (Restangular, $scope, notification) {
+	        controller: ['$http', '$scope', 'notification', function ($http, $scope, notification) {
 
-	            Restangular.one('personal-details').get().then(function successCallback(response) {
-	                $scope.user = {
-	                    username: response.username,
-	                    email: response.email,
-	                    telephone: response.telephone,
-	                    role: localStorage.userRole,
-	                    apikey: response.jwtoken
-	                };
-	            }, function errorCallback(response) {});
+	            $http.get('../api/personal-details').then(function successCallback(response) {
 
-	            // Start Update Details
+	                if (response.status === 200) {
+	                    $scope.user = {
+	                        username: response.data.username,
+	                        email: response.data.email,
+	                        telephone: response.data.telephone,
+	                        role: response.data.group.name,
+	                        apikey: response.data.jwtoken
+	                    };
+	                }
+	            }, function errorCallback(response) {
+	                if (response.status === 400) {
+	                    notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                } else {
+	                    notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                }
+	            });
 
-	            $scope.updateDetails = function () {
-	                Restangular.one('personal-details').put($scope.user).then(function successCallback(response) {}, function errorCallback(response) {});
+	            $scope.updateInfo = function () {
+	                $http.put('../api/personal-details', $scope.user).then(function successCallback(response) {
+	                    if (response.status === 200) {
+	                        notification.log('Update Successfully', { addnCls: 'humane-flatty-success' });
+	                    }
+	                }, function errorCallback(response) {
+	                    if (response.status === 400) {
+	                        notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                    } else {
+	                        notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                    }
+	                });
 	            };
 	        }],
 	        template: _userDetailsHtml2['default']
 	    });
 	}
 
-	details.$inject = ['$stateProvider'];
+	userDetails.$inject = ['$stateProvider'];
 
-	exports['default'] = details;
+	exports['default'] = userDetails;
 	module.exports = exports['default'];
 
 /***/ }),
-/* 147 */
+/* 152 */
 /***/ (function(module, exports) {
 
-	module.exports = "<head>\r\n  <style type=\"text/css\">\r\n    @media screen and ( max-width: 1600px ) {\r\n      .frm {\r\n        margin-left: 150px;\r\n        margin-right: 150px;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 989px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 767px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 600px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 540px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 480px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 380px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n  </style>\r\n</head>\r\n\r\n<div class=\"row list-header\">\r\n    <div class=\"col-lg-12\">\r\n\r\n        <div class=\"page-header\">\r\n            <h4>Personal Details</h4>\r\n        </div>\r\n\r\n    </div>\r\n</div>\r\n\r\n    <div class=\"row frm\">\r\n\r\n              <form ng-controller=\"updateDetails\" ng-submit=\"updateDetails()\" ng-controller=\"main\">\r\n\r\n                <div class=\"form-group\">\r\n                  <label for=\"exampleInputEmail1\">Group</label>\r\n                  <input type=\"input\" class=\"form-control\" id=\"exampleInputEmail1\" value=\"{{user.role}}\" aria-describedby=\"emailHelp\" placeholder=\"\" disabled=\"disabled\">\r\n                </div>\r\n\r\n                <div class=\"form-group\">\r\n                  <label for=\"exampleInputEmail1\">Username</label>\r\n                  <input type=\"input\" class=\"form-control\" id=\"exampleInputEmail1\" value=\"{{user.username}}\" aria-describedby=\"emailHelp\" placeholder=\"\" disabled=\"disabled\">\r\n                </div>\r\n\r\n                  <div class=\"form-group\">\r\n                      <label for=\"exampleInputEmail1\">Api Key</label>\r\n                      <input type=\"input\" class=\"form-control\" id=\"exampleInputEmail1\" value=\"{{user.apikey}}\" aria-describedby=\"emailHelp\" placeholder=\"\" disabled=\"disabled\">\r\n                  </div>\r\n\r\n                <div class=\"form-group\">\r\n                  <label for=\"exampleInputEmail1\">Email</label>\r\n                  <input type=\"email\" class=\"form-control\" id=\"exampleInputEmail1\" ng-model=\"user.email\" value=\"user.email\" aria-describedby=\"emailHelp\" placeholder=\"\">\r\n                </div>\r\n\r\n                <div class=\"form-group\">\r\n                  <label for=\"exampleInputEmail1\">Telephone</label>\r\n                  <input type=\"input\" class=\"form-control\" id=\"exampleInputEmail1\" ng-model=\"user.telephone\" value=\"user.telephone\" aria-describedby=\"emailHelp\" placeholder=\"\">\r\n                </div>\r\n\r\n                  <hr>\r\n                <button type=\"submit\" class=\"btn btn-default pull-right\">Submit</button>\r\n              </form>\r\n\r\n    \r\n    </div>";
+	module.exports = "<head>\r\n  <style type=\"text/css\">\r\n    @media screen and ( max-width: 1600px ) {\r\n      .frm {\r\n        margin-left: 150px;\r\n        margin-right: 150px;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 989px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 767px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 600px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 540px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 480px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 380px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n  </style>\r\n</head>\r\n<body>\r\n    <div class=\"row list-header\">\r\n        <div class=\"col-lg-12\">\r\n            <div class=\"page-header\">\r\n                <h4>Personal Details</h4>\r\n            </div>\r\n        </div>\r\n    </div>\r\n\r\n    <div class=\"container\">\r\n        <div class=\"row\">\r\n            <div class=\"col-md-12\">\r\n                <form ng-submit=\"updateInfo()\">\r\n                    <div class=\"form-group\">\r\n                        <label for=\"groupInput\">Group</label>\r\n                        <input type=\"text\" class=\"form-control\" id=\"groupInput\" ng-model=\"user.role\" placeholder=\"Group\" disabled=\"disabled\">\r\n                    </div>\r\n\r\n                    <div class=\"form-group\">\r\n                        <label for=\"usernameInput\">Username</label>\r\n                        <input type=\"text\" class=\"form-control\" id=\"usernameInput\" ng-model=\"user.username\" placeholder=\"Username\" disabled=\"disabled\">\r\n                    </div>\r\n\r\n                    <div class=\"form-group\">\r\n                        <label for=\"apikeyInput\">Api Key</label>\r\n                        <input type=\"text\" class=\"form-control\" id=\"apikeyInput\" ng-model=\"user.apikey\" placeholder=\"Api Key\" disabled=\"disabled\">\r\n                    </div>\r\n\r\n                    <div class=\"form-group\">\r\n                        <label for=\"emailInput\">Email</label>\r\n                        <input type=\"email\" class=\"form-control\" id=\"emailInput\" ng-model=\"user.email\" placeholder=\"Email\">\r\n                    </div>\r\n\r\n                    <div class=\"form-group\">\r\n                        <label for=\"telephoneInput\">Telephone</label>\r\n                        <input type=\"text\" class=\"form-control\" id=\"telephoneInput\" ng-model=\"user.telephone\" placeholder=\"Telephone\">\r\n                    </div>\r\n\r\n                    <hr>\r\n                    <button type=\"submit\" class=\"btn btn-default pull-right\">Submit</button>\r\n                </form>\r\n            </div>\r\n        </div>\r\n    </div>\r\n</body>\r\n\r\n\r\n\r\n";
 
 /***/ }),
-/* 148 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18448,7 +19033,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _geoipHtml = __webpack_require__(149);
+	var _geoipHtml = __webpack_require__(154);
 
 	var _geoipHtml2 = _interopRequireDefault(_geoipHtml);
 
@@ -18509,13 +19094,13 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 149 */
+/* 154 */
 /***/ (function(module, exports) {
 
 	module.exports = "<head>\r\n    <style type=\"text/css\">\r\n        @media screen and ( max-width: 1600px ) {\r\n            .frm {\r\n                margin-left: 150px;\r\n                margin-right: 150px;\r\n            }\r\n        }\r\n\r\n        @media screen and ( max-width: 989px ) {\r\n            .frm {\r\n                margin-left: auto;\r\n                margin-right: auto;\r\n            }\r\n        }\r\n\r\n        @media screen and ( max-width: 767px ) {\r\n            .frm {\r\n                margin-left: auto;\r\n                margin-right: auto;\r\n            }\r\n        }\r\n\r\n        @media screen and ( max-width: 600px ) {\r\n            .frm {\r\n                margin-left: auto;\r\n                margin-right: auto;\r\n            }\r\n        }\r\n\r\n        @media screen and ( max-width: 540px ) {\r\n            .frm {\r\n                margin-left: auto;\r\n                margin-right: auto;\r\n            }\r\n        }\r\n\r\n        @media screen and ( max-width: 480px ) {\r\n            .frm {\r\n                margin-left: auto;\r\n                margin-right: auto;\r\n            }\r\n        }\r\n\r\n        @media screen and ( max-width: 380px ) {\r\n            .frm {\r\n                margin-left: auto;\r\n                margin-right: auto;\r\n            }\r\n        }\r\n    </style>\r\n</head>\r\n\r\n<div class=\"row list-header\">\r\n    <div class=\"col-lg-12\">\r\n\r\n        <div class=\"page-header\">\r\n            <h4>GeoIP</h4>\r\n        </div>\r\n\r\n    </div>\r\n</div>\r\n\r\n<div class=\"row frm\">\r\n\r\n    <form ng-submit=\"updateurl()\">\r\n\r\n        <div class=\"alert alert-danger\" id=\"status_false\" style=\"display:none;\"></div>\r\n        <div class=\"alert alert-success\" id=\"status_true\" style=\"display: none;\"></div>\r\n\r\n        <div class=\"form-group\">\r\n            <label for=\"send_url\">URL</label>\r\n            <input class=\"form-control\" id=\"send_url\"  aria-describedby=\"emailHelp\" placeholder=\"URL\">\r\n        </div>\r\n\r\n        <hr>\r\n        <button type=\"submit\" class=\"btn btn-default pull-right\">Submit</button>\r\n    </form>\r\n\r\n\r\n</div>";
 
 /***/ }),
-/* 150 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18526,7 +19111,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _supportHtml = __webpack_require__(151);
+	var _supportHtml = __webpack_require__(156);
 
 	var _supportHtml2 = _interopRequireDefault(_supportHtml);
 
@@ -18546,13 +19131,13 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 151 */
+/* 156 */
 /***/ (function(module, exports) {
 
 	module.exports = "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Support</title>\r\n    <script type=\"text/javascript\" src=\"http://assets.freshdesk.com/widget/freshwidget.js\"></script>\r\n    <style type=\"text/css\" media=\"screen, projection\">\r\n        @import url(http://assets.freshdesk.com/widget/freshwidget.css);\r\n    </style>\r\n</head>\r\n<body>\r\n\r\n<iframe title=\"Feedback Form\" class=\"freshwidget-embedded-form\" id=\"freshwidget-embedded-form\" src=\"https://mago.freshdesk.com/widgets/feedback_widget/new?&widgetType=embedded&screenshot=No\" scrolling=\"no\" height=\"500px\" width=\"100%\" frameborder=\"0\" >\r\n</iframe>\r\n\r\n\r\n\r\n</body>\r\n</html>";
 
 /***/ }),
-/* 152 */
+/* 157 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18563,7 +19148,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _serverStatusHtml = __webpack_require__(153);
+	var _serverStatusHtml = __webpack_require__(158);
 
 	var _serverStatusHtml2 = _interopRequireDefault(_serverStatusHtml);
 
@@ -18586,13 +19171,13 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 153 */
+/* 158 */
 /***/ (function(module, exports) {
 
 	module.exports = "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Server Status</title>\r\n</head>\r\n<body>\r\n    <div class=\"container\">\r\n        <div class=\"row\">\r\n            <div class=\"col-md-12\">\r\n                <iframe style=\"border: none;\" src=\"{{statusUrl}}\" height=\"800\" width=\"800\"></iframe>\r\n            </div>\r\n        </div>\r\n    </div>\r\n</body>\r\n</html>";
 
 /***/ }),
-/* 154 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18603,17 +19188,17 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _changePasswordHtml = __webpack_require__(155);
+	var _changePasswordHtml = __webpack_require__(160);
 
 	var _changePasswordHtml2 = _interopRequireDefault(_changePasswordHtml);
 
-	exports['default'] = function ($stateProvider) {
+	function changePassword($stateProvider) {
+
 	    $stateProvider.state('change-password', {
 	        parent: 'main',
 	        url: '/change-password',
-	        params: {},
-
-	        controller: ['Restangular', '$scope', 'notification', function (Restangular, $scope, notification) {
+	        headers: { "Content-Type": "application/json;charset=UTF-8" },
+	        controller: ['$http', '$scope', 'notification', function ($http, $scope, notification) {
 
 	            $scope.pwdata = {
 	                currentPassword: '',
@@ -18621,30 +19206,37 @@
 	                verifyPassword: ''
 	            };
 
-	            $scope.createPost = function () {
-	                Restangular.one('user/change-password').customPOST($scope.pwdata).then(function successCallback(response) {
-	                    notification.log(response.message, { addnCls: 'humane-flatty-success' });
+	            $scope.changePass = function () {
+	                $http.post('../api/user/change-password', $scope.pwdata).then(function successCallback(response) {
+	                    if (response.status === 200) {
+	                        notification.log(response.data.message, { addnCls: 'humane-flatty-success' });
+	                    }
 	                }, function errorCallback(response) {
-	                    notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                    if (response.status === 400) {
+	                        notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                    } else {
+	                        notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+	                    }
 	                });
 	            };
 	        }],
-
 	        template: _changePasswordHtml2['default']
 	    });
-	};
+	}
 
-	;
+	changePassword.$inject = ['$stateProvider'];
+
+	exports['default'] = changePassword;
 	module.exports = exports['default'];
 
 /***/ }),
-/* 155 */
+/* 160 */
 /***/ (function(module, exports) {
 
-	module.exports = "<head>\r\n  <style type=\"text/css\">\r\n    @media screen and ( max-width: 1600px ) {\r\n      .frm {\r\n        margin-left: 150px;\r\n        margin-right: 150px;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 989px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 767px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 600px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 540px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 480px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 380px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n  </style>\r\n</head>\r\n<body>\r\n\r\n<div class=\"row list-header\">\r\n    <div class=\"col-lg-12\">\r\n\r\n        <div class=\"page-header\">\r\n            <h4>Change Password</h4>\r\n        </div>\r\n\r\n    </div>\r\n</div>\r\n\r\n<div class=\"container\">\r\n    <div class=\"row\">\r\n\r\n        <div class=\"col-md-12\">\r\n            <form ng-submit=\"createPost()\">\r\n\r\n                <div class=\"form-group\">\r\n                    <label for=\"currentPassword\">Old Password</label>\r\n                    <input type=\"password\" class=\"form-control\" id=\"currentPassword\" ng-model=\"pwdata.currentPassword\" placeholder=\"\">\r\n                </div>\r\n\r\n                <div class=\"form-group\">\r\n                    <label for=\"newPassword\">New Password</label>\r\n                    <input type=\"password\" class=\"form-control\" id=\"newPassword\" ng-model=\"pwdata.newPassword\"  placeholder=\"\">\r\n                </div>\r\n\r\n                <div class=\"form-group\">\r\n                    <label for=\"verifyPassword\">Repeat Password</label>\r\n                    <input type=\"password\" class=\"form-control\" id=\"verifyPassword\" ng-model=\"pwdata.verifyPassword\" placeholder=\"\">\r\n                </div>\r\n\r\n                <button type=\"submit\" class=\"btn btn-default pull-right\">Submit</button>\r\n            </form>\r\n        </div>\r\n\r\n    </div>\r\n</div>\r\n</body>\r\n";
+	module.exports = "<head>\r\n  <style type=\"text/css\">\r\n    @media screen and ( max-width: 1600px ) {\r\n      .frm {\r\n        margin-left: 150px;\r\n        margin-right: 150px;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 989px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 767px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 600px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 540px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 480px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n\r\n    @media screen and ( max-width: 380px ) {\r\n      .frm {\r\n        margin-left: auto;\r\n        margin-right: auto;\r\n      }\r\n    }\r\n  </style>\r\n</head>\r\n<body>\r\n\r\n<div class=\"row list-header\">\r\n    <div class=\"col-lg-12\">\r\n\r\n        <div class=\"page-header\">\r\n            <h4>Change Password</h4>\r\n        </div>\r\n\r\n    </div>\r\n</div>\r\n\r\n<div class=\"container\">\r\n    <div class=\"row\">\r\n\r\n        <div class=\"col-md-12\">\r\n            <form ng-submit=\"changePass()\">\r\n\r\n                <div class=\"form-group\">\r\n                    <label for=\"currentPassword\">Old Password</label>\r\n                    <input type=\"password\" class=\"form-control\" id=\"currentPassword\" ng-model=\"pwdata.currentPassword\" placeholder=\"\">\r\n                </div>\r\n\r\n                <div class=\"form-group\">\r\n                    <label for=\"newPassword\">New Password</label>\r\n                    <input type=\"password\" class=\"form-control\" id=\"newPassword\" ng-model=\"pwdata.newPassword\"  placeholder=\"\">\r\n                </div>\r\n\r\n                <div class=\"form-group\">\r\n                    <label for=\"verifyPassword\">Repeat Password</label>\r\n                    <input type=\"password\" class=\"form-control\" id=\"verifyPassword\" ng-model=\"pwdata.verifyPassword\" placeholder=\"\">\r\n                </div>\r\n\r\n                <button type=\"submit\" class=\"btn btn-default pull-right\">Submit</button>\r\n            </form>\r\n        </div>\r\n\r\n    </div>\r\n</div>\r\n</body>\r\n";
 
 /***/ }),
-/* 156 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18655,7 +19247,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _epgchartHtml = __webpack_require__(157);
+	var _epgchartHtml = __webpack_require__(162);
 
 	var _epgchartHtml2 = _interopRequireDefault(_epgchartHtml);
 
@@ -18740,13 +19332,192 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 157 */
+/* 162 */
 /***/ (function(module, exports) {
 
 	module.exports = "<vis-graph2d data=\"data\" options=\"options\"></vis-graph2d>\r\n<vis-timeline data=\"data_timeline\" options=\"options\" events=\"events\"></vis-timeline>\r\n\r\n";
 
 /***/ }),
-/* 158 */
+/* 163 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _edit_buttonHtml = __webpack_require__(164);
+
+	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
+
+	exports['default'] = function (nga, admin) {
+	    var assetsDetails = admin.getEntity('assetsDetails');
+
+	    assetsDetails.listView().title('<h4>Assets Details <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').listActions(['edit', 'delete']).batchActions([]).fields([nga.field('assets_category_id', 'reference').targetEntity(admin.getEntity('assetsCategory')).targetField(nga.field('title')).isDetailLink(true).label('Assets Category'), nga.field('title', 'string').label('Title'), nga.field('short_description', 'text').map(function truncate(value) {
+	        if (!value) return '';
+	        return value.length > 80 ? value.substr(0, 80) + '...' : value;
+	    }).label('Short Description'), nga.field('icon_url').template('<img src="{{ entry.values.icon_url }}" height="35" width="35" />').label('Icon'), nga.field('image_url').template('<img src="{{ entry.values.image_url }}" height="35" width="35" />').label('Image'), nga.field('rating', 'number').label('Rating'), nga.field('price', 'number').label('Price'), nga.field('isavailable', 'boolean').label('Is Available')]);
+
+	    assetsDetails.deletionView().title('<h4>Assets Details <i class="fa fa-angle-right" aria-hidden="true"></i> Remove <span style ="color:red;"> {{ entry.values.title }} </span></h4>').actions(['<ma-back-button entry="entry" entity="entity"></ma-back-button>']);
+
+	    assetsDetails.creationView().title('<h4>Assets Details <i class="fa fa-angle-right" aria-hidden="true"></i> Create: Assets</h4>').fields([nga.field('assets_category_id', 'reference').targetEntity(admin.getEntity('assetsCategory')).targetField(nga.field('title')).isDetailLink(true).label('Assets Category'), nga.field('title', 'string').attributes({ placeholder: 'Asset Title' }).validation({ required: true }).label('Title'), nga.field('short_description', 'text').attributes({ placeholder: 'Specify short description you need for the asset' }).validation({ required: true }).label('Short Description'), nga.field('long_description', 'text').attributes({ placeholder: 'Specify long description you need for the asset' }).validation({ required: true }).label('Long Description'), nga.field('icon_url', 'file').uploadInformation({ 'url': '/file-upload/single-file/hospitalityAssets/icon_url', 'apifilename': 'result' }).template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.icon_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.icon_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">Not larger than 150 KB</small></div>').validation({
+	        validator: function validator(value) {
+	            if (value == null) {
+	                throw new Error('Please, choose your icon');
+	            } else {
+	                var icon_url = document.getElementById('icon_url');
+	                if (icon_url.value.length > 0) {
+	                    if (icon_url.files[0].size > 153600) {
+	                        throw new Error('Your Icon is too Big, not larger than 150 KB');
+	                    }
+	                }
+	            }
+	        }
+	    }).label('Icon *'), nga.field('image_url', 'file').uploadInformation({ 'url': '/file-upload/single-file/hospitalityAssets/image_url', 'apifilename': 'result' }).template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.image_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.image_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">Not larger than 600 KB</small></div>').validation({
+	        validator: function validator(value) {
+	            if (value == null) {
+	                throw new Error('Please, choose image');
+	            } else {
+	                var image_url = document.getElementById('image_url');
+	                if (image_url.value.length > 0) {
+	                    if (image_url.files[0].size > 614400) {
+	                        throw new Error('Your Image is too Big, not larger than 600 KB');
+	                    }
+	                }
+	            }
+	        }
+	    }).label('Image *'), nga.field('rating', 'number').attributes({ placeholder: 'Rating' }).validation({ required: true }).label('Rating'), nga.field('price', 'number').attributes({ placeholder: 'Price' }).validation({ required: true }).label('Price'), nga.field('json_actions', 'string').attributes({ placeholder: 'JSON Actions' }).validation({ required: true }).label('JSON Actions'), nga.field('isavailable', 'boolean').attributes({ placeholder: 'Is Available' }).validation({ required: true }).label('Is Available'), nga.field('template').label('').template(_edit_buttonHtml2['default'])]);
+
+	    assetsDetails.editionView().title('<h4>Assets Details <i class="fa fa-angle-right" aria-hidden="true"></i> Edit: {{ entry.values.title }}</h4>').actions(['list']).fields([assetsDetails.creationView().fields()]);
+
+	    return assetsDetails;
+	};
+
+	module.exports = exports['default'];
+
+/***/ }),
+/* 164 */
+/***/ (function(module, exports) {
+
+	module.exports = "<div class=\"row\">\r\n    <div class=\"btn-group inline pull-right\">\r\n      <div class=\"btn btn-small\"><ma-submit-button class=\"pull-right\" label=\"Submit\"></ma-submit-button></div>\r\n      <div class=\"btn btn-small\"><ma-back-button class=\"pull-right\" label=\"Cancel\"></ma-back-button></div>\r\n    </div>\r\n</div>\r\n\r\n<hr>";
+
+/***/ }),
+/* 165 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _edit_buttonHtml = __webpack_require__(164);
+
+	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
+
+	exports['default'] = function (nga, admin) {
+	    var assetsCategory = admin.getEntity('assetsCategory');
+
+	    assetsCategory.listView().title('<h4>Assets Category <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').listActions(['edit', 'delete']).batchActions([]).fields([nga.field('assets_master_id', 'reference').targetEntity(admin.getEntity('assetsMaster')).targetField(nga.field('title')).isDetailLink(true).label('Assets Master'), nga.field('title', 'string').label('Title'), nga.field('description', 'text').map(function truncate(value) {
+	        if (!value) return '';
+	        return value.length > 80 ? value.substr(0, 80) + '...' : value;
+	    }).label('Description'), nga.field('api_url', 'string').label('Api Url'), nga.field('image_url').template('<img src="{{ entry.values.image_url }}" height="35" width="35" />').label('Image'), nga.field('order', 'number').label('Order'), nga.field('isavailable', 'boolean').label('Is Available')]);
+
+	    assetsCategory.deletionView().title('<h4>Assets Category <i class="fa fa-angle-right" aria-hidden="true"></i> Remove <span style ="color:red;"> {{ entry.values.title }} </span></h4>').actions(['<ma-back-button entry="entry" entity="entity"></ma-back-button>']);
+
+	    assetsCategory.creationView().title('<h4>Assets Category <i class="fa fa-angle-right" aria-hidden="true"></i> Create: Assets</h4>').fields([nga.field('assets_master_id', 'reference').targetEntity(admin.getEntity('assetsMaster')).targetField(nga.field('title')).label('Assets Master'), nga.field('title', 'string').attributes({ placeholder: 'Asset Title' }).validation({ required: true }).label('Title'), nga.field('description', 'text').attributes({ placeholder: 'Specify information you need for the asset' }).validation({ required: true }).label('Description'), nga.field('api_url', 'string').attributes({ placeholder: 'Api Url' }).validation({ required: true }).label('Api Url'), nga.field('image_url', 'file').uploadInformation({ 'url': '/file-upload/single-file/hospitalityAssets/image_url', 'apifilename': 'result' }).template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.image_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.image_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">Not larger than 600 KB</small></div>').validation({
+	        validator: function validator(value) {
+	            if (value == null) {
+	                throw new Error('Please, choose image');
+	            } else {
+	                var image_url = document.getElementById('image_url');
+	                if (image_url.value.length > 0) {
+	                    if (image_url.files[0].size > 614400) {
+	                        throw new Error('Your Image is too Big, not larger than 600 KB');
+	                    }
+	                }
+	            }
+	        }
+	    }).label('Image *'), nga.field('order', 'number').attributes({ placeholder: 'Order' }).validation({ required: true }).label('Order'), nga.field('isavailable', 'boolean').attributes({ placeholder: 'Is Available' }).validation({ required: true }).label('Is Available'), nga.field('template').label('').template(_edit_buttonHtml2['default'])]);
+
+	    assetsCategory.editionView().title('<h4>Assets Category <i class="fa fa-angle-right" aria-hidden="true"></i> Edit: {{ entry.values.title }}</h4>').actions(['list']).fields([assetsCategory.creationView().fields(), nga.field('assetsDetails', 'referenced_list').label('Accets Details').targetEntity(admin.getEntity('assetsDetails')).targetReferenceField('id').targetFields([nga.field('title', 'string').label('Title'), nga.field('short_description', 'text').map(function truncate(value) {
+	        if (!value) return '';
+	        return value.length > 80 ? value.substr(0, 80) + '...' : value;
+	    }).label('Short Description'), nga.field('icon_url').template('<img src="{{ entry.values.icon_url }}" height="35" width="35" />').label('Icon'), nga.field('image_url').template('<img src="{{ entry.values.image_url }}" height="35" width="35" />').label('Image'), nga.field('rating', 'number').label('Rating'), nga.field('price', 'number').label('Price')]).listActions(['edit', 'delete']), nga.field('template').label('').template('<ma-create-button entity-name="assetsDetails" class="pull-right" label="ADD DETAILS" default-values="{ assets_category_id: entry.values.id }"></ma-create-button>')]);
+
+	    return assetsCategory;
+	};
+
+	module.exports = exports['default'];
+
+/***/ }),
+/* 166 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _edit_buttonHtml = __webpack_require__(164);
+
+	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
+
+	exports['default'] = function (nga, admin) {
+	    var assetsMaster = admin.getEntity('assetsMaster');
+
+	    assetsMaster.listView().title('<h4>Assets Master <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').listActions(['edit', 'delete']).batchActions([]).fields([nga.field('title', 'string').label('Title'), nga.field('description', 'text').map(function truncate(value) {
+	        if (!value) return '';
+	        return value.length > 80 ? value.substr(0, 80) + '...' : value;
+	    }).label('Description'), nga.field('icon_url').template('<img src="{{ entry.values.icon_url }}" height="35" width="35" />').label('Icon'), nga.field('image_url').template('<img src="{{ entry.values.image_url }}" height="35" width="35" />').label('Image'), nga.field('order', 'number').label('Order'), nga.field('isavailable', 'boolean').label('Is Available')]);
+
+	    assetsMaster.deletionView().title('<h4>Assets Master <i class="fa fa-angle-right" aria-hidden="true"></i> Remove <span style ="color:red;"> {{ entry.values.title }} </span></h4>').actions(['<ma-back-button entry="entry" entity="entity"></ma-back-button>']);
+
+	    assetsMaster.creationView().title('<h4>Assets Master <i class="fa fa-angle-right" aria-hidden="true"></i> Create: Assets</h4>').fields([nga.field('title', 'string').attributes({ placeholder: 'Asset Title' }).validation({ required: true }).label('Title'), nga.field('description', 'text').attributes({ placeholder: 'Specify information you need for the asset' }).validation({ required: true }).label('Description'), nga.field('icon_url', 'file').uploadInformation({ 'url': '/file-upload/single-file/hospitalityAssets/icon_url', 'apifilename': 'result' }).template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.icon_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.icon_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">Not larger than 150 KB</small></div>').validation({
+	        validator: function validator(value) {
+	            if (value == null) {
+	                throw new Error('Please, choose your icon');
+	            } else {
+	                var icon_url = document.getElementById('icon_url');
+	                if (icon_url.value.length > 0) {
+	                    if (icon_url.files[0].size > 153600) {
+	                        throw new Error('Your Icon is too Big, not larger than 150 KB');
+	                    }
+	                }
+	            }
+	        }
+	    }).label('Icon *'), nga.field('image_url', 'file').uploadInformation({ 'url': '/file-upload/single-file/hospitalityAssets/image_url', 'apifilename': 'result' }).template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.image_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.image_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">Not larger than 600 KB</small></div>').validation({
+	        validator: function validator(value) {
+	            if (value == null) {
+	                throw new Error('Please, choose image');
+	            } else {
+	                var image_url = document.getElementById('image_url');
+	                if (image_url.value.length > 0) {
+	                    if (image_url.files[0].size > 614400) {
+	                        throw new Error('Your Image is too Big, not larger than 600 KB');
+	                    }
+	                }
+	            }
+	        }
+	    }).label('Image *'), nga.field('order', 'number').attributes({ placeholder: 'Order' }).validation({ required: true }).label('Order'), nga.field('isavailable', 'boolean').attributes({ placeholder: 'Is Available' }).validation({ required: true }).label('Is Available'), nga.field('template').label('').template(_edit_buttonHtml2['default'])]);
+
+	    assetsMaster.editionView().title('<h4>Assets Master <i class="fa fa-angle-right" aria-hidden="true"></i> Edit: {{ entry.values.title }}</h4>').actions(['list']).fields([assetsMaster.creationView().fields()]);
+
+	    return assetsMaster;
+	};
+
+	module.exports = exports['default'];
+
+/***/ }),
+/* 167 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -18766,7 +19537,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 159 */
+/* 168 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -18786,7 +19557,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 160 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18797,11 +19568,11 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_genre_btnHtml = __webpack_require__(162);
+	var _filter_genre_btnHtml = __webpack_require__(170);
 
 	var _filter_genre_btnHtml2 = _interopRequireDefault(_filter_genre_btnHtml);
 
@@ -18876,19 +19647,13 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 161 */
-/***/ (function(module, exports) {
-
-	module.exports = "<div class=\"row\">\r\n    <div class=\"btn-group inline pull-right\">\r\n      <div class=\"btn btn-small\"><ma-submit-button class=\"pull-right\" label=\"Submit\"></ma-submit-button></div>\r\n      <div class=\"btn btn-small\"><ma-back-button class=\"pull-right\" label=\"Cancel\"></ma-back-button></div>\r\n    </div>\r\n</div>\r\n\r\n<hr>";
-
-/***/ }),
-/* 162 */
+/* 170 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"row\">\r\n    <div class=\"btn-group inline pull-right\"> \r\n      <div class=\"btn btn-small\"><ma-filtered-list-button entity-name=\"Channels\" class=\"pull-right\" label=\"SEE ALL CHANNELS\" filter=\"{ genre_id: entry.values.id }\"></ma-filtered-list-button></div> \r\n    </div>\r\n</div>\r\n\r\n<hr>";
 
 /***/ }),
-/* 163 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18899,11 +19664,11 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_genre_btnHtml = __webpack_require__(162);
+	var _filter_genre_btnHtml = __webpack_require__(170);
 
 	var _filter_genre_btnHtml2 = _interopRequireDefault(_filter_genre_btnHtml);
 
@@ -18959,7 +19724,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 164 */
+/* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18970,7 +19735,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19007,7 +19772,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 165 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19018,7 +19783,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19046,7 +19811,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 166 */
+/* 174 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19057,7 +19822,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19080,7 +19845,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 167 */
+/* 175 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19091,7 +19856,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19187,7 +19952,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 168 */
+/* 176 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19198,7 +19963,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19327,7 +20092,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 169 */
+/* 177 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19338,7 +20103,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19356,7 +20121,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 170 */
+/* 178 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19367,7 +20132,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19434,7 +20199,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 171 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19445,7 +20210,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19578,7 +20343,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 172 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19589,7 +20354,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19619,7 +20384,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 173 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19630,7 +20395,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19691,7 +20456,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 174 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19702,7 +20467,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19766,7 +20531,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 175 */
+/* 183 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19777,7 +20542,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19798,84 +20563,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 176 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-			value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _edit_buttonHtml = __webpack_require__(161);
-
-	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
-
-	exports['default'] = function (nga, admin) {
-			var company_settings = admin.getEntity('company_settings');
-			company_settings.listView().title('<h4>Users <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').batchActions([]).fields([nga.field('company_name', 'string').label('Company name'), nga.field('locale', 'string').label('Language')]).filters([nga.field('q').label('').template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>').pinned(true)]).listActions(['edit']).exportFields([company_settings.listView().fields()]);
-
-			company_settings.creationView().title('<h4>Company Settings <i class="fa fa-angle-right" aria-hidden="true"></i> Create: Setting </h4>').fields([nga.field('company_name', 'string').validation({ required: true }).label('Company name').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.company_name"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Set your company name (By default - MAGOWARE)</small>' + '</div>'), nga.field('company_logo', 'file').label('Company logo').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.company_logo }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.company_logo"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/company_logo', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-							var company_logo = document.getElementById('company_logo');
-							if (company_logo.value.length > 0) {
-									if (company_logo.files[0].size > 1048576) {
-											throw new Error('Your company logo is too Big, not larger than 1 MB');
-									}
-							}
-					}
-			}), nga.field('company_url', 'string').validation({ required: true }).attributes({ placeholder: 'Company website' }), nga.field('asset_limitations.client_limit', 'number').validation({ required: true }).attributes({ placeholder: 'Client limitation' }), nga.field('asset_limitations.channel_limit', 'number').validation({ required: true }).attributes({ placeholder: 'Channel limitation' }), nga.field('asset_limitations.vod_limit', 'number').validation({ required: true }).attributes({ placeholder: 'Vod item limitation' }), nga.field('locale', 'string').validation({ required: true }).defaultValue('en').label('Language').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.locale"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">User interface language (not in use).</small>' + '</div>'), nga.field('log_event_interval', 'number').validation({ required: true }).defaultValue(300).label('Log event interval').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.log_event_interval"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Interval between event logs</small>' + '</div>'), nga.field('mobile_background_url', 'file').label('Mobile Background').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">566x318 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-							var mobile_background_url = document.getElementById('mobile_background_url');
-							if (mobile_background_url.value.length > 0) {
-									if (mobile_background_url.files[0].size > 1048576) {
-											throw new Error('Your Mobile Background is too Big, not larger than 1 MB');
-									}
-							}
-					}
-			}), nga.field('mobile_logo_url', 'file').label('Mobile Logo').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">240x38 px, not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_logo_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-							var mobile_logo_url = document.getElementById('mobile_logo_url');
-							if (mobile_logo_url.value.length > 0) {
-									if (mobile_logo_url.files[0].size > 614400) {
-											throw new Error('Your Mobile Logo is too Big, not larger than 600 KB');
-									}
-							}
-					}
-			}), nga.field('box_logo_url', 'file').label('Box Logo').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1988x318 px,not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_logo_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-							var box_logo_url = document.getElementById('box_logo_url');
-							if (box_logo_url.value.length > 0) {
-									if (box_logo_url.files[0].size > 614400) {
-											throw new Error('Your Box Logo is too Big, not larger than 600 KB');
-									}
-							}
-					}
-			}), nga.field('box_background_url', 'file').label('Box Background').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1.3 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-							var box_background_url = document.getElementById('box_background_url');
-							if (box_background_url.value.length > 0) {
-									if (box_background_url.files[0].size > 1572864) {
-											throw new Error('Your Box Background is too Big, not larger than 1.3 MB');
-									}
-							}
-					}
-			}), nga.field('vod_background_url', 'file').label('VOD Background').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.vod_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.vod_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/vod_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-							var vod_background_url = document.getElementById('vod_background_url');
-							if (vod_background_url.value.length > 0) {
-									if (vod_background_url.files[0].size > 1048576) {
-											throw new Error('Your VOD Background is too Big, not larger than 1 MB');
-									}
-							}
-					}
-			}), nga.field('assets_url', 'string').validation({ required: true }).label('Assets URL').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.assets_url"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">URL to provide images through a CDN.</small>' + '</div>').attributes({ placeholder: 'Assets URL' }), nga.field('ip_service_url', 'string').validation({ required: true }).label('IP service URL').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.ip_service_url"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Service providing with device timezone.</small>' + '</div>').attributes({ placeholder: 'IP service URL' }), nga.field('ip_service_key', 'text').validation({ required: true }).label('IP service key'), nga.field('firebase_key', 'text').validation({ required: true }).label('Firebase key'), nga.field('help_page', 'string').validation({ required: true }).label('Help and Support website').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.help_page"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Configure application help page (By default /help_and_support)</small>' + '</div>'), nga.field('online_payment_url', 'string').validation({ required: true }).label('Online payment web page').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.online_payment_url"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Configure web page for online payments from application</small>' + '</div>'), nga.field('vod_subset_nr', 'number').defaultValue(200).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.vod_subset_nr"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Number of movies sent in each vod request</small>' + '</div>').label('Vod movies / request'), nga.field('activity_timeout', 'number').defaultValue(10800).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.activity_timeout"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Number of seconds to wait before screen goes black due to inactivity</small>' + '</div>').label('Inactivity Timeout'), nga.field('channel_log_time', 'number').defaultValue(6).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.channel_log_time"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Number of seconds to wait before sending log due to channel stream buffering</small>' + '</div>').label('Channel log time'), nga.field('email_address').validation({ required: true }).label('Email Address').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.email_address"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Email address appearing in the email details.</small>' + '</div>').attributes({ placeholder: 'Address' }), nga.field('email_username').validation({ required: true }).label('Email Username').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.email_username"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Username for outgoing smtp mail server.</small>' + '</div>').attributes({ placeholder: 'Username' }), nga.field('email_password', 'password').validation({ required: true }).label('Email Password').template('<div class="form-group">' + '<ma-input-field field="field" type="password" value="entry.values.email_password"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Password for outgoing smtp mail server.</small>' + '</div>').attributes({ placeholder: 'Password' }), nga.field('smtp_host').validation({ required: true }).label('Smtp host').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.smtp_host"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Smtp host and port (smtp_host:port)</small>' + '</div>').attributes({ placeholder: 'smtp.gmail.com:465' }), nga.field('smtp_secure', 'choice').defaultValue(true).choices([{ value: false, label: 'Disable secure connection with Smtp server' }, { value: true, label: 'Enable secure connection with Smtp server' }]).validation({ required: true }).template('<div class="form-group">' + '<ma-choice-field field="field" value="entry.values.smtp_secure"></ma-choice-field>' + '<small id="emailHelp" class="form-text text-muted">Consider your Smtp host configurations for this setting </small>' + '</div>').label('Secure connection'), nga.field('analytics_id', 'string').attributes({ placeholder: 'Analytics ID' }).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.analytics_id"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Google analytics ID to monitor audience and system logs.</small>' + '</div>').label('Analytics ID'), nga.field('new_encryption_key', 'string').attributes({ placeholder: 'Current encryption key' }).defaultValue('0123456789abcdef').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.new_encryption_key"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Current key. Used to decrypt the authentification token sent by the device</small>' + '</div>').label('Current encryption key'), nga.field('old_encryption_key', 'string').attributes({ placeholder: 'Previous encryption key' }).defaultValue('0123456789abcdef').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.old_encryption_key"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Previous encryption key. If key transition is checked and the new key fails, attempt to use this key for authetification </small>' + '</div>').label('Previous encryption key'), nga.field('key_transition', 'string').defaultValue(false).label('Key transition'), nga.field('template').label('').template(_edit_buttonHtml2['default'])]);
-
-			company_settings.editionView().title('<h4>Company Setting <i class="fa fa-angle-right" aria-hidden="true"></i> Edit: {{ entry.values.username }}</h4>').actions(['list']).fields([company_settings.creationView().fields()]);
-
-			return company_settings;
-	};
-
-	module.exports = exports['default'];
-
-/***/ }),
-/* 177 */
+/* 184 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19886,7 +20574,166 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
+
+	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
+
+	exports['default'] = function (nga, admin) {
+	    var company_settings = admin.getEntity('company_settings');
+	    company_settings.listView().title('<h4>Company <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').batchActions([]).fields([nga.field('company_name', 'string').label('Company name'), nga.field('locale', 'string').label('Language'), nga.field('expire_date', 'date').label('Expire Date')]).filters([nga.field('q').label('').template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>').pinned(true)]).listActions(['edit']).exportFields([company_settings.listView().fields()]);
+
+	    company_settings.creationView().title('<h4>Company Settings <i class="fa fa-angle-right" aria-hidden="true"></i> Create: Settings </h4>').onSubmitSuccess(['progression', 'notification', '$state', 'entry', 'entity', function (progression, notification, $state, entry, entity) {
+	        progression.done();
+	        notification.log('Successfully created', { addnCls: 'humane-flatty-success' });
+	        $state.go($state.get('edit'), { entity: 'company_settings', id: entry.values.id });
+	        return false;
+	    }]).fields([nga.field('company_name', 'string').attributes({ placeholder: 'Company Name' }).validation({ required: true }).label('Company name').template('<div>' + '<ma-input-field field="field" value="entry.values.company_name"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Set your company name (By default - MAGOWARE)</small>' + '</div>'), nga.field('company_url', 'string').validation({ required: true }).attributes({ placeholder: 'Company website' }), nga.field('email_address').validation({ required: true }).label('Email Address').template('<div>' + '<ma-input-field field="field" value="entry.values.email_address"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Email address appearing in the email details.</small>' + '</div>').attributes({ placeholder: 'Address' }), nga.field('email_username').validation({ required: true }).label('Email Username').template('<div>' + '<ma-input-field field="field" value="entry.values.email_username"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Username for outgoing smtp mail server.</small>' + '</div>').attributes({ placeholder: 'Username' }), nga.field('email_password', 'password').validation({ required: true }).label('Email Password').template('<div>' + '<ma-input-field field="field" type="password" value="entry.values.email_password"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Password for outgoing smtp mail server.</small>' + '</div>').attributes({ placeholder: 'Password' }), nga.field('template').label('').template(_edit_buttonHtml2['default']),
+
+	    //hidden field for creation view
+	    nga.field('company_logo', 'file').label('').defaultValue('/files/settings/mago.png').cssClasses('hidden').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.company_logo }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.company_logo"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/company_logo', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var company_logo = document.getElementById('company_logo');
+	            if (company_logo.value.length > 0) {
+	                if (company_logo.files[0].size > 1048576) {
+	                    throw new Error('Your company logo is too Big, not larger than 1 MB');
+	                }
+	            }
+	        }
+	    }), nga.field('asset_limitations.client_limit', 'number')
+	    // .validation({ required: true })
+	    .defaultValue('').label('').cssClasses('hidden').attributes({ placeholder: 'Client limitation' }), nga.field('asset_limitations.channel_limit', 'number').defaultValue('').label('').cssClasses('hidden')
+	    // .validation({ required: true })
+	    .attributes({ placeholder: 'Channel limitation' }), nga.field('asset_limitations.vod_limit', 'number').defaultValue('').label('').cssClasses('hidden')
+	    // .validation({ required: true })
+	    .attributes({ placeholder: 'Vod item limitation' }), nga.field('locale', 'string')
+	    // .validation({ required: true })
+	    .defaultValue('en').cssClasses('hidden').label('').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.locale"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">User interface language (not in use).</small>' + '</div>'), nga.field('log_event_interval', 'number')
+	    // .validation({ required: true })
+	    .defaultValue(300).cssClasses('hidden').label('').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.log_event_interval"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Interval between event logs</small>' + '</div>'), nga.field('mobile_background_url', 'file').defaultValue('/files/settings/mago.png').label('').cssClasses('hidden').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">566x318 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var mobile_background_url = document.getElementById('mobile_background_url');
+	            if (mobile_background_url.value.length > 0) {
+	                if (mobile_background_url.files[0].size > 1048576) {
+	                    throw new Error('Your Mobile Background is too Big, not larger than 1 MB');
+	                }
+	            }
+	        }
+	    }), nga.field('mobile_logo_url', 'file').defaultValue('/files/settings/mago.png').label('').cssClasses('hidden').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">240x38 px, not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_logo_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var mobile_logo_url = document.getElementById('mobile_logo_url');
+	            if (mobile_logo_url.value.length > 0) {
+	                if (mobile_logo_url.files[0].size > 614400) {
+	                    throw new Error('Your Mobile Logo is too Big, not larger than 600 KB');
+	                }
+	            }
+	        }
+	    }), nga.field('box_logo_url', 'file').defaultValue('/files/settings/mago.png').label('').cssClasses('hidden').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1988x318 px,not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_logo_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var box_logo_url = document.getElementById('box_logo_url');
+	            if (box_logo_url.value.length > 0) {
+	                if (box_logo_url.files[0].size > 614400) {
+	                    throw new Error('Your Box Logo is too Big, not larger than 600 KB');
+	                }
+	            }
+	        }
+	    }), nga.field('box_background_url', 'file').defaultValue('/files/settings/mago.png').label('').cssClasses('hidden').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1.3 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var box_background_url = document.getElementById('box_background_url');
+	            if (box_background_url.value.length > 0) {
+	                if (box_background_url.files[0].size > 1572864) {
+	                    throw new Error('Your Box Background is too Big, not larger than 1.3 MB');
+	                }
+	            }
+	        }
+	    }), nga.field('vod_background_url', 'file').defaultValue('/files/settings/mago.png').label('').cssClasses('hidden').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.vod_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.vod_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/vod_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var vod_background_url = document.getElementById('vod_background_url');
+	            if (vod_background_url.value.length > 0) {
+	                if (vod_background_url.files[0].size > 1048576) {
+	                    throw new Error('Your VOD Background is too Big, not larger than 1 MB');
+	                }
+	            }
+	        }
+	    }), nga.field('assets_url', 'string')
+	    // .validation({ required: true })
+	    .defaultValue('').cssClasses('hidden').label('').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.assets_url"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">URL to provide images through a CDN.</small>' + '</div>').attributes({ placeholder: 'Assets URL' }), nga.field('ip_service_url', 'string')
+	    // .validation({ required: true })
+	    .defaultValue('').cssClasses('hidden').label('').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.ip_service_url"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Service providing with device timezone.</small>' + '</div>').attributes({ placeholder: 'IP service URL' }), nga.field('ip_service_key', 'text').defaultValue('').cssClasses('hidden')
+	    // .validation({ required: true })
+	    .label(''), nga.field('firebase_key', 'text').defaultValue('').cssClasses('hidden')
+	    // .validation({ required: true })
+	    .label(''), nga.field('help_page', 'string').defaultValue('').cssClasses('hidden')
+	    // .validation({ required: true })
+	    .label('').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.help_page"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Configure application help page (By default /help_and_support)</small>' + '</div>'), nga.field('online_payment_url', 'string').defaultValue('').cssClasses('hidden')
+	    // .validation({ required: true })
+	    .label('').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.online_payment_url"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Configure web page for online payments from application</small>' + '</div>'), nga.field('vod_subset_nr', 'number').defaultValue(200).cssClasses('hidden').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.vod_subset_nr"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Number of movies sent in each vod request</small>' + '</div>').label(''), nga.field('activity_timeout', 'number').defaultValue(10800).cssClasses('hidden').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.activity_timeout"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Number of seconds to wait before screen goes black due to inactivity</small>' + '</div>').label(''), nga.field('channel_log_time', 'number').defaultValue(6).cssClasses('hidden').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.channel_log_time"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Number of seconds to wait before sending log due to channel stream buffering</small>' + '</div>').label(''), nga.field('smtp_host').defaultValue('')
+	    // .validation({ required: true })
+	    .cssClasses('hidden').label('').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.smtp_host"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Smtp host and port (smtp_host:port)</small>' + '</div>').attributes({ placeholder: 'smtp.gmail.com:465' }), nga.field('smtp_secure', 'choice').defaultValue(true).cssClasses('hidden').choices([{ value: false, label: 'Disable secure connection with Smtp server' }, { value: true, label: 'Enable secure connection with Smtp server' }])
+	    // .validation({ required: true})
+	    .template('<div class="form-group">' + '<ma-choice-field field="field" value="entry.values.smtp_secure"></ma-choice-field>' + '<small id="emailHelp" class="form-text text-muted">Consider your Smtp host configurations for this setting </small>' + '</div>').label(''), nga.field('analytics_id', 'string').defaultValue('').cssClasses('hidden').attributes({ placeholder: 'Analytics ID' }).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.analytics_id"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Google analytics ID to monitor audience and system logs.</small>' + '</div>').label(''), nga.field('new_encryption_key', 'string').attributes({ placeholder: 'Current encryption key' }).defaultValue('0123456789abcdef').cssClasses('hidden').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.new_encryption_key"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Current key. Used to decrypt the authentification token sent by the device</small>' + '</div>').label(''), nga.field('old_encryption_key', 'string').attributes({ placeholder: 'Previous encryption key' }).defaultValue('0123456789abcdef').cssClasses('hidden').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.old_encryption_key"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Previous encryption key. If key transition is checked and the new key fails, attempt to use this key for authetification </small>' + '</div>').label(''), nga.field('key_transition', 'string').defaultValue(false).cssClasses('hidden').label('')]);
+
+	    company_settings.editionView().title('<h4>Company Setting <i class="fa fa-angle-right" aria-hidden="true"></i> Edit: {{ entry.values.username }}</h4>').actions(['list']).fields([nga.field('company_name', 'string').validation({ required: true }).label('Company name').template('<div>' + '<ma-input-field field="field" value="entry.values.company_name"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Set your company name (By default - MAGOWARE)</small>' + '</div>'), nga.field('company_logo', 'file').label('Company logo').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.company_logo }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.company_logo"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/company_logo', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var company_logo = document.getElementById('company_logo');
+	            if (company_logo.value.length > 0) {
+	                if (company_logo.files[0].size > 1048576) {
+	                    throw new Error('Your company logo is too Big, not larger than 1 MB');
+	                }
+	            }
+	        }
+	    }), nga.field('company_url', 'string').validation({ required: true }).attributes({ placeholder: 'Company website' }), nga.field('asset_limitations.client_limit', 'number').validation({ required: true }).attributes({ placeholder: 'Client limitation' }), nga.field('asset_limitations.channel_limit', 'number').validation({ required: true }).attributes({ placeholder: 'Channel limitation' }), nga.field('asset_limitations.vod_limit', 'number').validation({ required: true }).attributes({ placeholder: 'Vod item limitation' }), nga.field('locale', 'string').validation({ required: true }).defaultValue('en').label('Language').template('<div>' + '<ma-input-field field="field" value="entry.values.locale"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">User interface language (not in use).</small>' + '</div>'), nga.field('log_event_interval', 'number').validation({ required: true }).defaultValue(300).label('Log event interval').template('<div>' + '<ma-input-field field="field" value="entry.values.log_event_interval"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Interval between event logs</small>' + '</div>'), nga.field('mobile_background_url', 'file').label('Mobile Background').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">566x318 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var mobile_background_url = document.getElementById('mobile_background_url');
+	            if (mobile_background_url.value.length > 0) {
+	                if (mobile_background_url.files[0].size > 1048576) {
+	                    throw new Error('Your Mobile Background is too Big, not larger than 1 MB');
+	                }
+	            }
+	        }
+	    }), nga.field('mobile_logo_url', 'file').label('Mobile Logo').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">240x38 px, not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_logo_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var mobile_logo_url = document.getElementById('mobile_logo_url');
+	            if (mobile_logo_url.value.length > 0) {
+	                if (mobile_logo_url.files[0].size > 614400) {
+	                    throw new Error('Your Mobile Logo is too Big, not larger than 600 KB');
+	                }
+	            }
+	        }
+	    }), nga.field('box_logo_url', 'file').label('Box Logo').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1988x318 px,not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_logo_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var box_logo_url = document.getElementById('box_logo_url');
+	            if (box_logo_url.value.length > 0) {
+	                if (box_logo_url.files[0].size > 614400) {
+	                    throw new Error('Your Box Logo is too Big, not larger than 600 KB');
+	                }
+	            }
+	        }
+	    }), nga.field('box_background_url', 'file').label('Box Background').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1.3 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var box_background_url = document.getElementById('box_background_url');
+	            if (box_background_url.value.length > 0) {
+	                if (box_background_url.files[0].size > 1572864) {
+	                    throw new Error('Your Box Background is too Big, not larger than 1.3 MB');
+	                }
+	            }
+	        }
+	    }), nga.field('vod_background_url', 'file').label('VOD Background').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.vod_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.vod_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/vod_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
+	            var vod_background_url = document.getElementById('vod_background_url');
+	            if (vod_background_url.value.length > 0) {
+	                if (vod_background_url.files[0].size > 1048576) {
+	                    throw new Error('Your VOD Background is too Big, not larger than 1 MB');
+	                }
+	            }
+	        }
+	    }), nga.field('background_video_url', 'string').validation({ required: false }).attributes({ placeholder: 'Background Video Url' }).label('Background Video Url'), nga.field('background_video_duration', 'number').validation({ required: false }).attributes({ placeholder: 'Background Video Duration' }).label('Background Video Duration'), nga.field('assets_url', 'string').validation({ required: true }).label('Assets URL').template('<div>' + '<ma-input-field field="field" value="entry.values.assets_url"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">URL to provide images through a CDN.</small>' + '</div>').attributes({ placeholder: 'Assets URL' }), nga.field('ip_service_url', 'string').validation({ required: true }).label('IP service URL').template('<div>' + '<ma-input-field field="field" value="entry.values.ip_service_url"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Service providing with device timezone.</small>' + '</div>').attributes({ placeholder: 'IP service URL' }), nga.field('ip_service_key', 'text').validation({ required: true }).label('IP service key'), nga.field('firebase_key', 'text').validation({ required: true }).label('Firebase key'), nga.field('help_page', 'string').validation({ required: true }).label('Help and Support website').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.help_page"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Configure application help page (By default /help_and_support)</small>' + '</div>'), nga.field('online_payment_url', 'string').validation({ required: true }).label('Online payment web page').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.online_payment_url"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Configure web page for online payments from application</small>' + '</div>'), nga.field('vod_subset_nr', 'number').defaultValue(200).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.vod_subset_nr"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Number of movies sent in each vod request</small>' + '</div>').label('Vod movies / request'), nga.field('activity_timeout', 'number').defaultValue(10800).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.activity_timeout"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Number of seconds to wait before screen goes black due to inactivity</small>' + '</div>').label('Inactivity Timeout'), nga.field('channel_log_time', 'number').defaultValue(6).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.channel_log_time"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Number of seconds to wait before sending log due to channel stream buffering</small>' + '</div>').label('Channel log time'), nga.field('email_address').validation({ required: true }).label('Email Address').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.email_address"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Email address appearing in the email details.</small>' + '</div>').attributes({ placeholder: 'Address' }), nga.field('email_username').validation({ required: true }).label('Email Username').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.email_username"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Username for outgoing smtp mail server.</small>' + '</div>').attributes({ placeholder: 'Username' }), nga.field('email_password', 'password').validation({ required: true }).label('Email Password').template('<div class="form-group">' + '<ma-input-field field="field" type="password" value="entry.values.email_password"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Password for outgoing smtp mail server.</small>' + '</div>').attributes({ placeholder: 'Password' }), nga.field('smtp_host').validation({ required: true }).label('Smtp host').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.smtp_host"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Smtp host and port (smtp_host:port)</small>' + '</div>').attributes({ placeholder: 'smtp.gmail.com:465' }), nga.field('smtp_secure', 'choice').defaultValue(true).choices([{ value: false, label: 'Disable secure connection with Smtp server' }, { value: true, label: 'Enable secure connection with Smtp server' }]).validation({ required: true }).template('<div class="form-group">' + '<ma-choice-field field="field" value="entry.values.smtp_secure"></ma-choice-field>' + '<small id="emailHelp" class="form-text text-muted">Consider your Smtp host configurations for this setting </small>' + '</div>').label('Secure connection'), nga.field('analytics_id', 'string').attributes({ placeholder: 'Analytics ID' }).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.analytics_id"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Google analytics ID to monitor audience and system logs.</small>' + '</div>').label('Analytics ID'), nga.field('new_encryption_key', 'string').attributes({ placeholder: 'Current encryption key' }).defaultValue('0123456789abcdef').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.new_encryption_key"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Current key. Used to decrypt the authentification token sent by the device</small>' + '</div>').label('Current encryption key'), nga.field('old_encryption_key', 'string').attributes({ placeholder: 'Previous encryption key' }).defaultValue('0123456789abcdef').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.old_encryption_key"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Previous encryption key. If key transition is checked and the new key fails, attempt to use this key for authetification </small>' + '</div>').label('Previous encryption key'), nga.field('key_transition', 'string').defaultValue(false).label('Key transition'), nga.field('template').label('').template(_edit_buttonHtml2['default'])]);
+
+	    return company_settings;
+	};
+
+	module.exports = exports['default'];
+
+/***/ }),
+/* 185 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19910,7 +20757,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 178 */
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19921,7 +20768,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -19929,63 +20776,102 @@
 
 	exports['default'] = function (nga, admin) {
 	    var ImagesSettings = admin.getEntity('ImagesSettings');
-	    ImagesSettings.listView().batchActions([]).fields([nga.field('box_logo_url', 'file').label('Box Logo *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1988x318 px,not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_logo_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-	            var box_logo_url = document.getElementById('box_logo_url');
-	            if (box_logo_url.value.length > 0) {
-	                if (box_logo_url.files[0].size > 614400) {
-	                    throw new Error('Your Box Logo is too Big, not larger than 600 KB');
+	    ImagesSettings.listView().batchActions([]).fields([nga.field('box_logo_url', 'file').label('Box Logo *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1988x318 px,not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_logo_url', 'apifilename': 'result' }).validation({
+	        validator: function validator(value) {
+	            if (value === null) {
+	                throw new Error('Please, choose Box Logo');
+	            } else {
+	                var box_logo_url = document.getElementById('box_logo_url');
+	                if (box_logo_url.value.length > 0) {
+	                    if (box_logo_url.files[0].size > 614400) {
+	                        throw new Error('Your Box Logo is too Big, not larger than 600 KB');
+	                    }
 	                }
 	            }
 	        }
-	    }), nga.field('box_background_url', 'file').label('Box Background *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1.3 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-	            var box_background_url = document.getElementById('box_background_url');
-	            if (box_background_url.value.length > 0) {
-	                if (box_background_url.files[0].size > 1572864) {
-	                    throw new Error('Your Box Background is too Big, not larger than 1.3 MB');
+	    }), nga.field('box_background_url', 'file').label('Box Background *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.box_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.box_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1.3 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/box_background_url', 'apifilename': 'result' }).validation({
+	        validator: function validator(value) {
+	            if (value == null) {
+	                throw new Error('Please, choose Box Background');
+	            } else {
+	                var box_background_url = document.getElementById('box_background_url');
+	                if (box_background_url.value.length > 0) {
+	                    if (box_background_url.files[0].size > 1572864) {
+	                        throw new Error('Your Box Background is too Big, not larger than 1.3 MB');
+	                    }
 	                }
 	            }
 	        }
-	    }), nga.field('mobile_background_url', 'file').label('Landscape Background Mobile *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">540x960 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-	            var mobile_background_url = document.getElementById('mobile_background_url');
-	            if (mobile_background_url.value.length > 0) {
-	                if (mobile_background_url.files[0].size > 1048576) {
-	                    throw new Error('Your Landscape Background Mobile is too Big, not larger than 1 MB');
+	    }), nga.field('mobile_background_url', 'file').label('Landscape Background Mobile *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">540x960 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_background_url', 'apifilename': 'result' }).validation({
+	        validator: function validator(value) {
+
+	            if (value == null) {
+	                throw new Error('Please, choose Landscape Background Mobile');
+	            } else {
+	                var mobile_background_url = document.getElementById('mobile_background_url');
+	                if (mobile_background_url.value.length > 0) {
+	                    if (mobile_background_url.files[0].size > 1048576) {
+	                        throw new Error('Your Landscape Background Mobile is too Big, not larger than 1 MB');
+	                    }
 	                }
 	            }
 	        }
-	    }), nga.field('portrait_background_url', 'file').label('Portrait Background Mobile').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.portrait_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.portrait_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">432x768 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/portrait_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-	            var portrait_background_url = document.getElementById('portrait_background_url');
-	            if (portrait_background_url.value.length > 0) {
-	                if (portrait_background_url.files[0].size > 1048576) {
-	                    throw new Error('Your Portrait Background Mobile is too Big, not larger than 1 MB');
+	    }), nga.field('portrait_background_url', 'file').label('Portrait Background Mobile').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.portrait_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.portrait_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">432x768 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/portrait_background_url', 'apifilename': 'result' }).validation({
+	        validator: function validator(value) {
+
+	            if (value == null) {
+	                throw new Error('Please, choose Portrait Background Mobile');
+	            } else {
+	                var portrait_background_url = document.getElementById('portrait_background_url');
+	                if (portrait_background_url.value.length > 0) {
+	                    if (portrait_background_url.files[0].size > 1048576) {
+	                        throw new Error('Your Portrait Background Mobile is too Big, not larger than 1 MB');
+	                    }
 	                }
 	            }
 	        }
-	    }), nga.field('mobile_logo_url', 'file').label('Mobile Logo *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">240x38 px, not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_logo_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-	            var mobile_logo_url = document.getElementById('mobile_logo_url');
-	            if (mobile_logo_url.value.length > 0) {
-	                if (mobile_logo_url.files[0].size > 614400) {
-	                    throw new Error('Your Mobile Logo is too Big, not larger than 600 KB');
+	    }), nga.field('mobile_logo_url', 'file').label('Mobile Logo *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.mobile_logo_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.mobile_logo_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">240x38 px, not larger than 600 KB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/mobile_logo_url', 'apifilename': 'result' }).validation({
+	        validator: function validator(value) {
+
+	            if (value == null) {
+	                throw new Error('Please, choose Mobile Logo');
+	            } else {
+	                var mobile_logo_url = document.getElementById('mobile_logo_url');
+	                if (mobile_logo_url.value.length > 0) {
+	                    if (mobile_logo_url.files[0].size > 614400) {
+	                        throw new Error('Your Mobile Logo is too Big, not larger than 600 KB');
+	                    }
 	                }
 	            }
 	        }
-	    }), nga.field('vod_background_url', 'file').label('VOD Background *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.vod_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.vod_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/vod_background_url', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-	            var vod_background_url = document.getElementById('vod_background_url');
-	            if (vod_background_url.value.length > 0) {
-	                if (vod_background_url.files[0].size > 1048576) {
-	                    throw new Error('Your VOD Background is too Big, not larger than 1 MB');
+	    }), nga.field('vod_background_url', 'file').label('VOD Background *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.vod_background_url }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.vod_background_url"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/vod_background_url', 'apifilename': 'result' }).validation({
+	        validator: function validator(value) {
+
+	            if (value == null) {
+	                throw new Error('Please, choose VOD Background');
+	            } else {
+	                var vod_background_url = document.getElementById('vod_background_url');
+	                if (vod_background_url.value.length > 0) {
+	                    if (vod_background_url.files[0].size > 1048576) {
+	                        throw new Error('Your VOD Background is too Big, not larger than 1 MB');
+	                    }
 	                }
 	            }
 	        }
-	    }), nga.field('company_name', 'string').validation({ required: true }).label('Company name').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.company_name"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Set your company name (By default - MAGOWARE)</small>' + '</div>'), nga.field('company_logo', 'file').label('Company logo *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.company_logo }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.company_logo"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/company_logo', 'apifilename': 'result' }).validation({ required: true, validator: function validator() {
-	            var company_logo = document.getElementById('company_logo');
-	            if (company_logo.value.length > 0) {
-	                if (company_logo.files[0].size > 1048576) {
-	                    throw new Error('Your company logo is too Big, not larger than 1 MB');
+	    }), nga.field('background_video_url', 'string').validation({ required: false }).attributes({ placeholder: 'Background Video Url' }).label('Background Video Url'), nga.field('background_video_duration', 'number').validation({ required: false }).attributes({ placeholder: 'Background Video Duration' }).label('Background Video Duration'), nga.field('company_name', 'string').validation({ required: true }).label('Company name').template('<div>' + '<ma-input-field field="field" value="entry.values.company_name"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Set your company name (By default - MAGOWARE)</small>' + '</div>'), nga.field('company_logo', 'file').label('Company logo *').template('<div class="row">' + '<div class="col-xs-12 col-sm-1"><img src="{{ entry.values.company_logo }}" height="40" width="40" /></div>' + '<div class="col-xs-12 col-sm-8"><ma-file-field field="field" value="entry.values.company_logo"></ma-file-field></div>' + '</div>' + '<div class="row"><small id="emailHelp" class="form-text text-muted">1920x1080 px, not larger than 1 MB</small></div>').uploadInformation({ 'url': '/file-upload/single-file/settings/company_logo', 'apifilename': 'result' }).validation({
+	        validator: function validator(value) {
+	            if (value == null) {
+	                throw new Error('Please, choose Company logo');
+	            } else {
+	                var company_logo = document.getElementById('company_logo');
+	                if (company_logo.value.length > 0) {
+	                    if (company_logo.files[0].size > 1048576) {
+	                        throw new Error('Your company logo is too Big, not larger than 1 MB');
+	                    }
 	                }
 	            }
 	        }
-	    }), nga.field('locale', 'string').validation({ required: true }).label('Locale').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.locale"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">User interface language (not in use).</small>' + '</div>'), nga.field('template').label('').template(_edit_buttonHtml2['default'])]);
+	    }), nga.field('locale', 'string').validation({ required: true }).label('Locale').template('<div>' + '<ma-input-field field="field" value="entry.values.locale"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">User interface language (not in use).</small>' + '</div>'), nga.field('template').label('').template(_edit_buttonHtml2['default'])]);
 
 	    ImagesSettings.editionView().title('<h4><i class="fa fa-angle-right" aria-hidden="true"></i> Images and Logos</h4>').actions(['']).onSubmitSuccess(['progression', 'notification', '$state', 'entry', 'entity', function (progression, notification, $state, entry, entity) {
 	        progression.done(); // stop the progress bar
@@ -20001,7 +20887,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 179 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20012,7 +20898,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20036,7 +20922,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 180 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20047,7 +20933,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20071,7 +20957,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 181 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20082,7 +20968,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20106,7 +20992,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 182 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20117,7 +21003,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20131,7 +21017,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 183 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20142,7 +21028,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20169,7 +21055,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 184 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20180,7 +21066,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20216,7 +21102,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 185 */
+/* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20227,7 +21113,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20251,7 +21137,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 186 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20262,7 +21148,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20295,7 +21181,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 187 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20306,7 +21192,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20398,7 +21284,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 188 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20409,7 +21295,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20494,7 +21380,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 189 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20505,7 +21391,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20528,7 +21414,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 190 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20539,7 +21425,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20563,7 +21449,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 191 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20574,7 +21460,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20604,7 +21490,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 192 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20615,7 +21501,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20647,7 +21533,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 193 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20658,7 +21544,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20677,7 +21563,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 194 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20688,7 +21574,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20777,7 +21663,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 195 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20788,7 +21674,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20812,7 +21698,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 196 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20823,7 +21709,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -20871,7 +21757,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 197 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20882,13 +21768,13 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
 	exports['default'] = function (nga, admin) {
 	        var epgdata = admin.getEntity('EpgData');
-	        epgdata.listView().title('<h4>Epg Data <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').actions(['batch', 'export', 'create']).fields([nga.field('channel_number').cssClasses('hidden-xs').label('Nr'), nga.field('title', 'string').label('Title'), nga.field('episode_title', 'string').label('Episode title'), nga.field('short_name', 'string').cssClasses('hidden-xs').label('Short Name'), nga.field('event_category', 'string').label('Category'), nga.field('event_rating', 'number').attributes({ min: 1, max: 10 }).label('Rating'), nga.field('event_language', 'string').label('Language'), nga.field('short_description').label('Short Description'), nga.field('long_description', 'text').map(function truncate(value) {
+	        epgdata.listView().title('<h4>Epg Data <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').actions(['filter', 'batch', 'export', 'create']).fields([nga.field('channel_number').cssClasses('hidden-xs').label('Nr'), nga.field('title', 'string').label('Title'), nga.field('episode_title', 'string').label('Episode title'), nga.field('short_name', 'string').cssClasses('hidden-xs').label('Short Name'), nga.field('event_category', 'string').label('Category'), nga.field('event_rating', 'number').attributes({ min: 1, max: 10 }).label('Rating'), nga.field('event_language', 'string').label('Language'), nga.field('short_description').label('Short Description'), nga.field('long_description', 'text').map(function truncate(value) {
 	                if (!value) {
 	                        return 'No Description';
 	                }
@@ -20897,7 +21783,13 @@
 	                if (!value) {
 	                        return "No Timezone";
 	                }
-	        }).cssClasses('hidden-xs').label('Timezone')]).filters([nga.field('q').label('').template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"></input><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>').pinned(true)]).listActions(['edit']).exportFields([epgdata.listView().fields()]);
+	        }).cssClasses('hidden-xs').label('Timezone')]).filters([nga.field('q').label('').template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>').pinned(true), nga.field('title').attributes({ placeholder: 'Full Title' }).label('Title'), nga.field('channel_number', 'number').attributes({ placeholder: 'Channel Number' }).label('Channel Number'), nga.field('program_start', 'datetime').transform(function (value) {
+	                var value1 = value.toString();
+	                return value1;
+	        }).attributes({ placeholder: 'Program Start' }).label('Program Start'), nga.field('program_end', 'datetime').transform(function (value) {
+	                var value2 = value.toString();
+	                return value2;
+	        }).attributes({ placeholder: 'Program End' }).label('Program End')]).listActions(['edit']).exportFields([epgdata.listView().fields()]);
 
 	        epgdata.creationView().onSubmitSuccess(['progression', 'notification', '$state', 'entry', 'entity', function (progression, notification, $state, entry, entity) {
 	                progression.done();
@@ -20925,7 +21817,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 198 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20936,7 +21828,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _epg_logsHtml = __webpack_require__(199);
+	var _epg_logsHtml = __webpack_require__(207);
 
 	var _epg_logsHtml2 = _interopRequireDefault(_epg_logsHtml);
 
@@ -20963,13 +21855,13 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 199 */
+/* 207 */
 /***/ (function(module, exports) {
 
 	module.exports = "<!DOCTYPE html>\r\n<html >\r\n<head>\r\n    <title>Simple Invoicing - Built with AngularJS</title>\r\n    <meta charset='utf-8'>\r\n    <meta name=\"description\" content=\"AngularJS and Angular Code Example for creating Invoices and Invoicing Application\">\r\n    <script src=\"https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"js/main.js\"></script>\r\n</head>\r\n<body>\r\n\r\n<div class=\"container\" ng-app=\"myApp\" ng-controller=\"logsCtrl\">\r\n    <div class=\"row\">\r\n        <div class=\"btn-group inline pull-right\">\r\n            <div class=\"btn btn-small\"><see-logs post=\"entry\" class=\"pull-right\" data-method=\"ctrlFn\"></see-logs></div>\r\n            <div class=\"btn btn-small\"><ma-back-button class=\"pull-right\" label=\"Cancel\"></ma-back-button></div>\r\n        </div>\r\n    </div>\r\n    <hr><br/><br/><br/><br/>\r\n\r\n    <div class=\"row\">\r\n        <table class=\"table\">\r\n            <thead>\r\n            <tr>\r\n                <th style=\"border-bottom: none;\">{{records1[0]}}</th>\r\n                <th style=\"border-bottom: none;\">{{records1[1]}}</th>\r\n                <th style=\"border-bottom: none;\">{{records1[2]}}</th>\r\n                <th style=\"border-bottom: none;\">{{records1[3]}}</th>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            <tr ng-repeat=\"x in records.message\">\r\n                <td>{{x.file_name}}</td>\r\n                <td>{{x.saved_records}}</td>\r\n                <td>{{x.non_saved_records}}</td>\r\n                <td>{{x.error_log}}</td>\r\n            </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n\r\n</body>\r\n</html>";
 
 /***/ }),
-/* 200 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20980,11 +21872,11 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_genre_btnHtml = __webpack_require__(162);
+	var _filter_genre_btnHtml = __webpack_require__(170);
 
 	var _filter_genre_btnHtml2 = _interopRequireDefault(_filter_genre_btnHtml);
 
@@ -21023,7 +21915,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 201 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21034,7 +21926,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -21141,7 +22033,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 202 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21152,7 +22044,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -21233,7 +22125,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 203 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21244,15 +22136,15 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_package_btnHtml = __webpack_require__(204);
+	var _filter_package_btnHtml = __webpack_require__(212);
 
 	var _filter_package_btnHtml2 = _interopRequireDefault(_filter_package_btnHtml);
 
-	var _drag_drop_packageDrag_and_drop_templateHtml = __webpack_require__(205);
+	var _drag_drop_packageDrag_and_drop_templateHtml = __webpack_require__(213);
 
 	var _drag_drop_packageDrag_and_drop_templateHtml2 = _interopRequireDefault(_drag_drop_packageDrag_and_drop_templateHtml);
 
@@ -21304,19 +22196,19 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 204 */
+/* 212 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"row\">\r\n    <div class=\"btn-group inline pull-right\"> \r\n      <div class=\"btn btn-small\"><ma-filtered-list-button entity-name=\"packagechannels\" class=\"pull-right\" label=\"SEE ALL CHANNELS\" filter=\"{ package_id: entry.values.id }\"></ma-filtered-list-button></div> \r\n      <div class=\"btn btn-small\"><ma-create-button entity-name=\"packagechannels\" class=\"pull-right\" label=\"ADD CHANNEL\" default-values=\"{ package_id: entry.values.id }\"></ma-create-button></div> \r\n    </div>\r\n</div>\r\n\r\n<hr>";
 
 /***/ }),
-/* 205 */
+/* 213 */
 /***/ (function(module, exports) {
 
 	module.exports = "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Drag &amp; Drop Lists for angular.js</title>\r\n</head>\r\n<body ng-app=\"myApp\">\r\n\r\n<div ng-controller=\"dragdropctrl\">\r\n    <div class=\"multiDemo row\">\r\n\r\n        <p class=\"text-center bg-default paragraph\">You can select or multiselect Channels from Available list to Selected list and back.</p>\r\n\r\n        <div class=\"col-md-12\">\r\n            <div class=\"row\">\r\n\r\n                <div ng-repeat=\"list in models\" class=\"col-md-6\">\r\n                    <div class=\"panel panel-default\">\r\n                        <div class=\"panel-heading\">\r\n                            <h3 class=\"panel-title text-center\">{{list.listName}}</h3>\r\n                        </div>\r\n                        <div class=\"panel-body\">\r\n                            <input type=\"text\" id=\"usr\" ng-model=\"searchText\" placeholder=\"Search Channel by name or by number...\" />\r\n                            <ul dnd-list dnd-drop=\"onDrop(list, item, index)\">\r\n                                <li ng-repeat=\"item in list.items | filter:searchText\"\r\n                                    dnd-draggable=\"getSelectedItemsIncluding(list, item)\"\r\n                                    dnd-dragstart=\"onDragstart(list, event)\"\r\n                                    dnd-moved=\"onMoved(list)\"\r\n                                    dnd-dragend=\"list.dragging = false\"\r\n                                    dnd-selected=\"item.selected = !item.selected\"\r\n                                    ng-class=\"{'selected': item.selected}\"\r\n                                    ng-hide=\"list.dragging && item.selected\"\r\n                                >\r\n                                    <div style=\"display: none;\">{{item.id}}</div> &nbsp;{{item.nr}}&nbsp;-&nbsp;{{item.label}}\r\n                                </li>\r\n                            </ul>\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n            </div><!--row-->\r\n            <div class=\"row\">\r\n                <div class=\"btn-group inline pull-right\">\r\n                    <div class=\"btn btn-small\"><see-drag post=\"entry\" class=\"pull-right\" data-method=\"ctrlFn\"></see-drag></div>\r\n                    <!--<div class=\"btn btn-small\"><ma-filtered-list-button entity-name=\"packagechannels\" class=\"pull-right\" label=\"SEE ALL CHANNELS\" filter=\"{ package_id: entry.values.id }\"></ma-filtered-list-button></div>-->\r\n                </div>\r\n            </div><!--row-->\r\n            <hr><br/><br/><br/><br/>\r\n        </div><!--col-md-12-->\r\n    </div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n</div>\r\n</body>\r\n</html>";
 
 /***/ }),
-/* 206 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21327,11 +22219,11 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_package_btnHtml = __webpack_require__(204);
+	var _filter_package_btnHtml = __webpack_require__(212);
 
 	var _filter_package_btnHtml2 = _interopRequireDefault(_filter_package_btnHtml);
 
@@ -21350,7 +22242,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 207 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21361,11 +22253,11 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_package_btnHtml = __webpack_require__(204);
+	var _filter_package_btnHtml = __webpack_require__(212);
 
 	var _filter_package_btnHtml2 = _interopRequireDefault(_filter_package_btnHtml);
 
@@ -21392,7 +22284,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 208 */
+/* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21403,11 +22295,11 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_genre_btnHtml = __webpack_require__(162);
+	var _filter_genre_btnHtml = __webpack_require__(170);
 
 	var _filter_genre_btnHtml2 = _interopRequireDefault(_filter_genre_btnHtml);
 
@@ -21427,7 +22319,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 209 */
+/* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21438,7 +22330,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -21470,7 +22362,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 210 */
+/* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21481,7 +22373,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -21499,7 +22391,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 211 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21510,7 +22402,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -21537,7 +22429,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 212 */
+/* 220 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -21556,7 +22448,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 213 */
+/* 221 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -21575,7 +22467,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 214 */
+/* 222 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -21594,7 +22486,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 215 */
+/* 223 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -21613,7 +22505,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 216 */
+/* 224 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -21632,7 +22524,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 217 */
+/* 225 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21643,7 +22535,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -21651,14 +22543,14 @@
 
 	exports['default'] = function (nga, admin) {
 		var settings = admin.getEntity('Settings');
-		settings.listView().batchActions([]).fields([nga.field('analytics_id', 'string').attributes({ placeholder: 'Analytics ID' }).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.analytics_id"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Google analytics ID to monitor audience and system logs.</small>' + '</div>').label('Analytics ID'), nga.field('company_name', 'string').validation({ required: true }).label('Company name').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.company_name"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Set your company name (By default - MAGOWARE)</small>' + '</div>'), nga.field('locale', 'string').validation({ required: true }).label('Locale').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.locale"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">User interface language (not in use).</small>' + '</div>'), nga.field('allow_guest_login', 'boolean').label('').template('<form ng-app="myApp" ng-controller="checkboxController">' + '<div class="form-check">' + '<label class="toggle">' + '<input type="checkbox" name="toggle" ng-change="setValueForGuest(checkboxModel.checkbox_value)" ng-model="checkboxModel.checkbox_value"' +
+		settings.listView().batchActions([]).fields([nga.field('smtp_host').validation({ required: true }).label('Smtp host').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.smtp_host"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Smtp host and port (smtp_host:port)</small>' + '</div>').attributes({ placeholder: 'smtp.gmail.com:465' }), nga.field('email_username').validation({ required: true }).label('Email Username').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.email_username"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Username for outgoing smtp mail server.</small>' + '</div>').attributes({ placeholder: 'Username' }), nga.field('email_password', 'password').validation({ required: true }).label('Email Password').template('<div class="form-group">' + '<ma-input-field field="field" type="password" value="entry.values.email_password"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Password for outgoing smtp mail server.</small>' + '</div>').attributes({ placeholder: 'Password' }), nga.field('smtp_secure', 'choice').defaultValue(true).choices([{ value: false, label: 'Disable secure connection with Smtp server' }, { value: true, label: 'Enable secure connection with Smtp server' }]).validation({ required: true }).template('<div class="form-group">' + '<ma-choice-field field="field" value="entry.values.smtp_secure"></ma-choice-field>' + '<small id="emailHelp" class="form-text text-muted">Consider your Smtp host configurations for this setting </small>' + '</div>').label('Secure connection'), nga.field('email_address').validation({ required: true }).label('Email Address').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.email_address"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Email address appearing in the email details.</small>' + '</div>').attributes({ placeholder: 'Address' }), nga.field('analytics_id', 'string').attributes({ placeholder: 'Analytics ID' }).template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.analytics_id"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Google analytics ID to monitor audience and system logs.</small>' + '</div>').label('Analytics ID'), nga.field('company_name', 'string').validation({ required: true }).label('Company name').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.company_name"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Set your company name (By default - MAGOWARE)</small>' + '</div>'), nga.field('locale', 'string').validation({ required: true }).label('Locale').template('<div class="form-group">' + '<ma-input-field field="field" value="entry.values.locale"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">User interface language (not in use).</small>' + '</div>'), nga.field('allow_guest_login', 'boolean').label('').template('<form ng-app="myApp" ng-controller="checkboxController">' + '<div class="form-check">' + '<label class="toggle">' + '<input type="checkbox" name="toggle" ng-change="setValueForGuest(checkboxModel.checkbox_value)" ng-model="checkboxModel.checkbox_value"' +
 		/*'ng-true-value="true" ng-false-value="false"*/'> <span class="label-text">Allow Guest Login</span>' + '</label>' + '</div>' + '</form>'), nga.field('template').label('').template(_edit_buttonHtml2['default']),
 
 		//HIDDEN FROM UI
 		nga.field('updatedAt', 'datetime').cssClasses('hidden').editable(false).label(''), nga.field('menulastchange', 'datetime').cssClasses('hidden').editable(false).label(''), nga.field('updatemenulastchange', 'boolean').cssClasses('hidden').editable(true).validation({ required: false }).label(''), nga.field('livetvlastchange', 'datetime').cssClasses('hidden').editable(false).label(''), nga.field('updatelivetvtimestamp', 'boolean').cssClasses('hidden').editable(true).validation({ required: false }).label(''), nga.field('vodlastchange', 'datetime').cssClasses('hidden').editable(false).label(''), nga.field('updatevodtimestamp', 'boolean').cssClasses('hidden').editable(true).validation({ required: false }).label(''), nga.field('googlegcmapi').template('<div class="form-group" style="display: none;">' + '<ma-input-field field="field" value="entry.values.googlegcmapi"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Google GCM API code for push messages to android devices.</small>' + '</div>').label(''), nga.field('applekeyid').template('<div class="form-group" style="display: none;">' + '<ma-input-field field="field" value="entry.values.applekeyid"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Apple key id for push messages to apple devices.</small>' + '</div>').label(''), nga.field('appleteamid').template('<div class="form-group" style="display: none;">' + '<ma-input-field field="field" value="entry.values.appleteamid"></ma-input-field>' + '<small id="emailHelp" class="form-text text-muted">Apple team id for push messages to apple devices.</small>' + '</div>').label(''), nga.field('applecertificate', 'text').template('<div class="form-group" style="display: none;">' + '<ma-text-field field="field" value="entry.values.applecertificate"></ma-text-field>' + '<small id="emailHelp" class="form-text text-muted">Apple team id for push messages to apple devices.</small>' + '</div>').label('')]);
 
 		//./HIDDEN FROM UI
-		settings.editionView().title('<h4><i class="fa fa-angle-right" aria-hidden="true"></i> Other</h4>').actions(['']).onSubmitSuccess(['progression', 'notification', '$state', 'entry', 'entity', function (progression, notification, $state, entry, entity) {
+		settings.editionView().title('<h4><i class="fa fa-angle-right" aria-hidden="true"></i> Company Settings</h4>').actions(['']).onSubmitSuccess(['progression', 'notification', '$state', 'entry', 'entity', function (progression, notification, $state, entry, entity) {
 			progression.done(); // stop the progress bar
 			notification.log('Element #' + entry._identifierValue + ' successfully edited.', { addnCls: 'humane-flatty-success' }); // add a notification
 			// redirect to the list view
@@ -21672,7 +22564,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 218 */
+/* 226 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21683,7 +22575,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -21761,7 +22653,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 219 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21772,25 +22664,25 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
 	exports['default'] = function (nga, admin) {
 		var user = admin.getEntity('Users');
-		user.listView().title('<h4>Users <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').batchActions([]).actions(['<roles post="entry"></roles>', 'filter', 'export', 'create', '<invite type="invite_users" selection="selection"></invite>']).fields([nga.field('group_id', 'reference').targetEntity(admin.getEntity('Groups')).targetField(nga.field('name')).label('Group'), nga.field('company_id', 'reference').targetEntity(admin.getEntity('Settings')).targetField(nga.field('company_name')).attributes({ placeholder: 'Choose company from dropdown list' }).perPage(-1).label('Company'), nga.field('username', 'string').label('Username'), nga.field('email', 'email').cssClasses('hidden-xs').label('Email'), nga.field('telephone', 'string').cssClasses('hidden-xs').label('Telephone'), nga.field('last_login_ip', 'string').map(function truncate(value) {
+		user.listView().title('<h4>Users <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').batchActions([]).actions(['<roles post="entry"></roles>', 'filter', 'export', '<invite type="invite_users" selection="selection"></invite>']).fields([nga.field('group_id', 'reference').targetEntity(admin.getEntity('Groups')).targetField(nga.field('name')).label('Group'), nga.field('company_id', 'reference').targetEntity(admin.getEntity('Settings')).targetField(nga.field('company_name')).attributes({ placeholder: 'Choose company from dropdown list' }).perPage(-1).label('Company'), nga.field('username', 'string').label('Username'), nga.field('email', 'email').cssClasses('hidden-xs').label('Email'), nga.field('telephone', 'string').cssClasses('hidden-xs').label('Telephone'), nga.field('updatedAt', 'date').label('UpdatedAt'), nga.field('last_login_ip', 'string').map(function truncate(value) {
 			if (!value) {
-				return '';
+				return 'Invitation Pending';
 			}
 			return value.length > 14 ? value.substr(0, 14) + '...' : value;
-		}).label('Last Login IP'), nga.field('isavailable', 'boolean').label('Is Available')]).filters([nga.field('q').label('').template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>').pinned(true), nga.field('group_id', 'reference').targetEntity(admin.getEntity('Groups')).targetField(nga.field('name')).label('Group')]).listActions(['edit']).exportFields([user.listView().fields()]);
+		}).label('Last Login IP'), nga.field('isavailable', 'boolean').label('Is Available')]).filters([nga.field('q').label('').template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>').pinned(true), nga.field('company_id', 'reference').targetEntity(admin.getEntity('Settings')).targetField(nga.field('company_name')).label('Company'), nga.field('group_id', 'reference').targetEntity(admin.getEntity('Groups')).targetField(nga.field('name')).label('Group')]).listActions(['edit', '<approve-invitation size="xs" review="entry"></approve-invitation>']).exportFields([user.listView().fields()]);
 
 		user.creationView().title('<h4>Users <i class="fa fa-angle-right" aria-hidden="true"></i> Create: User </h4>').fields([nga.field('group_id', 'reference').targetEntity(admin.getEntity('Groups')).targetField(nga.field('name')).validation({ validator: function validator(value) {
 				if (value === null || value === '') {
 					throw new Error('Please Select Group');
 				}
 			}
-		}).permanentFilters({ exclude_group: 'superadmin' }).attributes({ placeholder: 'Select group' }).label('Group *'), nga.field('company_id', 'reference').targetEntity(admin.getEntity('Settings')).targetField(nga.field('company_name')).attributes({ placeholder: 'Choose company from dropdown list' }).perPage(-1).label('Company'), nga.field('username', 'string').attributes({ placeholder: 'Username must be at least 3 character long' }).validation({ required: true, minlength: 3 }).label('Username'), nga.field('hashedpassword', 'password').attributes({ placeholder: 'Password must be at least 4 character long' }).validation({ required: true, minlength: 4 }).label('Password'), nga.field('email', 'email').attributes({ placeholder: 'Email' }).validation({ required: true }).label('Email'), nga.field('telephone', 'string').attributes({ placeholder: 'Telephone' }).validation({ required: true }).label('Telephone'), nga.field('jwtoken', 'string').attributes({ placeholder: 'Api Key', readOnly: true }).defaultValue('').label('Api Key'), nga.field('template').label('').template('<generate post="entry"></generate>'), nga.field('isavailable', 'boolean').validation({ required: true }).label('Is Available'), nga.field('template').label('').template(_edit_buttonHtml2['default']),
+		}).permanentFilters({ exclude_group: 'superadmin' }).attributes({ placeholder: 'Select group' }).label('Group *'), nga.field('username', 'string').attributes({ placeholder: 'Username must be at least 3 character long' }).validation({ required: true, minlength: 3 }).label('Username'), nga.field('hashedpassword', 'password').attributes({ placeholder: 'Password must be at least 4 character long' }).validation({ required: true, minlength: 4 }).label('Password'), nga.field('email', 'email').attributes({ placeholder: 'Email' }).validation({ required: true }).label('Email'), nga.field('telephone', 'string').attributes({ placeholder: 'Telephone' }).validation({ required: true }).label('Telephone'), nga.field('jwtoken', 'string').attributes({ placeholder: 'Api Key', readOnly: true }).defaultValue('').label('Api Key'), nga.field('template').label('').template('<generate post="entry"></generate>'), nga.field('isavailable', 'boolean').validation({ required: true }).label('Is Available'), nga.field('template').label('').template(_edit_buttonHtml2['default']),
 		//hidden from UI
 		nga.field('third_party_api_token', 'string').cssClasses('hidden').attributes({ placeholder: 'Third party token' }).defaultValue('').label('')]);
 
@@ -21799,7 +22691,7 @@
 					throw new Error('Please Select Group');
 				}
 			}
-		}).permanentFilters({ exclude_group: 'superadmin' }).attributes({ placeholder: 'Select group' }).label('Group *'), nga.field('username', 'string').attributes({ placeholder: 'Username must be at least 3 character long' }).validation({ required: true, minlength: 3 }).label('Username'), nga.field('hashedpassword', 'password').attributes({ placeholder: 'Password must be at least 4 character long' }).validation({ required: true, minlength: 4 }).label('Password'), nga.field('email', 'email').attributes({ placeholder: 'Email' }).validation({ required: true }).label('Email'), nga.field('telephone', 'string').attributes({ placeholder: 'Telephone' }).validation({ required: true }).label('Telephone'), nga.field('jwtoken', 'string').attributes({ placeholder: 'Api Key', readOnly: true }).defaultValue('').label('Api Key'), nga.field('template').label('').template('<generate post="entry"></generate>'), nga.field('isavailable', 'boolean').validation({ required: true }).label('Is Available'), nga.field('template').label('').template(_edit_buttonHtml2['default']),
+		}).permanentFilters({ exclude_group: 'superadmin' }).attributes({ placeholder: 'Select group' }).label('Group *'), nga.field('username', 'string').attributes({ placeholder: 'Username must be at least 3 character long', readOnly: true }).validation({ required: true, minlength: 3 }).label('Username'), nga.field('hashedpassword', 'password').attributes({ placeholder: 'Password must be at least 4 character long' }).validation({ required: true, minlength: 4 }).label('Password'), nga.field('email', 'email').attributes({ placeholder: 'Email' }).validation({ required: true }).label('Email'), nga.field('telephone', 'string').attributes({ placeholder: 'Telephone' }).validation({ required: true }).label('Telephone'), nga.field('jwtoken', 'string').attributes({ placeholder: 'Api Key', readOnly: true }).defaultValue('').label('Api Key'), nga.field('template').label('').template('<generate post="entry"></generate>'), nga.field('isavailable', 'boolean').validation({ required: true }).label('Is Available'), nga.field('template').label('').template(_edit_buttonHtml2['default']),
 		//hidden from UI
 		nga.field('third_party_api_token', 'string').cssClasses('hidden').attributes({ placeholder: 'Third party token' }).defaultValue('').label('')]);
 
@@ -21809,7 +22701,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 220 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21820,7 +22712,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -21832,7 +22724,7 @@
 					progression.done();
 					$state.go($state.get('edit'), { entity: entity.name(), id: entry._identifierValue });
 					return false;
-			}]).title('<h4>User groups <i class="fa fa-angle-right" aria-hidden="true"></i> Create: User groups</h4>').fields([nga.field('company_id', 'reference').targetEntity(admin.getEntity('Settings')).targetField(nga.field('company_name')).attributes({ placeholder: 'Choose company from dropdown list' }).perPage(-1).label('Company'), nga.field('name', 'string').attributes({ placeholder: 'Group name' }).validation({ required: true }).label('Group name'), nga.field('code', 'choice').choices([{ value: 'superadmin', label: 'superadmin' }, { value: 'admin', label: 'admin' }, { value: 'finance', label: 'finance' }, { value: 'sales', label: 'sales' }, { value: 'cc', label: 'cc' }, { value: 'content_management', label: 'content management' }, { value: 'marketing', label: 'marketing' }, { value: 'IT', label: 'IT' }, { value: 'audit', label: 'audit' }, { value: 'resellers', label: 'resellers' }, { value: 'guest', label: 'guest' }]).attributes({ placeholder: 'Group code' }).validation({ required: true }).label('Group code'), nga.field('isavailable', 'boolean').attributes({ placeholder: 'Is Available' }).validation({ required: true }).label('Is Available'), nga.field('template').label('').template(_edit_buttonHtml2['default'])]);
+			}]).title('<h4>User groups <i class="fa fa-angle-right" aria-hidden="true"></i> Create: User groups</h4>').fields([nga.field('name', 'string').attributes({ placeholder: 'Group name' }).validation({ required: true }).label('Group name'), nga.field('code', 'choice').choices([{ value: 'superadmin', label: 'superadmin' }, { value: 'admin', label: 'admin' }, { value: 'finance', label: 'finance' }, { value: 'sales', label: 'sales' }, { value: 'cc', label: 'cc' }, { value: 'content_management', label: 'content management' }, { value: 'marketing', label: 'marketing' }, { value: 'IT', label: 'IT' }, { value: 'audit', label: 'audit' }, { value: 'resellers', label: 'resellers' }, { value: 'guest', label: 'guest' }]).attributes({ placeholder: 'Group code' }).validation({ required: true }).label('Group code'), nga.field('isavailable', 'boolean').attributes({ placeholder: 'Is Available' }).validation({ required: true }).label('Is Available'), nga.field('template').label('').template(_edit_buttonHtml2['default'])]);
 
 			groups.editionView().title('<h4>User group <i class="fa fa-angle-right" aria-hidden="true"></i> Edit: {{ entry.values.name }}</h4>').actions(['list']).fields([groups.creationView().fields(), nga.field('', 'referenced_list').label('User permissions').targetEntity(admin.getEntity('Grouprights')).targetReferenceField('group_id').targetFields([nga.field('api_group_name', 'string').label('Api Group'), nga.field('description', 'string').label('Description'), nga.field('grouprights.id', 'template').label('Permitions ').template('<allow-menu size="xs" review="entry"></allow-menu>')])]);
 
@@ -21842,7 +22734,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 221 */
+/* 229 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -21861,7 +22753,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 222 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21872,7 +22764,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -21902,7 +22794,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 223 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21913,11 +22805,11 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_genre_btnHtml = __webpack_require__(162);
+	var _filter_genre_btnHtml = __webpack_require__(170);
 
 	var _filter_genre_btnHtml2 = _interopRequireDefault(_filter_genre_btnHtml);
 
@@ -21953,7 +22845,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 224 */
+/* 232 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21964,11 +22856,11 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_genre_btnHtml = __webpack_require__(162);
+	var _filter_genre_btnHtml = __webpack_require__(170);
 
 	var _filter_genre_btnHtml2 = _interopRequireDefault(_filter_genre_btnHtml);
 
@@ -22003,7 +22895,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 225 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22014,11 +22906,11 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
-	var _filter_genre_btnHtml = __webpack_require__(162);
+	var _filter_genre_btnHtml = __webpack_require__(170);
 
 	var _filter_genre_btnHtml2 = _interopRequireDefault(_filter_genre_btnHtml);
 
@@ -22042,7 +22934,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 226 */
+/* 234 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22053,7 +22945,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -22071,7 +22963,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 227 */
+/* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22082,7 +22974,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -22100,7 +22992,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 228 */
+/* 236 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22111,7 +23003,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -22153,7 +23045,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 229 */
+/* 237 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22164,7 +23056,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -22173,7 +23065,9 @@
 	exports['default'] = function (nga, admin) {
 	    var vod = admin.getEntity('Vods');
 	    var language_list = [{ value: { "iso_639_1": "en", "name": "English" }, label: 'English' }, { value: { "iso_639_1": "sp", "name": "Spanish" }, label: 'Spanish' }, { value: { "iso_639_1": "gr", "name": "German" }, label: 'German' }, { value: { "iso_639_1": "fr", "name": "French" }, label: 'French' }];
-	    vod.listView().title('<h4>Vods <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').batchActions(['<vod type="update_film" selection="selection"></vod>']).actions(['<move type="move_to_package" selection="selection"></move>', 'batch', 'export', 'filter', 'create']).fields([nga.field('title', 'string').label('Title'), nga.field('expiration_time', 'datetime').label('Expiration Time'), nga.field('vod_vod_categories').cssClasses('hidden').map(function getpckgid(value, entry) {
+	    vod.listView().title('<h4>Vods <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>').batchActions([
+	    // '<vod type="update_film" selection="selection"></vod>',
+	    '<move type="move_to_package"  selection="selection"></move>']).actions(['batch', 'export', 'filter', 'create']).fields([nga.field('title', 'string').label('Title'), nga.field('expiration_time', 'datetime').label('Expiration Time'), nga.field('vod_vod_categories').cssClasses('hidden').map(function getpckgid(value, entry) {
 	        var return_object = [];
 	        for (var i = 0; i < value.length; i++) {
 	            return_object[i] = value[i].category_id;
@@ -22324,7 +23218,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 230 */
+/* 238 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22335,7 +23229,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -22381,7 +23275,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 231 */
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22392,7 +23286,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -22453,7 +23347,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 232 */
+/* 240 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22464,7 +23358,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -22482,7 +23376,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 233 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22493,7 +23387,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -22523,7 +23417,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 234 */
+/* 242 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22534,7 +23428,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _edit_buttonHtml = __webpack_require__(161);
+	var _edit_buttonHtml = __webpack_require__(164);
 
 	var _edit_buttonHtml2 = _interopRequireDefault(_edit_buttonHtml);
 
@@ -22550,7 +23444,7 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 235 */
+/* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22561,7 +23455,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _resellers_dashboardHtml = __webpack_require__(236);
+	var _resellers_dashboardHtml = __webpack_require__(244);
 
 	var _resellers_dashboardHtml2 = _interopRequireDefault(_resellers_dashboardHtml);
 
@@ -22586,13 +23480,13 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 236 */
+/* 244 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"row dashboard-starter\"></div>\r\n<resellersdashboard-summary></resellersdashboard-summary>\r\n\r\n<graph>\r\n    <vis-timeline data=\"data\" options=\"options\"></vis-timeline>\r\n</graph>\r\n\r\n<div class=\"row dashboard-content\">\r\n\r\n    <div class=\"col-lg-12\">\r\n        <div class=\"panel panel-default theme\">\r\n            <ma-dashboard-panel collection=\"dashboardController.collections.sales_report\" entries=\"dashboardController.entries.sales_report\" datastore=\"dashboardController.datastore\"></ma-dashboard-panel>\r\n        </div>\r\n    </div>\r\n\r\n\r\n    <div class=\"container-fluid\">\r\n        <!--div class=\"col-xs-2 idiqagentstatus-buttonHolders pull-right\">\r\n        <button type=\"button\" class=\"btn btn-xs\" ng-click=\"agentClicked()\">Show hidden Node and change color</button>\r\n      </div-->\r\n        <vis-timeline data=\"data\" options=\"options\"></vis-timeline>\r\n    </div>\r\n\r\n</div>";
 
 /***/ }),
-/* 237 */
+/* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22603,7 +23497,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _dashboardHtml = __webpack_require__(238);
+	var _dashboardHtml = __webpack_require__(246);
 
 	var _dashboardHtml2 = _interopRequireDefault(_dashboardHtml);
 
@@ -22622,19 +23516,19 @@
 	module.exports = exports['default'];
 
 /***/ }),
-/* 238 */
+/* 246 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"row dashboard-starter\"></div>\r\n<dashboard-summary></dashboard-summary>\r\n\r\n<graph>\r\n    <vis-timeline data=\"data\" options=\"options\"></vis-timeline>\r\n</graph>\r\n\r\n<div class=\"row dashboard-content\">\r\n\r\n    <div class=\"container-fluid\">\r\n        <div class=\"panel panel-default theme\">\r\n            <ma-dashboard-panel collection=\"dashboardController.collections.login_accounts\" entries=\"dashboardController.entries.login_accounts\" datastore=\"dashboardController.datastore\"></ma-dashboard-panel>\r\n        </div>\r\n    </div>\r\n\r\n    <div class=\"col-lg-12\">\r\n        <div class=\"panel panel-default theme\">\r\n            <ma-dashboard-panel collection=\"dashboardController.collections.sales_report\" entries=\"dashboardController.entries.sales_report\" datastore=\"dashboardController.datastore\"></ma-dashboard-panel>\r\n        </div>\r\n    </div>\r\n\r\n\r\n    <div class=\"container-fluid\">\r\n        <!--div class=\"col-xs-2 idiqagentstatus-buttonHolders pull-right\">\r\n        <button type=\"button\" class=\"btn btn-xs\" ng-click=\"agentClicked()\">Show hidden Node and change color</button>\r\n      </div-->\r\n        <vis-timeline data=\"data\" options=\"options\"></vis-timeline>\r\n    </div>\r\n\r\n</div>";
 
 /***/ }),
-/* 239 */
+/* 247 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div class=\"navbar-header\">\r\n    <button type=\"button\" class=\"navbar-toggle\" ng-click=\"isCollapsed = !isCollapsed\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n    </button>\r\n    <a class=\"navbar-brand\" href=\"#\" ng-click=\"appController.displayHome()\" ng-app=\"myApp\" ng-controller=\"envVariablesCtrl\">\r\n\r\n        <div class=\"row\">\r\n            <div class=\"col-sm-6\">\r\n                <img src=\"{{company_logo}}\"  class=\"img-responsive logo_company\" alt=\"Company Logo\">\r\n            </div>\r\n            <div class=\"col-sm-6\">\r\n                <p id=\"company_name\">{{company_name}} - Administration System</p>\r\n            </div>\r\n        </div>\r\n    </a>\r\n</div>\r\n\r\n<ul class=\"nav navbar-top-links navbar-right text-center responsive\">\r\n    <li uib-dropdown>\r\n        <a uib-dropdown-toggle href=\"#\" aria-expanded=\"true\" ng-controller=\"username\">\r\n            <i class=\"fa fa-user fa-lg\"></i>&nbsp; {{ username }}&nbsp;<i class=\"fa fa-caret-down\"></i>\r\n        </a>\r\n        <ul class=\"dropdown-menu dropdown-user\" role=\"menu\">\r\n            <li><a href=\"#/personal\" onClick=\"window.location.reload()\"><i class=\"fa fa-user fa-fw\"></i> Personal Details</a></li>\r\n            <li><a href=\"#/change-password\"><i class=\"fa fa-cog fa-fw\"></i> Change Password</a></li>\r\n            <li><a href=\"#\" onclick=\"logout()\"><i class=\"fa fa-sign-out fa-fw\"></i> Logout</a></li>\r\n        </ul>\r\n    </li>\r\n</ul>\r\n\r\n<ul class=\"nav navbar-top-links navbar-right text-center\">\r\n    <li uib-dropdown ng-controller=\"languageCtrl\">\r\n        <a id=\"single-button\" href=\"#\" aria-expanded=\"true\" uib-dropdown-toggle ng-disabled=\"disabled\">\r\n            <i class=\"fa fa-globe fa-lg\"></i>&nbsp; Language {{button}}&nbsp;<i class=\"fa fa-caret-down\"></i>\r\n        </a>\r\n        <ul class=\"dropdown-menu dropdown-user\" role=\"menu\" aria-labelledby=\"single-button\">\r\n            <li role=\"menuitem\">\r\n                <a ng-click=\"serve_language('en');change('English')\"><i class=\"fa fa-sign-out fa-fw\"></i> English</a>\r\n                <a ng-click=\"serve_language('fr');change('French')\"><i class=\"fa fa-sign-out fa-fw\"></i> French</a>\r\n                <a ng-click=\"serve_language('sp');change('Spanish')\"><i class=\"fa fa-sign-out fa-fw\"></i> Spanish</a>\r\n\t\t\t\t<a ng-click=\"serve_language('sq');change('Albanian')\"><i class=\"fa fa-sign-out fa-fw\"></i> Albanian</a>\r\n            </li>\r\n\r\n        </ul>\r\n    </li>\r\n</ul>\r\n\r\n\r\n\r\n";
+	module.exports = "<div class=\"navbar-header\">\r\n    <button type=\"button\" class=\"navbar-toggle\" ng-click=\"isCollapsed = !isCollapsed\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n    </button>\r\n    <a class=\"navbar-brand\" href=\"#\" ng-click=\"appController.displayHome()\" ng-app=\"myApp\" ng-controller=\"envVariablesCtrl\">\r\n\r\n        <div class=\"row\">\r\n            <div class=\"col-sm-6\">\r\n                <img src=\"{{company_logo}}\"  class=\"img-responsive logo_company\" alt=\"Company Logo\">\r\n            </div>\r\n            <div class=\"col-sm-6\">\r\n                <p id=\"company_name\">{{company_name}} - Administration System</p>\r\n            </div>\r\n        </div>\r\n    </a>\r\n</div>\r\n\r\n<ul class=\"nav navbar-top-links navbar-right text-center responsive\">\r\n    <li uib-dropdown>\r\n        <a uib-dropdown-toggle href=\"#\" aria-expanded=\"true\" ng-controller=\"username\">\r\n            <i class=\"fa fa-user fa-lg\"></i>&nbsp; {{ username }}&nbsp;<i class=\"fa fa-caret-down\"></i>\r\n        </a>\r\n        <ul class=\"dropdown-menu dropdown-user\" role=\"menu\">\r\n            <li><a href=\"#/personal\"><i class=\"fa fa-user fa-fw\"></i> Personal Details</a></li>\r\n            <li><a href=\"#/change-password\"><i class=\"fa fa-cog fa-fw\"></i> Change Password</a></li>\r\n            <li><a href=\"#\" onclick=\"logout()\"><i class=\"fa fa-sign-out fa-fw\"></i> Logout</a></li>\r\n        </ul>\r\n    </li>\r\n</ul>\r\n\r\n<ul class=\"nav navbar-top-links navbar-right text-center\">\r\n    <li uib-dropdown ng-controller=\"languageCtrl\">\r\n        <a id=\"single-button\" href=\"#\" aria-expanded=\"true\" uib-dropdown-toggle ng-disabled=\"disabled\">\r\n            <i class=\"fa fa-globe fa-lg\"></i>&nbsp; Language {{button}}&nbsp;<i class=\"fa fa-caret-down\"></i>\r\n        </a>\r\n        <ul class=\"dropdown-menu dropdown-user\" role=\"menu\" aria-labelledby=\"single-button\">\r\n            <li role=\"menuitem\">\r\n                <a ng-click=\"serve_language('en');change('English')\"><i class=\"fa fa-sign-out fa-fw\"></i> English</a>\r\n                <a ng-click=\"serve_language('fr');change('French')\"><i class=\"fa fa-sign-out fa-fw\"></i> French</a>\r\n                <a ng-click=\"serve_language('sp');change('Spanish')\"><i class=\"fa fa-sign-out fa-fw\"></i> Spanish</a>\r\n\t\t\t\t<a ng-click=\"serve_language('sq');change('Albanian')\"><i class=\"fa fa-sign-out fa-fw\"></i> Albanian</a>\r\n            </li>\r\n\r\n        </ul>\r\n    </li>\r\n</ul>\r\n\r\n\r\n\r\n";
 
 /***/ }),
-/* 240 */
+/* 248 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -23164,7 +24058,7 @@
 	module.exports = exports["default"];
 
 /***/ }),
-/* 241 */
+/* 249 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -23206,7 +24100,7 @@
 	module.exports = exports["default"];
 
 /***/ }),
-/* 242 */
+/* 250 */
 /***/ (function(module, exports) {
 
 	// removed by extract-text-webpack-plugin

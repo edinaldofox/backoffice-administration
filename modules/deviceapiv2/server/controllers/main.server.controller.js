@@ -143,7 +143,7 @@ exports.get_devicemenu_leveltwo = function(req, res) {
 exports.get_weather_widget = function(req, res) {
 
     if (fs.existsSync('public/weather_widget/index.html')) {
-        var url= req.app.locals.backendsettings[1].assets_url;
+        var url= req.app.locals.backendsettings[req.thisuser.company_id].assets_url;
         var file = '/weather_widget/index.html';
         var response_Array = {
             "widget_url": url+file
@@ -203,8 +203,8 @@ exports.get_qrCode = function(req, res) {
                 if (!fs.existsSync('./public/files/qrcode/')){
                     fs.mkdirSync('./public/files/qrcode/');
                  }
-
-                var url = req.app.locals.backendsettings[1].assets_url;
+                let company_id = !req.headers.company_id ? 1 : req.headers.company_id;
+                var url = req.app.locals.backendsettings[company_id].assets_url;
                 var d = new Date();
                 var qr_png = qr.image(url+'/apiv2/htmlContent/remotedeviceloginform?googleid='+req.body.googleid, { type: 'png', margin: 1, size: 5 });
                 qr_png.pipe(fs.createWriteStream('./public/files/qrcode/'+d.getTime()+'qrcode.png'));
@@ -233,7 +233,8 @@ exports.qr_login = function(req, res) {
                     "password" : req.body.password
                 };
                 var push_obj = new push_functions.ACTION_PUSH('Action', 'Performing an action', 5, 'login_user', login_params);
-                push_functions.send_notification(req.body.googleid, req.app.locals.backendsettings[1].firebase_key, req.body.username, push_obj, 60, false, false, function(result){});
+                let company_id = req.headers.company_id ? req.headers.company_id : 1;
+                push_functions.send_notification(req.body.googleid, req.app.locals.backendsettings[company_id].firebase_key, req.body.username, push_obj, 60, false, false, function(result){});
                 res.status(200).send({message: 'Message sent'});
 
 };

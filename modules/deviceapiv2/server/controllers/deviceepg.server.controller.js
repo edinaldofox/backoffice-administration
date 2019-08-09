@@ -1115,7 +1115,7 @@ exports.get_daily_epg =  function(req, res) {
 exports.test_get_epg_data = function(req, res) {
 
     var timeshift = 0;
-    var minusminutes = isNaN(parseInt(req.query._start)) ? -180:parseInt(req.query._start);
+    var minusminutes = isNaN(parseInt(req.query._start)) ? -180: parseInt(req.query._start);
     var plusminutes =   isNaN(parseInt(req.query._end)) ? 1440: parseInt(req.query._end);
     var starttime = (Date.now() +  minusminutes * 60000);
     var endtime   = (Date.now() +  plusminutes * 60000);
@@ -1195,11 +1195,25 @@ exports.get_epg_data = function(req, res) {
         final_where.include = [{
             model: models.epg_data, attributes: ['id','title', 'short_name', 'short_description', 'long_description', 'program_start','program_end','duration_seconds', 'long_description'],
             required: false,
+            //where: Sequelize.and(
+            //    {company_id: req.thisuser.company_id},
+            //    {program_start: {gte:starttime}},
+            //    {program_start: {lte:endtime}}
+            //),
             where: Sequelize.and(
                 {company_id: req.thisuser.company_id},
-                {program_start: {gte:starttime}},
-                {program_start: {lte:endtime}}
+                Sequelize.or(
+                    Sequelize.and(
+                        {program_start:{gte:starttime}},
+                        {program_start:{lte:endtime}}
+                    ),
+                    Sequelize.and(
+                        {program_end: {gte:starttime}},
+                        {program_end:{lte:endtime}}
+                    )
+                )
             ),
+
             include: [{model:models.program_schedule, attributes:['id'], required:false, where: {login_id:req.thisuser.id}}]
         }];
 

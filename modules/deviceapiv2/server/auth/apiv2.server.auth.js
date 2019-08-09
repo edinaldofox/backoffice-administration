@@ -107,6 +107,12 @@ exports.emptyCredentials = function(req, res, next) {
 
 exports.isAllowed = function(req, res, next) {
 
+    //IF COMPANY ID IS MISSING, THEN ASSIGN THE DEFAULT ONE: company_id = 1
+    let COMPANY_ID = 1;
+    if(req.headers.company_id) COMPANY_ID = req.headers.company_id * 1;
+
+
+
     if(req.body.auth){  //serach for auth
         var auth = decodeURIComponent(req.body.auth);
     }
@@ -131,11 +137,11 @@ exports.isAllowed = function(req, res, next) {
             else req.body.language = 'eng'; //the language parameter is missing, use english as default language
         }
 
-        if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=")) === false){
-            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=");
+        if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","=")) === false){
+            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","=");
         }
-        else if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[1].key_transition === true){
-            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=");
+        else if(missing_params(querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[COMPANY_ID].key_transition === true){
+            var auth_obj = querystring.parse(auth_decrypt1(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","=");
         }
         else {
             response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
@@ -151,11 +157,11 @@ exports.isAllowed = function(req, res, next) {
             }
         }
         else{
-            if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=")) === false){
-                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].new_encryption_key),";","=");
+            if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","=")) === false){
+                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","=");
             }
-            else if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[1].key_transition === true){
-                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].old_encryption_key),";","=");
+            else if(missing_params(querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","=")) === false && req.app.locals.backendsettings[COMPANY_ID].key_transition === true){
+                var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","=");
             }
             else {
                 response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
@@ -182,7 +188,7 @@ exports.isAllowed = function(req, res, next) {
             else{
                 //reading client data
                 models.login_data.findOne({
-                    where: {username: auth_obj.username}
+                    where: {username: auth_obj.username, company_id: COMPANY_ID}
                 }).then(function (result) {
                     if(result) {
                         //the user is a normal client account. check user rights to make requests with his credentials
@@ -211,7 +217,7 @@ exports.isAllowed = function(req, res, next) {
                             }
                         }
                         //login as guest is enabled and the user is guest. allow request to be processed
-                        else if( (auth_obj.username === 'guest') && (req.app.locals.backendsettings[1].allow_guest_login === true) ){
+                        else if( (auth_obj.username === 'guest') && (req.app.locals.backendsettings[COMPANY_ID].allow_guest_login === true) ){
                             req.thisuser = result;
                             req.auth_obj = auth_obj;
                             next();
@@ -274,3 +280,80 @@ function parse_plain_auth(auth){
     }
     return final_auth;
 }
+
+//======================================================================================================================
+
+
+//verifies if token/auth is valid
+exports.isAuthTokenValid = function(req, res, next) {
+
+    //IF COMPANY ID IS MISSING, THEN ASSIGN THE DEFAULT ONE: company_id = 1
+    let COMPANY_ID = 1;
+    if(req.headers.company_id) COMPANY_ID = req.headers.company_id * 1;
+
+
+    if(req.body.auth){  //serach for auth parameter on post data
+        //auth is in header, as an object with all parameters
+        var auth = decodeURIComponent(req.body.auth);
+    }
+    else if(req.headers.auth){ //search for auth paramter in headers
+        var auth = decodeURIComponent(req.headers.auth);
+        //some ios version was adding extra "{}"
+        auth = auth.replace("{","");
+        auth = auth.replace("}","");
+        auth = auth.replace(/(,\+)/g, ',').replace(/\\r|\\n|\n|\r/g, ''); //remove all occurrences of '+' characters before each token component, remove newlines and carriage returns
+        let tmp_object = querystring.parse(auth,",","="); //convert token string into token object. library
+        if(tmp_object.auth) {
+            auth = tmp_object.auth.replace(/ /g, "+"); //handle library bug that replaces all '+' characters with spaces
+        }
+    }
+    else if(req.params.auth) { //search for auth paremter in query parameters
+        var auth = decodeURIComponent(req.params.auth);
+    }
+    else {
+        //auth parameter not found
+        response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
+        return;
+    }
+
+    //verify and extract auth object
+    if(isplaintext(auth, req.plaintext_allowed)){
+        //auth object is plain text
+        var auth_obj = querystring.parse(auth,";","=");
+    }
+    else {
+        //auth object is encrypted, key is unknown, try with company_id = 1
+        var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","="); //todo: fix static company_id
+        //try old key
+        if(missing_params(auth_obj)){
+            auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","="); //todo: fix static company_id
+        }
+    }
+
+    //if auth_obj is missing any of the five parameters, then token could not be decrypted.
+    if(missing_params(auth_obj)){
+        response.send_res(req, res, [], 889, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
+    }
+    else {
+        //controls if mobile app is using HDMI
+        if((req.body.hdmi === 'true') && (['2', '3'].indexOf(auth_obj.appid) !== -1)){
+            response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_INSTALLATION', 'no-store'); //hdmi cannot be active for mobile devices
+        }
+        //controls if timestamp is within limits
+        else if(valid_timestamp(auth_obj) === false){
+            response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TIMESTAMP', 'no-store');
+        }
+        //controls if appid is a valid number
+        else if(valid_appid(auth_obj) === true){
+            set_screensize(auth_obj);
+            req.auth_obj = auth_obj;
+            next();
+            return null; //returns promise
+        }
+        else {
+            response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_APPID', 'no-store');
+        }
+    }
+};
+
+

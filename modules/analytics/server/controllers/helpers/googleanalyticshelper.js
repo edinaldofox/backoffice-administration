@@ -22,7 +22,7 @@ function getipaddress(theip){
 function trackobject(object_data,req, cb) {
 
     object_data.v = 1;
-    object_data.tid = req.app.locals.backendsettings[1].analytics_id; //analytics ID
+    object_data.tid = req.app.locals.backendsettings[req.thisuser.company_id].analytics_id; //analytics ID
     object_data.ua  = req.headers["user-agent"];    //user agent
     object_data.cid = req.auth_obj.username;        //user ID
     object_data.uip = req.ip.replace('::ffff:', '');    // user ip

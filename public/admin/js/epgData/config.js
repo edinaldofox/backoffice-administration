@@ -4,7 +4,7 @@ export default function (nga, admin) {
 	var epgdata = admin.getEntity('EpgData');
 	epgdata.listView()
         .title('<h4>Epg Data <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>')
-        .actions(['batch', 'export', 'create'])
+        .actions(['filter','batch', 'export', 'create'])
         .fields([
             nga.field('channel_number')
                     .cssClasses('hidden-xs')
@@ -53,13 +53,32 @@ export default function (nga, admin) {
                     .label('Timezone'),
         ])
         .filters([
-          nga.field('q')
-              .label('')
-              .template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"></input><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>')
-              .pinned(true)])
+            nga.field('q')
+                .label('')
+                .template('<div class="input-group"><input type="text" ng-model="value" placeholder="Search" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span></div>')
+                .pinned(true),
+            nga.field('title')
+                .attributes({ placeholder: 'Full Title' })
+                .label('Title'),
+            nga.field('channel_number','number')
+                .attributes({ placeholder: 'Channel Number' })
+                .label('Channel Number'),
+            nga.field('program_start','datetime')
+                .transform(function (value) {
+                    var value1 = value.toString();
+                    return value1;
+                })
+                .attributes({ placeholder: 'Program Start' })
+                .label('Program Start'),
+            nga.field('program_end','datetime')
+                .transform(function (value) {
+                    var value2 = value.toString();
+                    return value2;
+                })
+                .attributes({ placeholder: 'Program End' })
+                .label('Program End'),
+        ])
 		.listActions(['edit'])
-
-
         .exportFields([
          epgdata.listView().fields(),
         ]);

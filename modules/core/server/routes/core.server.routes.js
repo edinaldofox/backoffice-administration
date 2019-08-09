@@ -15,4 +15,14 @@ module.exports = function(app) {
 
   //Submit contact form data
   app.route('/api/contact').post(core.contact);
+
+  //generate auth token
+  app.route('/apiv2/generate_demo_auth')
+      .post(core.generateauth);
+
+  app.route('/apiv2/testjwtoken')
+      .all(core.testjwtoken);
+
+
+
 };

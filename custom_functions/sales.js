@@ -74,15 +74,18 @@ function add_subscription(req, res, login_id, combo_id, username){
 exports.add_subscription_transaction = function(req,res,sale_or_refund,transaction_id,start_date,end_date) {
 
     // if product_id exists in param list search combo by product_id, else search by combo id
-    var combo_where = {company_id: req.token.company_id}; //query parameter
+    var combo_where = {company_id: req.token.company_id, isavailable: true}; //query parameter
     if(req.body.product_id) {
-        combo_where = {product_id: req.body.product_id, isavailable: true}; //if product id is coming
+        combo_where.product_id = req.body.product_id; //if product id is coming
     }
     else if(req.body.combo_id) {
-        combo_where = {id: req.body.combo_id, isavailable: true}; //if combo id is coming
+        combo_where.id = req.body.combo_id //if combo id is coming
+    }
+    else if(req.body.product_name){
+        combo_where.name = req.body.product_name //if product name is coming
     }
     else {
-        combo_where = {name: req.body.product_name, isavailable: true}; //if product name is coming
+        return {status: false, message: 'Product identification parameters missing'};
     }
 
     var transactions_array = [];
@@ -117,7 +120,7 @@ exports.add_subscription_transaction = function(req,res,sale_or_refund,transacti
                             var sub = {
                                 login_id: loginData.id,
                                 package_id: item.package_id,
-                                company_id: (req.body.company_id) ? req.body.company_id : 1,
+                                company_id: req.token.company_id,
                                 customer_username: loginData.username,
                                 user_username: req.token.username //live
                             };
@@ -167,7 +170,7 @@ exports.add_subscription_transaction = function(req,res,sale_or_refund,transacti
                             user_username: loginData.id,
                             saledate: Date.now(),
                             active:sale_or_refund,
-                            company_id: (req.body.company_id) ? req.body.company_id : 1
+                            company_id: req.token.company_id
                         };
 
                         if(sale_or_refund == 1) {

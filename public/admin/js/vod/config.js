@@ -12,9 +12,10 @@ export default function (nga, admin) {
     vod.listView()
         .title('<h4>Vods <i class="fa fa-angle-right" aria-hidden="true"></i> List</h4>')
         .batchActions([
-            '<vod type="update_film" selection="selection"></vod>'
+            // '<vod type="update_film" selection="selection"></vod>',
+            '<move type="move_to_package"  selection="selection"></move>'
         ])
-        .actions(['<move type="move_to_package" selection="selection"></move>','batch', 'export', 'filter','create'])
+        .actions(['batch', 'export', 'filter','create'])
         .fields([
             nga.field('title', 'string')
                 .label('Title'),

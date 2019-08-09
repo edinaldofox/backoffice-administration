@@ -28,7 +28,7 @@ function mkdir_recursive(basepath, custompath){
         fullpath = fullpath + custompath.split('/')[i]+'/';
         if (!fs.existsSync(fullpath)) {
             mkdirp(fullpath, function(err){
-                //todo: return some response?
+                winston.error('error creating path: ',err);
             });
         }
     }
@@ -41,10 +41,13 @@ function moveFile(sourcePath, destPath, cb){
 function copyFile(sourcePath, destPath, cb, moveFlag){
     var source = fs.createReadStream(sourcePath);
     var dest = fs.createWriteStream(destPath);
+
     source.pipe(dest);
     source.on('end', function() {
         if (moveFlag)
-            fs.unlink(sourcePath);
+            fs.unlink(sourcePath,function (err) {
+                winston.error('error deleting file: ',err);
+            });
         cb();
     });
     source.on('error', function(err) { cb(err)});
@@ -57,7 +60,7 @@ function deleteFile(filePath)
     {
         var Path=path.resolve('./public'+filePath[i]);
         fs.unlink(Path,function (err) {
-            //todo: do sth on error?
+            winston.error('error deleting file: ',err);
         });
     }
 }
@@ -163,6 +166,7 @@ function updateFile (prev_val,target_paths,delete_files,delete_on)
         target_path=path.resolve('./public'+changed_name[i]);
         copyOnUpdate(source_path, target_path,  function(err){
             //todo: do sth on error?
+            winston.error('error function copyOnUpdate: ',err);
         })
     }
     //delete the old files of the new-updated ones
@@ -175,7 +179,7 @@ function uploadFile (req, res){
     /* get request and upload file informations */
     var tomodel = req.params.model;
     var tofield = req.params.field;
-    var existingfile = path.resolve('./public'+req.app.locals.backendsettings[1][tofield]);
+    var existingfile = path.resolve('./public'+req.app.locals.backendsettings[req.token.company_id][tofield]);
     var fileName= req.files.file.name;
      var fileExtension = get_file_extention(fileName);
     var tempPath = req.files.file.path;
@@ -200,7 +204,7 @@ function uploadFile (req, res){
                 if(tomodel == 'settings') {
                     dbModel.models[tomodel].update(
                         { [tofield]: uploadLinkPath},
-                        { where: {id: 1 }}
+                        { where: {id: req.token.company_id }}
                     ).then(function (update_result) {
                         //update memory value
                         //an if is required req.app.locals.backendsettings[1][tofield] = uploadLinkPath;
@@ -232,6 +236,7 @@ function uploadEpgFile (filepath){
     var uploadLinkPath = tempDirPath +'/'+ fileName.replace(fileExtension, '')+Date.now()+fileExtension;// create unique filename
     fs.writeFile(uploadLinkPath, filepath, function (err) {
         //todo: do sth on error?
+        winston.error('error function fs.writeFile: ',err);
     });
 
 }

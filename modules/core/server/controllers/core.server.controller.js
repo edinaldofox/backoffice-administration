@@ -1,11 +1,34 @@
 'use strict';
 
 var path = require('path'),
+    CryptoJS = require("crypto-js"),
   config = require(path.resolve('./config/config')),
   reCaptcha = require(path.resolve('./config/lib/reCaptcha')),
   async = require('async'),
-  nodemailer = require('nodemailer');
-var request = require('request');
+  nodemailer = require('nodemailer'),
+  request = require('request'),
+    jwt = require('jsonwebtoken'),
+    jwtSecret = "thisIsMySecretPasscode",
+    jwtIssuer = "MAGOWARE";
+
+function auth_encrypt(plainText, key) {
+  var C = CryptoJS;
+
+    console.log("text = ",plainText, "key=",key);
+
+    plainText = C.enc.Utf8.parse(plainText);
+  key = C.enc.Utf8.parse(key);
+  var aes = C.algo.AES.createEncryptor(key, {
+    mode: C.mode.CBC,
+    padding: C.pad.Pkcs7,
+    iv: key
+  });
+  var encrypted = aes.finalize(plainText);
+
+  return C.enc.Base64.stringify(encrypted);
+}
+
+
 
 var smtpTransport = nodemailer.createTransport(config.mailer.options);
 
@@ -122,4 +145,37 @@ exports.contact = function(req, res, next) {
   });
 
 
+};
+
+
+/**
+ * generate auth key
+ */
+exports.generateauth = function(req, res) {
+      var username = req.body.username;
+      var password = req.body.password;
+      var appid = req.body.appid;
+      var boxid = req.body.boxid;
+      var timestamp = req.body.timestamp;
+      var key = req.body.key || req.app.locals.backendsettings[1].new_encryption_key;
+
+      var text_to_auth = "username=" + username + ";password=" + password + ";appid=" + appid + ";boxid=" + boxid + ";timestamp=" + Date.now();
+
+      res.send(auth_encrypt(text_to_auth,key));
+
+};
+
+
+//decode jwt sent under Authorization header
+exports.testjwtoken = function(req, res) {
+
+    let aHeader = req.get("Authorization");
+    try {
+        var decoded = jwt.verify(aHeader, jwtSecret);
+
+        res.send(decoded);
+
+    } catch (err) {
+        res.send(err);
+    }
 };

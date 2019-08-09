@@ -4,11 +4,12 @@ var path = require('path'),
     response = require(path.resolve("./config/responses.js")),
     password_encryption = require(path.resolve('./modules/deviceapiv2/server/controllers/authentication.server.controller.js')),
     push_msg = require(path.resolve('./custom_functions/push_messages')),
-    crypto = require('crypto'),
     models = db.models;
 var async = require("async");
 var winston = require('winston');
 
+
+//todo: remove , replaced by loginv2
 /**
  * @api {post} /apiv2/credentials/login /apiv2/credentials/login
  * @apiVersion 0.2.0
@@ -23,6 +24,10 @@ var winston = require('winston');
  */
 exports.login = function(req, res) {
     var appids = [];
+
+    //IF COMPANY ID IS MISSING, THEN ASSIGN THE DEFAULT ONE: company_id = 1
+    let COMPANY_ID = 1;
+    if(req.headers.company_id) COMPANY_ID = req.headers.company_id * 1;
 
 
     if (req.auth_obj.username === 'guest') {
@@ -45,7 +50,10 @@ exports.login = function(req, res) {
             device_ip: req.ip.replace('::ffff:', ''),
             os: decodeURIComponent(req.body.os)
         }).then(function (result) {
-            var response_data = [{"encryption_key": req.app.locals.backendsettings[req.thisuser.company_id].new_encryption_key}];
+            var response_data = [{
+                "encryption_key": req.app.locals.backendsettings[req.thisuser.company_id].new_encryption_key,
+                "company_id" : req.thisuser.company_id
+            }];
             response.send_res(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'no-store');
         }).catch(function (error) {
             winston.error("Creating / updating the device record for guest account failed with error: ", error);
@@ -64,11 +72,21 @@ exports.login = function(req, res) {
                 for (var i = 0; i < result.length; i++) {
                     appids.push(result[i].app_id);
                 }
-                //login start
+
+
+
+                let max_multilogin_nr = req.thiscompany.filter(function(obj) {
+                    return obj.parameter_id === "max_multilogin_nr"
+                })[0].parameter_value;
+
+
+                //find all active devices for this user, where
                 models.login_data.findOne({
-                    where: {username: req.auth_obj.username},
+                    where: {username: req.auth_obj.username, company_id: COMPANY_ID},
                     attributes: ['id', 'username', 'password', 'account_lock', 'salt']
                 }).then(function (users) {
+
+
                     models.devices.findOne({
                         where: {username: req.auth_obj.username, device_active: true, appid: {in: appids}}
                     }).then(function (device) {
@@ -95,7 +113,11 @@ exports.login = function(req, res) {
                                     device_ip: req.ip.replace('::ffff:', ''),
                                     os: decodeURIComponent(req.body.os)
                                 }).then(function (result) {
-                                    var response_data = [{"encryption_key": req.app.locals.backendsettings[req.thisuser.company_id].new_encryption_key}];
+                                    var response_data = [{
+                                                            "encryption_key": req.app.locals.backendsettings[req.thisuser.company_id].new_encryption_key,
+                                                            "company_id" : req.thisuser.company_id,
+                                                            "password_hash" : req.thisuser.password
+                                                        }];
                                     response.send_res(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'no-store');
                                     return null;
                                 }).catch(function (error) {
@@ -113,7 +135,7 @@ exports.login = function(req, res) {
                             models.devices.upsert({
                                 device_active: true,
                                 login_data_id:		users.id,
-                                company_id: req.thisuser.company_id,
+                                company_id:         req.thisuser.company_id,
                                 username:           req.auth_obj.username,
                                 device_mac_address: decodeURIComponent(req.body.macaddress),
                                 appid:              req.auth_obj.appid,
@@ -129,7 +151,11 @@ exports.login = function(req, res) {
                                 device_ip:          req.ip.replace('::ffff:', ''),
                                 os:                 decodeURIComponent(req.body.os)
                             }).then(function(result){
-                                var response_data = [{"encryption_key": req.app.locals.backendsettings[req.thisuser.company_id].new_encryption_key}];
+                                var response_data = [{
+                                                        "encryption_key": req.app.locals.backendsettings[req.thisuser.company_id].new_encryption_key,
+                                                        "company_id" : req.thisuser.company_id,
+                                                        "password_hash" : req.thisuser.password
+                                }];
                                 response.send_res(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'no-store');
                                 return null;
                             }).catch(function(error) {
@@ -177,7 +203,7 @@ exports.logout = function(req, res) {
             device_active: false
         },
         {
-            where: { username : req.auth_obj.username, appid : req.auth_obj.appid}
+            where: { username : req.auth_obj.username, appid : req.auth_obj.appid, company_id: req.thisuser.company_id}
         }).then(function (result) {
         response.send_res(req, res, [], 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'no-store');
     }).catch(function(error) {
@@ -245,28 +271,26 @@ exports.logout_user = function(req, res) {
         }).then(function (result) {
             for(var i = 0; i<result.length; i++) appids.push(result[i].app_id); //appids stored into variable appids[]
             //find devices of same group where user is logged in
-            models.devices.findAll({
-                attributes: ['googleappid', 'company_id'],
-                where: {username : req.auth_obj.username, device_active: true, appid : {in: appids}}
-            }).then(function(devices){
+            models.devices.findOne({
+                //attributes: ['googleappid'],
+                //where: {username : req.auth_obj.username, device_active: true, appid : {in: appids}, company_id: req.thisuser.company_id}, //keshtu ishte
+                where: {username : req.auth_obj.username, device_active: true, appid : {in: appids}, login_data_id: req.thisuser.id}, //keshtu u ndryhsua, 16-7
+                //order: [db.sequelize.fn('max', db.sequelize.col('updatedAt'))]
+                order: [['updatedAt', 'ASC']] //first record
+            }).then(function(onedevice){
                 //log this user out of the devices of this group
-                async.forEach(devices, function(device, callback){
-                    //update device status
-                    models.devices.update(
-                        {device_active: false}, {where: { googleappid: device.googleappid}}
-                    ).then(function (result) {
-                        //send push message to log devices out
+
+                if (!onedevice) {
+                    return response.send_res(req, res, [], 200, 1, 'OK_DESCRIPTION', 'LOGOUT_OTHER_DEVICES', 'no-store');
+                }
+                else {
+                    onedevice.device_active = false;
+                    onedevice.save().then(function (result) {
                         var message = new push_msg.ACTION_PUSH('Action', "You have been logged in another device", '5', "logout_user");
-                        push_msg.send_notification(device.googleappid, req.app.locals.backendsettings[device.company_id].firebase_key, '', message, 5, false, true, function(result){});
-                        callback(null);
-                        return null;
-                    }).catch(function(error) {
-                        winston.error("Setting device as inactive failed with error: ", error);
+                        push_msg.send_notification(onedevice.googleappid, req.app.locals.backendsettings[req.thisuser.company_id].firebase_key, '', message, 5, false, true, function(result){});
+                        response.send_res(req, res, [], 200, 1, 'OK_DESCRIPTION', 'LOGOUT_OTHER_DEVICES', 'no-store');
                     });
-                }, function(error){
-                    if(!error) response.send_res(req, res, [], 200, 1, 'OK_DESCRIPTION', 'LOGOUT_OTHER_DEVICES', 'no-store');
-                    else response.send_res(req, res, [], 704, -1, 'REQUEST_FAILED', 'REQUEST_FAILED_DESC', 'no-store');
-                });
+                }
                 return null;
             }).catch(function(error){
                 winston.error("Getting a list of googleappids failed with error: ", error);
@@ -311,5 +335,164 @@ exports.lock_account = function lock_account(login_id, username) {
     }).catch(function(error) {
         winston.error("Getting a list of device data failed with error: ", error);
     });
+
+};
+
+/**
+ * @api {get} /apiv2/credentials/company_list GetCompanyList
+ * @apiName GetCompanyList
+ * @apiGroup DeviceAPI
+ *
+ * @apiUse header_auth
+ *
+ *@apiDescription Returns list of companies that have a an account with this username
+ *
+ * Copy paste this auth for testing purposes
+ *auth=%7Bapi_version%3D22%2C+appversion%3D1.1.4.2%2C+screensize%3D480x800%2C+appid%3D2%2C+devicebrand%3D+SM-G361F+Build%2FLMY48B%2C+language%3Deng%2C+ntype%3D1%2C+app_name%3DMAGOWARE%2C+device_timezone%3D2%2C+os%3DLinux%3B+U%3B+Android+5.1.1%2C+auth%3D8yDhVenHT3Mp0O2QCLJFhCUfT73WR1mE2QRc1ZE7J22cRfmskdTmhCk9ssGWhoIBpIzoTEOLIqwl%0A47NaUwLoLZjH1i2WRYaiioIRMqhRvH2FsSuf1YG%2FFoT9fEw4CrxF%0A%2C+hdmi%3Dfalse%2C+firmwareversion%3DLMY48B.G361FXXU1APB1%7D
+ *
+ */
+exports.company_list = function(req, res, next){
+
+    models.login_data.findAll({
+        attributes: ['id','username','password','salt'],
+        where: {username: req.auth_obj.username},
+        include: [{model: models.settings, attributes: ['id', 'company_name','new_encryption_key'], required: true}]
+    }).then(function(companies){
+
+       if(!companies){
+            response.send_res_get(req, res, [], 704, -1, 'WRONG_PASSWORD_DESCRIPTION', 'WRONG_PASSWORD_DATA', 'no-store');
+        }
+        else{
+            var company_list = [];
+            for(var i=0; i<companies.length; i++) {
+                //push setting object (company object) into the list
+                if(password_encryption.encryptPassword(req.auth_obj.password,companies[i].salt) == companies[i].password) {
+                    //console.log(password_encryption.encryptPassword(req.auth_obj.password,companies[i].salt), companies[i].password);
+                    company_list.push(companies[i].setting);
+                }
+            }
+
+            //if no password match
+            if(company_list.length == 0) {
+                response.send_res_get(req, res, [], 704, -1, 'WRONG_PASSWORD_DESCRIPTION', 'WRONG_PASSWORD_DATA', 'no-store');
+            }
+            //if one password match
+            else if(company_list.length == 1) {
+                req.auth_obj.company_id = companies[0].setting.id;
+                req.body.company_id = companies[0].setting.id;
+                req.url = '/apiv2/credentials/login';
+                return req.app._router.handle(req, res, next) ;
+            }
+            else {
+                response.send_res_get(req, res, company_list, 300, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=86400');
+            }
+        }
+
+    }).catch(function(error){
+        winston.error("Finding the list of companies for this user failed with error: ", error);
+        response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
+    });
+};
+
+
+
+//improved function to controll login on multiple devices per screen size.
+/**
+ * @api {post} /apiv2/credentials/login /apiv2/credentials/login
+ * @apiVersion 0.2.0
+ * @apiName DeviceLogin
+ * @apiGroup DeviceAPI
+ *
+ * @apiParam {String} username Customers login username.
+ * @apiParam {String} password Customers login password.
+ * @apiParam {String} boxid Unique device ID.
+ *
+ * @apiDescription If token is not present, plain text values are used to login
+ */
+exports.loginv2 = function(req, res) {
+    var appids = [];
+
+    //IF COMPANY ID IS MISSING, THEN ASSIGN THE DEFAULT ONE: company_id = 1
+    let COMPANY_ID = req.get("company_id") || 1;
+
+        models.app_group.findOne({
+            attributes: ['app_group_id'],
+            where: {app_id: req.auth_obj.appid}
+        }).then(function (result) {
+            models.app_group.findAll({
+                attributes: ['app_id'],
+                where: {app_group_id: result.app_group_id}
+            }).then(function (result) {
+                for (var i = 0; i < result.length; i++) {
+                    appids.push(result[i].app_id);
+                }
+
+                //let max_multilogin_nr = req.thiscompany.filter(function(obj) {
+                //    return obj.parameter_id === "max_multilogin_nr"
+                //})[0].parameter_value;
+
+                    models.devices.findAll({
+                            where: {username: req.auth_obj.username, device_active: true, appid: {in: appids}, device_id: {not: req.auth_obj.boxid}}
+                        }).then(function(device){
+
+                            var max_multilogin_nr = req.thiscompany.filter(function(obj) {
+                                return obj.parameter_id === "max_multilogin_nr"
+                            })[0].parameter_value;
+
+                            if(!device || device.length < Number(max_multilogin_nr)) {
+                                models.devices.upsert({
+                                    device_active:      true,
+                                    login_data_id:		req.thisuser.id,
+                                    username:           req.auth_obj.username,
+                                    device_mac_address: decodeURIComponent(req.body.macaddress),
+                                    appid:              req.auth_obj.appid,
+                                    app_name:           (req.body.app_name) ? req.body.app_name : '',
+                                    app_version:        req.body.appversion,
+                                    ntype:              req.body.ntype,
+                                    device_id:          req.auth_obj.boxid,
+                                    hdmi:               (req.body.hdmi=='true') ? 1 : 0,
+                                    firmware:           decodeURIComponent(req.body.firmwareversion),
+                                    device_brand:       decodeURIComponent(req.body.devicebrand),
+                                    screen_resolution:  decodeURIComponent(req.body.screensize),
+                                    api_version:        decodeURIComponent(req.body.api_version),
+                                    device_ip:          req.ip.replace('::ffff:', ''),
+                                    os:                 decodeURIComponent(req.body.os),
+                                    language:           req.body.language,
+                                    company_id:         req.thisuser.company_id
+
+                                    //googleappid:        req.body.googleappid
+                                }).then(function(result){
+                                    var response_data = [{
+                                        "encryption_key": req.app.locals.backendsettings[req.thisuser.company_id].new_encryption_key,
+                                        "company_id" : req.thisuser.company_id,
+                                        "password_hash" : req.thisuser.password
+                                    }];
+                                    response.send_res(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'no-store');
+                                    return null;
+                                }).catch(function(error) {
+                                    winston.error("device upsert error : ", error);
+                                    response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
+                                });
+                            }
+                            else {
+                                response.send_res(req, res, [], 705, -1, 'DUAL_LOGIN_ATTEMPT_DESCRIPTION', 'DUAL_LOGIN_ATTEMPT_DATA', 'no-store'); //same user try to login on another device
+                            }
+                            return null;
+                        }).catch(function(error) {
+                            winston.error("database error device search : ", error);
+                            response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
+                        });
+
+                //login end
+                return null;
+            }).catch(function(error) {
+                winston.error("Searching for the app group's appid failed with error: ", error);
+                response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION_6', 'DATABASE_ERROR_DATA', 'no-store');
+            });
+            return null;
+        }).catch(function(error) {
+            winston.error("Searching for the app group's data failed with error: ", error);
+            response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION_7', 'DATABASE_ERROR_DATA', 'no-store');
+        });
 
 };

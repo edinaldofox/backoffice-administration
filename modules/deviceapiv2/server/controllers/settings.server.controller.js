@@ -7,6 +7,7 @@ var path = require('path'),
     winston = require(path.resolve('./config/lib/winston')),
     dateFormat = require('dateformat'),
     moment = require('moment'),
+    querystring = require('querystring'),
     async = require('async'),
     http = require('http'),
     models = db.models;
@@ -44,7 +45,8 @@ exports.settings = function (req, res) {
         //GETTING USER DATA
         function (callback) {
             models.login_data.findOne({
-                attributes: ['id', 'player', 'pin', 'show_adult', 'timezone', 'auto_timezone', 'beta_user', 'activity_timeout'], where: { username: req.auth_obj.username }
+                attributes: ['id', 'player', 'pin', 'show_adult', 'timezone', 'auto_timezone', 'beta_user', 'activity_timeout'],
+                where: { username: req.auth_obj.username, company_id: req.thisuser.company_id}
             }).then(function (login_data) {
                 callback(null, login_data);
                 return null;
@@ -162,6 +164,7 @@ exports.settings = function (req, res) {
         function (login_data, daysleft, seconds_left, refresh, callback) {
             var get_beta_app = (login_data.beta_user) ? [0, 1] : [0];
             //FIND LATEST AVAILABLE UPGRADE FOR THIS APPID, WHOSE API AND APP VERSION REQUIREMENT IS FULFILLED BY THE DEVICE, and status fits the user status
+
             models.app_management.findOne({
                 attributes: ['id', 'title', 'description', 'url', 'isavailable', 'updatedAt'],
                 limit: 1,
@@ -321,9 +324,11 @@ exports.settings = function (req, res) {
                 "get_ads": (req.thisuser.get_ads && (req.thisuser.get_ads === true)) ? 1 : 0,
                 "vast_ad_url": "https://servedbyadbutler.com/vast.spark?setID=5291&ID=173381&pid=57743" //todo: get value from database
             }];
+
             response.send_res(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=43200');
         }
     ], function (err) {
+
         response.send_res(req, res, [], 706, -1, 'DATABASE_ERROR_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
     });
 
@@ -412,18 +417,24 @@ exports.get_settings = function (req, res) {
 
     var login_data = req.thisuser;
     var activity = 'livetv';
+    var iptimeoffset = req.app.locals.timezones[req.geoip.timezone];
+    let thisreqheaders = querystring.parse(req.get("auth"),",",":");
+    var get_beta_app = (req.thisuser.beta_user) ? [0, 1] : [0];
+
 
     models.subscription.findAll({
         attributes: ['end_date'], where: { login_id: login_data.id }, limit: 1, order: [['end_date', 'DESC']],
         include: [{
-            model: models.package, required: true, attributes: ['id'], include: [
-                {
-                    model: models.package_type, required: true, attributes: ['id'], where: { app_group_id: req.auth_obj.screensize }, include: [
-                        { model: models.activity, required: true, attributes: ['id'], where: { description: activity } }
-                    ]
+            model: models.package, required: true, attributes: ['id'],
+            include: [
+                        {
+                        model: models.package_type, required: true, attributes: ['id'], where: { app_group_id: req.auth_obj.screensize },
+                        include: [
+                                    { model: models.activity, required: true, attributes: ['id'], where: { description: activity } }
+                                ]
+                        }
+                   ]
                 }
-            ]
-        }
         ]
     }).then(function (enddate) {
         //res.send(enddate);
@@ -503,15 +514,55 @@ exports.get_settings = function (req, res) {
             "showadult": login_data.show_adult,
             "timezone": login_data.timezone,
             "auto_timezone": login_data.auto_timezone,
-            //"iptimezone": offset,
-            //"available_upgrade": available_upgrade,
+            "iptimezone": parseInt(iptimeoffset) / 60,
+            "available_upgrade": false,
             "get_ads": (req.thisuser.get_ads && (req.thisuser.get_ads === true)) ? 1 : 0,
             "vast_ad_url": "https://servedbyadbutler.com/vast.spark?setID=5291&ID=173381&pid=57743" //todo: get value from database
         }];
 
-        response.send_res_get(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=43200');
+
+
+
+        models.app_management.findOne({
+            attributes: ['id', 'title', 'description', 'url', 'isavailable', 'updatedAt'],
+            limit: 1,
+            where: {
+                beta_version: { in: get_beta_app },
+                appid: req.auth_obj.appid,
+                upgrade_min_api: { lte: req.get("api_version") }, //device api version must be greater / equal to min api version of the upgrade
+                upgrade_min_app_version: { lte: req.get("appversion") }, //device app version must be greater / equal to min app version of the upgrade
+                app_version: { gt: req.get("appversion") }, //device app version must be smaller than the app version of the upgrade
+                isavailable: 1,
+                company_id: req.thisuser.company_id
+            },
+            order: [['updatedAt', 'DESC']] //last updated record
+        }).then(function (result) {
+            if (result) {
+                id = result['id'];
+                name = result['title'];
+                updatedate = dateFormat(result['updatedAt'], "yyyy-mm-dd hh:MM:ss:000");
+                description = result['description'];
+                location = req.app.locals.backendsettings[req.thisuser.company_id].assets_url + '' + result['url'];
+                activated = result['isavailable'];
+                response_data[0].available_upgrade = true;
+                response.send_res_get(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=43200');
+            }
+            else {
+                //no upgrade condition found.
+                response_data[0].available_upgrade = false;
+                response.send_res_get(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=43200');
+            }
+            return null;
+        }).catch(function (error) {
+            winston.error("Searching for the latest available update for the user failed with error: ", error);
+            response.send_res_get(req, res, response_data, 200, 1, 'OK_DESCRIPTION', 'OK_DATA', 'private,max-age=43200');
+            return null;
+        });
+
+        return null;
+
     }).catch(function (error) {
         winston.error("Searching for the user's subscription failed with error: ", error);
         res.send(error);
     });
-}
+};

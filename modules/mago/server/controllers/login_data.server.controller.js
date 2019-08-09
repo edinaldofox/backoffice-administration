@@ -46,7 +46,7 @@ exports.create = function(req, res) {
     newData['updatedate'] = new Date();
   var limit = req.app.locals.backendsettings[req.token.company_id].asset_limitations.client_limit; //number of client accounts that this company can create
 
-  saas_functions.check_limit('login_data', limit).then(function(limit_reached){
+  saas_functions.check_limit('login_data', req.token.company_id, limit).then(function(limit_reached){
     if(limit_reached === true) return res.status(400).send({message: "You have reached the limit number of client accounts you can create for this plan. "});
     else{
       DBModel.create(newData).then(function(result) {

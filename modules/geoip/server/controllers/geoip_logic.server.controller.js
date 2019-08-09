@@ -14,34 +14,40 @@ exports.handleGetIPData = function(req, res) {
        return;
    }
 
-   Reader.open('./public/files/geoip/GeoLite2-City.mmdb').then(reader => {
-       let geoInfo = reader.city(ip);
-       let response = {};
-       response.country = geoInfo.country.isoCode
-       response.city = geoInfo.city.names.en;
-       response.timezone = geoInfo.location.timeZone;
-       res.send({status: true, geo_data: response});
-    }).catch(function(error) {
-        res.send({status: false, message: error})
-    });
+   Reader.open('./public/files/geoip/GeoLite2-City.mmdb')
+       .then(function(reader) {
+           let geoInfo = reader.city(ip);
+           let response = {};
+           response.country = geoInfo.country.isoCode
+           response.city = geoInfo.city.names.en;
+           response.timezone = geoInfo.location.timeZone;
+           res.send({status: true, geo_data: response});
+        }).catch(function(error) {
+            res.send({status: false, message: error})
+        });
 }
 
 exports.middleware = function (req, res, next) {
-    var ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
+    var ip = req.ip.replace('::ffff:', ''); //req.header('x-forwarded-for') || req.connection.remoteAddress;
 
-    return Reader.open('./public/files/geoip/GeoLite2-City.mmdb').then(reader => {
+    return Reader.open('./public/files/geoip/GeoLite2-City.mmdb')
+    .then(function(reader) {
         let geoInfo = reader.city(ip);
         let response = {};
-        response.country = geoInfo.country.isoCode
+        response.country = geoInfo.country.isoCode;
         response.city = geoInfo.city.names.en;
         response.timezone = geoInfo.location.timeZone;
         req.geoip = response;
         next()
      }).catch(function(error) {
+        req.geoip = {};
+        req.geoip.country = "England";
+        req.geoip.city = "Greenwich";
+        req.geoip.timezone = "Etc/Greenwich";
         next();
      });
  
-}
+};
 
 exports.handleDownloadDatabase = function(req, res) {
     let url = req.body.url;

@@ -47,7 +47,8 @@ var
         livetvlastchange: Date.now(),
         menulastchange: Date.now(),
         akamai_token_key: 'akamai_token_key',
-        flussonic_token_key: 'flussonic_token_key'
+        flussonic_token_key: 'flussonic_token_key',
+        expire_date: new Date()
     };
 
     const complete_menu_object = require(path.resolve("./config/defaultvalues/menu_map.json"));

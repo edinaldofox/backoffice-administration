@@ -182,11 +182,25 @@ module.exports = function(sequelize, DataTypes) {
             defaultValue: '{"client_limit":5,"channel_limit":20,"vod_limit":20}',
             allowNull: false,
             get: function () {
-                if(this.getDataValue('asset_limitations')) return JSON.parse(this.getDataValue('asset_limitations'));
+                try {
+                    return JSON.parse(this.getDataValue('asset_limitations'));
+                } catch (e) {
+                    return {"client_limit":5,"channel_limit":20,"vod_limit":20};
+                }
             },
             set: function (value) {
                 return this.setDataValue('asset_limitations', JSON.stringify(value));
             }
+        },
+        expire_date: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        background_video_url: {
+            type: DataTypes.STRING(255)
+        },
+        background_video_duration: {
+            type: DataTypes.INTEGER
         }
     }, {
         tableName: 'settings',

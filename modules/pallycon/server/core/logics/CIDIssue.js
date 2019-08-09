@@ -216,11 +216,12 @@
                  * 퀵스타트 샘플은 파일명의 확장자를 제거한 파일명을 cid로 세팅하게 되어있습니다.
                  * 확장자를 제거한 파일명이 200자리를 넘어갈 경우 뒷부분을 잘라냅니다.
                  */
-                var strName = sFileName.split('.')[0];
-                if(strName.length > 200)
-                  CID = strName.substring(0, 199);
-                else
-                  CID = strName;
+                //var strName = sFileName.split('.')[0];
+                //if(strName.length > 200)
+                //  CID = strName.substring(0, 199);
+                //else
+                // CID = strName;
+                CID = 'platinium'
             }
             /* = -------------------------------------------------------------------------- = */
             /* =   5. Content ID 생성 END / End of Content ID generation                    = */

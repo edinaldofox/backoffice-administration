@@ -13,7 +13,6 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.INTEGER(11),
             allowNull: false,
             defaultValue: 1,
-            unique: 'position'
         },
         title: {
             type: DataTypes.STRING(20),
@@ -38,7 +37,6 @@ module.exports = function(sequelize, DataTypes) {
         position: {
             type: DataTypes.INTEGER(11),
             allowNull: false,
-            unique: 'position'
         },
         menu_level: {
             type: DataTypes.INTEGER(11),

@@ -12,12 +12,13 @@ module.exports = function(sequelize, DataTypes) {
         company_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false,
-            defaultValue: 1
+            defaultValue: 1,
+            unique: 'parameter_id'
         },
         parameter_id: {
             type: DataTypes.STRING(100),
             allowNull: false,
-            unique: true
+            unique: 'parameter_id'
         },
         parameter_value: {
             type: DataTypes.STRING(100),

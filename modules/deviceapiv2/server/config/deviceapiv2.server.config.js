@@ -13,6 +13,8 @@ var path = require('path'),
 /**
  * Module init function.
  */
+
+//todo: advanced_Settgins duhet hequr dhe kaluar ne redis
 module.exports = function(app,   db) {
     app.locals.backendsettings = {};
 
@@ -21,6 +23,9 @@ module.exports = function(app,   db) {
         console.log('event:company_settings_updated' + channel + ' ' + message);
         redis.client.hgetall(message + ':company_settings', function(err, company_settings) {
             if(!app.locals.backendsettings[message].already_updated) {
+                let expire_date = new Date(company_settings.expire_date);
+                delete company_settings.expire_date;
+                company_settings.expire_date = expire_date;
                 delete app.locals.backendsettings[message];
                 app.locals.backendsettings[message] = company_settings;
             }
@@ -29,6 +34,7 @@ module.exports = function(app,   db) {
             }
         });
     });
+
     subscriber.subscribe('event:company_settings_updated');
 
     settings_DBModel.findAll({

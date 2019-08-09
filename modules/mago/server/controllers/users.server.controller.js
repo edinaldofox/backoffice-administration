@@ -9,7 +9,8 @@ var path = require('path'),
   db = require(path.resolve('./config/lib/sequelize')).models,
   crypto = require('crypto'),
   nodemailer = require('nodemailer'),
-  DBModel = db.users;
+  DBModel = db.users,
+  userFunctions = require(path.resolve('./custom_functions/user'));
 
 /**
  * Create
@@ -60,6 +61,30 @@ exports.create = function(req, res) {
 
 
 };
+exports.reInvite = function(req, res) {
+  db.users.findOne({
+    where: {id: req.body.user_id}
+  }).then(function(user) {
+    if (!user) {
+      res.status(404).send({status: false, message: 'User not found'});
+      return;
+    }
+
+    if (user.invite_pending == false) {
+      reject(new Error('User does not have a pending invite'));
+      return;
+    }
+
+    return userFunctions.sendInvite(req, user)
+      .then(function() {
+        res.send({status: true, message: 'Invitation sent'});
+      }).catch(function(err) {
+        res.send({status: false, message: 'Invitation sending failed'});
+      });
+  }).catch(function(err) {
+    res.status(500).send({status: false, message: 'Internal error'});
+  })
+}
 
 exports.createAndInvite = function (req, res) {
     var admin_id = 0;
@@ -82,23 +107,7 @@ exports.createAndInvite = function (req, res) {
                 where: { email: req.body.email }
             }).then(function (user) {
                 if (user) {
-                    if (user.isavailable) {
-                        res.status(300).send({ status: false, message: 'user exist' });
-                    }
-                    else {
-                        let userData = {
-                            email: user.email,
-                            password: crypto.randomBytes(4).toString('hex')
-                        }
-
-                        user.hashedpassword = user.encryptPassword(userData.password, user.salt);
-                        db.users.update({hashedpassword: user.hashedpassword}, {where: {id: user.id}}).then(function(result) {
-                            sendInvite(req, res, userData);
-                        }).catch(function(err) {
-                            winston.error(err);
-                            res.status(500).send({status: false, message: 'Error sending invitation'})
-                        })
-                    }
+                  res.status(300).send({ status: false, message: 'User exist' });
                 } else {
                     let userData = {
                         group_id: req.body.group_id,
@@ -109,7 +118,8 @@ exports.createAndInvite = function (req, res) {
                         jwtoken: '',
                         template: null,
                         isavailable: true,
-                        third_party_api_token: ''
+                        third_party_api_token: '',
+                        invite_pending: true
                     }
 
                     let userObj = db.users.build(userData);
@@ -117,60 +127,22 @@ exports.createAndInvite = function (req, res) {
 
                     if(req.token.role !== 'superadmin'){
                         userObj.company_id = req.token.company_id; //Make sure that only superadmins can choose the company freely. Other users can create accounts only for their company
+                    } else{
+                      userObj.company_id = req.body.company_id;
                     }
 
                     userObj.save().then(function (result) {
-                        sendInvite(req, res, {email: userObj.email, password: userData.hashedpassword}) //send message to given email
+                        userFunctions.sendInvite(req, result) //send message to given email
+                          .then(function() {
+                            res.send({status: true, message: 'Invitation send successfully'});
+                          }).catch(function(err) {
+                            res.status(500).send({status: false, message: 'Invititation sending failed. Please use resend button to resend invite'});
+                          })
                     }).catch(function (err) {
                         res.status(400).send({ status: false, message: err.message })
                     });
                 }
             });
-
-            function sendInvite(req, res, userData) {
-                var smtpConfig = {
-                    host: (req.app.locals.backendsettings[req.token.company_id].smtp_host) ? req.app.locals.backendsettings[req.token.company_id].smtp_host.split(':')[0] : 'smtp.gmail.com',
-                    port: (req.app.locals.backendsettings[req.token.company_id].smtp_host) ? Number(req.app.locals.backendsettings[req.token.company_id].smtp_host.split(':')[1]) : 465,
-                    secure: (req.app.locals.backendsettings[req.token.company_id].smtp_secure === false) ? req.app.locals.backendsettings[req.token.company_id].smtp_secure : true,
-                    auth: {
-                        user: req.app.locals.backendsettings[req.token.company_id].email_username,
-                        pass: req.app.locals.backendsettings[req.token.company_id].email_password
-                    }
-                }
-                var smtpTransport = nodemailer.createTransport(smtpConfig);
-
-                db.email_templates.findOne({
-                    attibutes: ['content'],
-                    where: {template_id: 'user-invite-email'}
-                }).then(function(template) {
-                    let htmlTemplate = null;
-                    if (!template) {
-                        //nedd to have invite default template
-                        htmlTemplate = 'email: ' + userData.email + '</br>' + ' password ' + userData.password + '</br> link ' + '';
-                    } else {
-                        const htmlContent = template.content;
-                        htmlTemplate = htmlContent.replace('{{email}}', userData.email).replace('{{password}}', userData.password).replace('{{login_link}}', 'http://testinglog.com');
-                    }
-
-                    let mailOptions = {
-                        to: userData.email,
-                        from: req.app.locals.backendsettings[req.token.company_id - 1].email_address,
-                        subject: 'Invitation',
-                        html: htmlTemplate
-                    }
-
-                    smtpTransport.sendMail(mailOptions, function(err) {
-                        if (err) {
-                            winston.error(err);
-                            res.send({status: false, message: 'Error sending invitation'})
-                        }
-                        else {
-                            winston.info('User invitation sent');
-                            res.send({status: true, message: 'Invitation sent successfully'})
-                        }
-                    });
-                });
-            }
         }
         else {
             return res.status(400).send({message: "Failed checking the user's authorization to perform this action"});
@@ -314,7 +286,20 @@ exports.list = function(req, res) {
   final_where.include = [];
 
     if(query.group_id) qwhere.group_id = query.group_id;
-    if(req.token.role !== 'superadmin') final_where.where.company_id = req.token.company_id; //return only records for this company
+    if(query.company_id) qwhere.company_id = query.company_id;
+
+    if(req.token.role !== 'superadmin') {
+      final_where.where.company_id = req.token.company_id;
+      final_where.include = [
+        {
+          model: db.groups,
+          required: true,
+          attributes: ['code'],
+          where: {code: {$notIn: ['superadmin', 'admin']}}
+        }
+      ] //return only records for this company
+    }
+      
 
   DBModel.findAndCountAll(
 

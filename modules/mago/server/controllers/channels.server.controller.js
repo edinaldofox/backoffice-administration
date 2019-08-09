@@ -63,7 +63,7 @@ exports.create = function(req, res) {
 
     var limit = req.app.locals.backendsettings[req.token.company_id].asset_limitations.channel_limit; //number of channels that this company can create
 
-    saas_functions.check_limit('channels', limit).then(function(limit_reached){
+    saas_functions.check_limit('channels', req.token.company_id, limit).then(function(limit_reached){
         if(limit_reached === true) return res.status(400).send({message: "You have reached the limit number of channels you can create for this plan. "});
         else{
             DBModel.create(req.body).then(function(result) {
@@ -257,8 +257,9 @@ exports.list = function(req, res) {
     qwhere.$or.channel_number.$like = '%'+query.q+'%';
   }
 
-  //start building where
-  final_where.where = qwhere;
+    //start building where
+    final_where.where = qwhere;
+    final_where.where.company_id = req.token.company_id; //count only records for this company
     if(parseInt(query._end) !== -1){
         if(parseInt(query._start)) final_where.offset = parseInt(query._start);
         if(parseInt(query._end)) final_where.limit = parseInt(query._end)-parseInt(query._start);

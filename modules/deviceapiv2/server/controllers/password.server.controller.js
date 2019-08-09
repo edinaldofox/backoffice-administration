@@ -74,13 +74,14 @@ exports.validateResetToken = function(req, res) {
  *
  */
 exports.forgot = function(req, res, next) {
+    let company_id = req.headers.company_id ? req.headers.company_id : 1;
     var smtpConfig = {
-        host: (req.app.locals.backendsettings[1].smtp_host) ? req.app.locals.backendsettings[1].smtp_host.split(':')[0] : 'smtp.gmail.com',
-        port: (req.app.locals.backendsettings[1].smtp_host) ? Number(req.app.locals.backendsettings[1].smtp_host.split(':')[1]) : 465,
-        secure: (req.app.locals.backendsettings[1].smtp_secure === false) ? req.app.locals.backendsettings[1].smtp_secure : true,
+        host: (req.app.locals.backendsettings[company_id].smtp_host) ? req.app.locals.backendsettings[company_id].smtp_host.split(':')[0] : 'smtp.gmail.com',
+        port: (req.app.locals.backendsettings[company_id].smtp_host) ? Number(req.app.locals.backendsettings[company_id].smtp_host.split(':')[1]) : 465,
+        secure: (req.app.locals.backendsettings[company_id].smtp_secure === false) ? req.app.locals.backendsettings[company_id].smtp_secure : true,
         auth: {
-            user: req.app.locals.backendsettings[1].email_username,
-            pass: req.app.locals.backendsettings[1].email_password
+            user: req.app.locals.backendsettings[company_id].email_username,
+            pass: req.app.locals.backendsettings[company_id].email_password
         }
     };
 

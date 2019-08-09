@@ -1,7 +1,7 @@
 'use strict'
 var myApp = angular.module('myApp', ['ng-admin','ng-admin.jwt-auth', 'ngVis', 'pascalprecht.translate', 'ngCookies','dndLists']);
 
-myApp.controller('envVariablesCtrl', ['$scope', '$http', function ($scope, $http) {
+myApp.controller('envVariablesCtrl', ['$scope', '$http','notification', function ($scope, $http,notification) {
     var config = {method: 'GET', url: '../api/env_settings'};
     if(localStorage.userToken) config.headers = {'Authorization': localStorage.userToken};  //user token should be included as a header in this request
     $http(config).then(function(response) {
@@ -12,7 +12,58 @@ myApp.controller('envVariablesCtrl', ['$scope', '$http', function ($scope, $http
 
     $scope.googlelogin = function () {
         location.replace("/api/auth/google");
-    }
+    };
+
+    $scope.signUpFields = function () {
+        angular.element( document.querySelector( '#loginView' ) ).removeClass('customVisible');
+        angular.element( document.querySelector( '#loginView' ) ).addClass('customHidden');
+        angular.element( document.querySelector( '#signUpView' ) ).removeClass('customHidden');
+        angular.element( document.querySelector( '#signUpView' ) ).addClass('customVisible');
+    };
+
+    $scope.loginFields = function () {
+        angular.element( document.querySelector( '#signUpView' ) ).removeClass('customVisible');
+        angular.element( document.querySelector( '#loginView' ) ).removeClass('customHidden');
+        angular.element( document.querySelector( '#signUpView' ) ).addClass('customHidden');
+        angular.element( document.querySelector( '#loginView' ) ).addClass('customVisible');
+    };
+
+    //loginEmail
+    $scope.loginEmail = function () {
+
+        if ( !$scope.company_name ) {
+            notification.log('Company Name should not be empty', { addnCls: 'humane-flatty-info' })
+        }else if(!$scope.phone){
+            notification.log('Phone Number should not be empty', { addnCls: 'humane-flatty-info' })
+        }else if(!$scope.email_address){
+            notification.log('Email Address should not be empty', { addnCls: 'humane-flatty-info' })
+        }else{
+
+            var postData = {
+                "company_name": $scope.company_name,
+                "email":  $scope.email_address,
+                "telephone": $scope.phone
+            };
+
+            $http.post('../api/company', postData).then(function successCallback(response) {
+                if (response.status === 200){
+                    notification.log(response.data.message, { addnCls: 'humane-flatty-success' });
+
+                    angular.element( document.querySelector( '#signUpView' ) ).removeClass('customVisible');
+                    angular.element( document.querySelector( '#loginView' ) ).removeClass('customHidden');
+                    angular.element( document.querySelector( '#signUpView' ) ).addClass('customHidden');
+                    angular.element( document.querySelector( '#loginView' ) ).addClass('customVisible');
+                }
+            }, function errorCallback(response) {
+                if (response.status === 400){
+                    notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+                } else {
+                    notification.log(response.data.message, { addnCls: 'humane-flatty-error' });
+                }
+            });
+        }
+    };
+    //./loginEmail
 }]);
 
 myApp.controller('main', function ($scope, $rootScope, $location, notification) {
@@ -362,18 +413,24 @@ myApp.config(['NgAdminConfigurationProvider', 'RestangularProvider', 'ngAdminJWT
         template: '{{token}}'
     });
 
-
 }]);
 
 myApp.run(['Restangular', '$location', 'notification', function(Restangular, $location, notification) {
     Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-        if(response.status > 200) {
+        if(response.status > 200 && response.status !== 402) {
 
                 deferred.reject("Server not responding to [some address]. It could be down, or this could be the wrong url.");
                 notification.log('Error: ' + ' ( ' + response.data.message + ' )', { addnCls: 'humane-flatty-error' })
 
             return false;
 
+        }else if(response.status === 402){
+            //if payment is required , show message then do logout (included logout trick by js)
+            notification.log(response.statusText ,{ addnCls: 'humane-flatty-error' } );
+            setInterval(function() {
+                localStorage.clear();
+                location.reload();
+            }, 5000);
         }
 
     });
@@ -392,6 +449,7 @@ myApp.directive('generate', require('./smsbatch/generate'));
 myApp.directive('roles', require('./smsbatch/user_roles_button'));
 myApp.directive('allowMenu', require('./groups/allowMenu'));
 myApp.directive('invite', require('./smsbatch/invite'));
+myApp.directive('approveInvitation', require('./smsbatch/approveInvitation'));
 myApp.directive('importchannelLogs', require('./import_channels_csv_m3u/see_logs_import_channel'));
 myApp.directive('importvodLogs', require('./import_vod_csv/see_logs_import_vod'));
 
@@ -489,17 +547,20 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     admin.addEntity(nga.entity('htmlContent'));
     admin.addEntity(nga.entity('tmdbvods'));
     admin.addEntity(nga.entity('tmdbseries'));
-
-    //test
-
     admin.addEntity(nga.entity('import_channel'));
     admin.addEntity(nga.entity('import_vod'));
 
+    admin.addEntity(nga.entity('assetsMaster'));
+    admin.addEntity(nga.entity('assetsCategory'));
+    admin.addEntity(nga.entity('assetsDetails'));
+
 
     //Config
+    require('./hospitality/assetsDetails/config')(nga, admin);
+    require('./hospitality/assetsCategory/config')(nga, admin);
+    require('./hospitality/assetsMaster/config')(nga, admin);
     require('./import_channels_csv_m3u/config')(nga, admin);
     require('./import_vod_csv/config')(nga, admin);
-
     require('./tmdb_import/config')(nga, admin);
     require('./tmdb_import_tvseries/config')(nga, admin);
     require('./htmlContent/config')(nga, admin);

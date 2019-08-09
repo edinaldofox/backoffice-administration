@@ -1,4 +1,7 @@
 {
+    "whitelist": [
+        "/api/user/change-password"
+    ],
     "status_dashboard": [
         "/api/devices",
         "/api/env_settings",
@@ -251,5 +254,10 @@
         "/api/personal-details",
         "/api/env_settings"
     ],
-    "support": []
+    "support": [],
+    "hospitality_assets": [
+        "/api/assetsMaster",
+        "/api/assetsCategory",
+        "/api/assetsDetails"
+    ]
 }

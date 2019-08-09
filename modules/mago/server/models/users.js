@@ -119,7 +119,11 @@ module.exports = function(sequelize, DataTypes) {
             allowNull: true
         },
         resetpasswordtoken: DataTypes.STRING,
-        resetpasswordexpires: DataTypes.BIGINT
+        resetpasswordexpires: DataTypes.BIGINT,
+        invite_pending: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
     },
     {
         instanceMethods: {

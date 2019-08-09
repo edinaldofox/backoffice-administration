@@ -6,7 +6,7 @@
 var path = require('path'),
     errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
     fileHandler = require(path.resolve('./modules/mago/server/controllers/common.controller')),
-    db = require(path.resolve('./config/lib/sequelize')).models,
+    db = require(path.resolve('./config/lib/sequelize')),
     fastcsv = require('fast-csv'),
     xml2js = require('xml2js'),
     async = require('async'),
@@ -14,35 +14,43 @@ var path = require('path'),
     iconv = require('iconv-lite'),
     moment = require('moment'),
     dateFormat = require('dateformat'),
-    DBChannels = db.channels,
-    DBModel = db.epg_data,
+    DBChannels = db.models.channels,
+    DBModel = db.models.epg_data,
     xmltv = require('xmltv'),
     winston = require(path.resolve('./config/lib/winston'));
 
-var download = require('download-file')
+var download = require('download-file');
 
 /**
  * Create
  */
 exports.create = function(req, res) {
 
-    db.channels.findOne({
+    DBChannels.findOne({
         attributes: ['id'], where: {channel_number: req.body.channel_number, company_id: req.token.company_id}
     }).then(function(result) {
-        req.body.channels_id = result.id;
-        req.body.company_id = req.token.company_id; //save record for this company
-        DBModel.create(req.body).then(function(result) {
-            if (!result) {
-                return res.status(400).send({message: 'fail create data'});
-            } else {
-                return res.jsonp(result);
-            }
-        }).catch(function(err) {
-            winston.error("Creating event failed with error: ", err);
-            return res.status(400).send({
-                message: errorHandler.getErrorMessage(err)
+
+        if(result) {
+            req.body.channels_id = result.id;
+            req.body.company_id = req.token.company_id; //save record for this company
+            DBModel.create(req.body).then(function(result) {
+                if (!result) {
+                    return res.status(400).send({message: 'fail create data'});
+                } else {
+                    return res.jsonp(result);
+                }
+            }).catch(function(err) {
+                winston.error("Creating event failed with error: ", err);
+                return res.status(400).send({
+                    message: errorHandler.getErrorMessage(err)
+                });
             });
-        });
+        }
+        else {
+            return res.send({
+                message: "Channel not found"
+            });
+        }
         return null;
     }).catch(function(err) {
         winston.error("Finding channel failed with error: ", err);
@@ -194,6 +202,26 @@ exports.list = function(req, res) {
         qwhere.$or.long_description.$like = '%'+query.q+'%';
     }
 
+    if(query.title) qwhere.title = query.title;
+    if(query.channel_number) qwhere.channel_number = query.channel_number;
+
+    console.log(query.program_start + ' ' + query.program_end)
+    if(query.program_start && query.program_end) {
+        // we have interval
+        qwhere.program_start = {};
+        qwhere.program_start.$gte = new Date(query.program_start);
+        qwhere.program_end = {};
+        qwhere.program_end.$lte = new Date(query.program_end);
+    }
+    else if(query.program_start) {
+        qwhere.program_start = {};
+        qwhere.program_start.$gte = new Date(query.program_start);
+        console.log('hour ' + new Date(query.program_start).getHours());
+    }
+    else if(query.program_end) {
+        qwhere.program_end = {}
+        qwhere.program_end.$lte = new Date(query.program_end);
+    }
 
     //start building where
     final_where.where = qwhere;
@@ -231,8 +259,12 @@ exports.list_chart_epg = function(req, res) {
     future.setDate(future.getDate()+7);
 
     DBChannels.findAll({
-        attributes: ['id', ['channel_number', 'group'],['title','content']],
-        where: {company_id: req.token.company_id}
+        attributes: ['id', ['channel_number', 'group'],
+            //['title','content']
+            [db.sequelize.fn("concat",db.sequelize.col('channel_number')," . ",db.sequelize.col('title')), 'content']
+        ],
+        where: {company_id: req.token.company_id, isavailable: true},
+        order: [['channel_number', 'DESC']]
     }).then(function(channels){
         DBModel.findAll({
                 attributes: ['id', ['channels_id', 'group'],['program_start','start'],['program_end','end'],['title','content']],
@@ -522,13 +554,13 @@ function import_xml_dga(req, res, current_time, epg_file, import_log, callback){
                 var channel_name = channels.$.name;
                 var filtered_channel_number = (req.body.channel_number) ? req.body.channel_number : {gte: -1}; //channel from epg file that is being processed, if allowed by channel_number input
                 //find channel id and number for this channel
-                db.channels.findOne({
+                DBChannels.findOne({
                     attributes: ['channel_number', 'id'],
                     where: {epg_map_id: channel_name, channel_number: filtered_channel_number, company_id: req.token.company_id}
                 }).then(function (channel_data) {
                     if(channel_data){
                         //destroys future epg for filtered channels
-                        db.epg_data.destroy({
+                        db.models.epg_data.destroy({
                             where: {channel_number: channel_data.channel_number, program_start: {gte: current_time}, company_id: req.token.company_id}
                         }).then(function (result) {
                             //iterate over all events of this channel
@@ -538,7 +570,7 @@ function import_xml_dga(req, res, current_time, epg_file, import_log, callback){
                                 try{var long_event_descriptor = events.extended_event_descriptor[0].text[0];}catch(error){var long_event_descriptor = "Program summary";}
                                 if(events && (moment(events.$.start_time).subtract(req.body.timezone, 'hour').format('YYYY-MM-DD HH:mm:ss') > moment(current_time).format('YYYY-MM-DD HH:mm:ss')) ){
                                     //only insert future programs (where program_start > current)
-                                    db.epg_data.create({
+                                    db.models.epg_data.create({
                                         channels_id: channel_data.id,
                                         channel_number: channel_data.channel_number,
                                         title: (short_event_name) ? short_event_name : "Program title",
@@ -693,11 +725,11 @@ function import_xml_standard(req, res, current_time){
                                 async.forEach(channels, function (channel, callback) {
                                     var filtered_channel_number = (req.body.channel_number) ? req.body.channel_number : {gte: -1};
                                     var channel_name = (channel["display-name"][0]._) ? channel["display-name"][0]._ : channel["display-name"]
-                                    db.channels.findOne({
+                                    DBChannels.findOne({
                                         attributes: ['channel_number'], where: {title: channel_name, channel_number: filtered_channel_number, company_id: req.token.company_id}
                                     }).then(function (ch_result) {
                                         if(ch_result){
-                                            db.epg_data.destroy({
+                                            db.models.epg_data.destroy({
                                                 where: {channel_number: filtered_channel_number, program_start: {gte: current_time}, company_id: req.token.company_id}
                                             }).then(function (result) {
                                                 channel_list[''+channel.$.id+''] = ({title: channel_name});
@@ -726,7 +758,7 @@ function import_xml_standard(req, res, current_time){
                                     //the program object cannot be empty, the channel for this program should be in the file and should have passed the user filter
                                     if(program.$ != undefined && channel_list[''+program.$.channel+'']){
                                         try{
-                                            db.channels.findOne({
+                                            DBChannels.findOne({
                                                 attributes: ['id', 'channel_number', 'title'],
                                                 where: {title: channel_list[''+program.$.channel+''].title, company_id: req.token.company_id}
                                             }).then(function (result) {
@@ -736,7 +768,7 @@ function import_xml_standard(req, res, current_time){
                                                     if( moment(stringtodate(program.$.start)).subtract(req.body.timezone, 'hour').format('YYYY-MM-DD HH:mm:ss') > moment(current_time).format('YYYY-MM-DD HH:mm:ss')){
                                                         var program_title = (program.title[0]._) ? program.title[0]._ : program.title[0];
                                                         var program_desc = (program.desc[0]._) ? program.desc[0]._ : program.desc[0];
-                                                        db.epg_data.create({
+                                                        db.models.epg_data.create({
                                                             channels_id: result.id,
                                                             channel_number: result.channel_number,
                                                             title: (program_title) ? program_title : "Program title",

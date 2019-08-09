@@ -23,15 +23,21 @@ module.exports = function(app) {
         .get(tokenGenerators.akamai_token_v2_generator)
         .post(tokenGenerators.akamai_token_v2_generator);
 
+    app.route('/apiv2/token/akamaitokenv2extraquery/*')
+        .all(authpolicy.isAllowed)
+        .get(tokenGenerators.akamai_token_v2_generator_extraquery)
+        .post(tokenGenerators.akamai_token_v2_generator_extraquery);
+
+
     app.route('/apiv2/token/catchupakamaitokenv2/*')
         .all(authpolicy.isAllowed)
         .get(tokenGenerators.catchup_akamai_token_v2_generator)
         .post(tokenGenerators.catchup_akamai_token_v2_generator);
 
-    app.route('/apiv2/token/mobileakamaitokenv2/*')
-        .all(authpolicy.isAllowed)
-        .get(tokenGenerators.akamai_token_v2_generator_tibo_mobile)
-        .post(tokenGenerators.akamai_token_v2_generator_tibo_mobile);
+    //app.route('/apiv2/token/mobileakamaitokenv2/*')
+    //    .all(authpolicy.isAllowed)
+    //    .get(tokenGenerators.akamai_token_v2_generator_tibo_mobile)
+    //    .post(tokenGenerators.akamai_token_v2_generator_tibo_mobile);
 
     app.route('/apiv2/token/flussonic/*')
         .all(authpolicy.isAllowed)

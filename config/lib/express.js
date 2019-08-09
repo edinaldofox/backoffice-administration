@@ -15,15 +15,16 @@ var config = require('../config'),
     path = require('path'),
     http = require('http'),
     https = require('https'),
+    multer = require('multer'),
     fs = require('fs'),
     winston = require('./winston'),
     cors = require('cors'),
     rateLimit = require('express-rate-limit'),
     securityConfig = require('../security/exprees.security.config'),
-    policy = require(path.resolve('./modules/mago/server/policies/mago.server.policy')),
+    policy = require(path.resolve('./modules/mago/server/policies/mago.server.policy'));
 
     //documentation
-    docs = require("express-mongoose-docs");
+    //docs = require("express-mongoose-docs");
 
     //language configuration parameters
     global.languages = {};
@@ -128,7 +129,7 @@ module.exports.initMiddleware = function(app) {
     }));
     app.use('/', bodyParser.urlencoded({
         extended: true
-    }))
+    }));
     app.use('/', bodyParser.json({
         limit: securityConfig.max_body_size
     }));
@@ -136,8 +137,29 @@ module.exports.initMiddleware = function(app) {
     // Add the cookie parser and flash middleware
     app.use(cookieParser());
 
-    //docs api
-    docs(app);
+
+    // Add multipart handling middleware
+    /*
+    var storage = multer.diskStorage({
+        destination: function(req, file, cb) {
+            cb(null, './uploads');
+        },
+        filename: function(req, file, cb) {
+            var getFileExt = function(fileName) {
+                var fileExt = fileName.split(".");
+                if (fileExt.length === 1 || (fileExt[0] === "" && fileExt.length === 2)) {
+                    return "";
+                }
+                return fileExt.pop();
+            };
+            cb(null, Date.now() + '.' + getFileExt(file.originalname));
+        }
+    });
+
+    app.use(multer({
+        storage: storage
+    }).single('file'));
+    */
 
 };
 
@@ -203,7 +225,7 @@ module.exports.initHelmetHeaders = function(app) {
     app.use(helmet.ieNoOpen());
     app.use(helmet.hsts({
         maxAge: SIX_MONTHS,
-        includeSubdomains: true,
+        includeSubDomains: true,
         force: true
     }));
     app.disable('x-powered-by');

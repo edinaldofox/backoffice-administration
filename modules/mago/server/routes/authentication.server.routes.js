@@ -31,7 +31,6 @@ module.exports = function(app) {
         .put(authController.update_personal_details);
 
     app.route('/api/auth/forgot')
-        .all(policy.Authenticate)
         .post(authController.forgot);
 
 };

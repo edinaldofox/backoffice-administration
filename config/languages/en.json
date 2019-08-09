@@ -56,6 +56,7 @@
         "NO_DATA_FOUND": "The requested list of items was empty",
         "GUEST_LOGIN_DISABLED_DESCRIPTION": "GUEST_LOGIN_DISABLED",
         "GUEST_LOGIN_DISABLED_DATA": "Guest login was disabled",
+        "MAX_LOGIN_NUMBER": "You have reached the maximing number of allowed devices. Please log out from another device.",
         "BUY": "Buy",
         "PLAY": "Play",
         "RELATED": "Related",

@@ -12,16 +12,17 @@ module.exports = function(sequelize, DataTypes) {
         company_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false,
-            defaultValue: 1
+            defaultValue: 1,
+            unique: 'company_name_code_unique'
         },
         name: {
             type: DataTypes.STRING(45),
-            unique: true,
+            unique: 'company_name_code_unique',
             allowNull: false
         },
         code: {
             type: DataTypes.STRING(45),
-            unique: true,
+            unique: 'company_name_code_unique',
             allowNull: false
         },
         isavailable: {

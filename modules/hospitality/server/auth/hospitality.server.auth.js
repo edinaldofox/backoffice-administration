@@ -102,6 +102,10 @@ function parse_plain_auth(auth){
 //verifies account by serching for username=username and password=mac address; used for hospitalities.)
 exports.isAccountAllowed = function(req, res, next) {
 
+    let COMPANY_ID = 1;
+    if(req.headers.company_id) COMPANY_ID = req.headers.company_id * 1;
+
+
     if(req.body.auth){  //serach for auth parameter on post data
         var auth = decodeURIComponent(req.body.auth);
     }
@@ -116,7 +120,7 @@ exports.isAccountAllowed = function(req, res, next) {
     }
     else {
         //auth parameter not found
-        response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
+        response.sendv3(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
         return;
     }
 
@@ -127,25 +131,25 @@ exports.isAccountAllowed = function(req, res, next) {
     }
     else {
         //auth object is encrypted
-        var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].new_encryption_key),";","="); //todo: fix static company_id
+        var auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].new_encryption_key),";","=");
         //try old key
         if(missing_params(auth_obj)){
-            auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[1].old_encryption_key),";","="); //todo: fix static company_id
+            auth_obj = querystring.parse(auth_decrypt(auth,req.app.locals.backendsettings[COMPANY_ID].old_encryption_key),";","=");
         }
     }
 
     //if auth_obj is missing any of the five parameters, then token could not be decrypted.
     if(missing_params(auth_obj)){
-        response.send_res(req, res, [], 889, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
+        response.sendv3(req, res, [], 889, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TOKEN', 'no-store');
     }
     else {
         //controls if mobile app is using HDMI
         if((req.body.hdmi === 'true') && (['2', '3'].indexOf(auth_obj.appid) !== -1)){
-            response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_INSTALLATION', 'no-store'); //hdmi cannot be active for mobile devices
+            response.sendv3(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_INSTALLATION', 'no-store'); //hdmi cannot be active for mobile devices
         }
         //controls if timestamp is within limits
         else if(valid_timestamp(auth_obj) === false){
-            response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TIMESTAMP', 'no-store');
+            response.sendv3(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_TIMESTAMP', 'no-store');
         }
         //controls if appid is a valid number
         else if(valid_appid(auth_obj) === true){
@@ -162,7 +166,7 @@ exports.isAccountAllowed = function(req, res, next) {
                     if(result) {
                         if(result.mac_address === auth_obj.password.trim()) {
                             if(result.account_lock) {
-                                response.send_res(req, res, [], 703, -1, 'ACCOUNT_LOCK_DESCRIPTION', 'ACCOUNT_LOCK_DATA', 'no-store');
+                                response.sendv3(req, res, [], 703, -1, 'ACCOUNT_LOCK_DESCRIPTION', 'ACCOUNT_LOCK_DATA', 'no-store');
                             }
                             else {
                                 req.thisuser = result;
@@ -172,20 +176,20 @@ exports.isAccountAllowed = function(req, res, next) {
                             }
                         }
                         else {
-                            response.send_res(req, res, [], 704, -1, 'WRONG_PASSWORD_DESCRIPTION', 'WRONG_PASSWORD_DATA', 'no-store');
+                            response.sendv3(req, res, [], 704, -1, 'WRONG_PASSWORD_DESCRIPTION', 'WRONG_PASSWORD_DATA', 'no-store');
                         }
                     }
                     else {
-                        response.send_res(req, res, [], 702, -1, 'USER_NOT_FOUND_DESCRIPTION', 'USER_NOT_FOUND_DATA', 'no-store');
+                        response.sendv3(req, res, [], 702, -1, 'USER_NOT_FOUND_DESCRIPTION', 'USER_NOT_FOUND_DATA', 'no-store');
                     }
                 }).catch(function(error) {
                     winston.error("Searching for the user account failed with error: ", error);
-                    response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
+                    response.sendv3(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'DATABASE_ERROR_DATA', 'no-store');
                 });
             }
         }
         else {
-            response.send_res(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_APPID', 'no-store');
+            response.sendv3(req, res, [], 888, -1, 'BAD_TOKEN_DESCRIPTION', 'INVALID_APPID', 'no-store');
         }
     }
 };

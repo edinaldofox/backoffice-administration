@@ -11,6 +11,12 @@ function move(Restangular, $uibModal, $q, notification, $state,$http) {
         },
         link: function(scope, element, attrs) {
 
+
+            scope.myFunction = function(){
+                var spanDropdown = document.querySelectorAll('span.btn-group')[0];
+                spanDropdown.classList.add("open");
+            };
+
             scope.icon = 'glyphicon-list';
             if (attrs.type == 'move_to_package') scope.button = 'Move to Package';
             var vods_array = [];
@@ -26,6 +32,10 @@ function move(Restangular, $uibModal, $q, notification, $state,$http) {
             var newarray = [];
 
             scope.moveto = function () {
+
+                var spanDropdown = document.querySelectorAll('span.btn-group')[0];
+                spanDropdown.classList.remove("open");
+
                 var array_of_selection_vod = scope.selection;
 
                 scope.change = function(name,id){
@@ -53,7 +63,7 @@ function move(Restangular, $uibModal, $q, notification, $state,$http) {
 
         },
         template: '<div class="btn-group" uib-dropdown is-open="status.isopen"> ' +
-        '<button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle ng-disabled="disabled">' +
+        '<button ng-click="myFunction()" id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle ng-disabled="disabled">' +
         '<span class="glyphicon {{icon}}"></span> {{button}} <span class="caret"></span>' +
         '</button>' +
         '<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">' +

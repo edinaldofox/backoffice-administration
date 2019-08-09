@@ -101,7 +101,7 @@ exports.create_customer_with_login = function(req, res) {
                 else{
                     //search if username exists
                     return db.login_data.findOne({
-                            where: {username: req.body.username.toLowerCase()}
+                            where: {username: req.body.username.toLowerCase(), company_id: req.token.company_id}
                         }).then(function (login_data) {
                             if (login_data) {
                                 return {status: false, login_data: true, message: "Username already exists"} //return if username found
@@ -185,9 +185,10 @@ exports.find_or_create_customer_and_login = function(req, res) {
                 }
                 else {
                     //begin data customer creation transaction
+
                     return db_t.sequelize.transaction(function (t) {
                         req.body.group_id = (req.body.group_id) ? req.body.group_id : 1;
-                        req.body.company_id = login_data.company_id;
+                        //req.body.company_id = login_data.company_id;
                         return db.customer_data.create(
                             req.body, {transaction: t}
                         ).then(function (new_customer) {

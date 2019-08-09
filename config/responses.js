@@ -25,6 +25,21 @@ module.exports = {
         this.response_object = [];
     },
 
+    sendv3: function(req, res, result, status, error, description, extra_data, header){
+        let clear_response = new this.APPLICATION_RESPONSE(req.body.language, status, error, description, extra_data, result);
+        delete clear_response.status_code;
+        clear_response.response_code = status;
+        res.status(status).send(clear_response);
+    },
+
+    //pjesa poshte nuk duhen perdorur me
+
+    send_res_get: function(req, res, result, status, error, description, extra_data, header){
+        var clear_response = new this.APPLICATION_RESPONSE(req.body.language, status, error, description, extra_data, result);
+        res.send(clear_response);
+    },
+
+
     send_res: function(req, res, result, status, error, description, extra_data, header){
         var evaluation_tag = crypto.createHash('sha256').update(JSON.stringify(result)).digest('hex');
         var client_etag = (!req.header('clientsETag')) ? "" : req.header('clientsETag');
@@ -35,11 +50,6 @@ module.exports = {
         res.setHeader('etag', evaluation_tag);
         res.setHeader('cache-control', cache_header);
         var clear_response = new this.APPLICATION_RESPONSE(req.body.language, status_code, error, description, extra_data, response_data);
-        res.send(clear_response);
-    },
-
-    send_res_get: function(req, res, result, status, error, description, extra_data, header){
-        var clear_response = new this.APPLICATION_RESPONSE(req.body.language, status, error, description, extra_data, result);
         res.send(clear_response);
     },
 

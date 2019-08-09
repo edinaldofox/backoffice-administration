@@ -1,9 +1,9 @@
 var path = require('path'),
     db = require(path.resolve('./config/lib/sequelize')).models;
 
-function check_limit(entity_name, limit) {
+function check_limit(entity_name, company_id, limit) {
     return new Promise(function (limit_reached, reject) {
-        db[entity_name].findAndCountAll({attributes: ['id']}).then(function (results) {
+        db[entity_name].findAndCountAll({attributes: ['id'], where: {company_id: company_id}}).then(function (results) {
             if (results.count >= limit) {
                 return limit_reached(true);
             }

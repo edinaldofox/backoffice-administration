@@ -109,7 +109,7 @@ exports.create = function(req, res) {
     req.body.company_id = req.token.company_id; //save record for this company
     var limit = req.app.locals.backendsettings[req.token.company_id].asset_limitations.vod_limit; //number of vod items that this company can create
 
-    saas_functions.check_limit('vod', limit).then(function(limit_reached){
+    saas_functions.check_limit('vod', req.token.company_id, limit).then(function(limit_reached){
         if(limit_reached === true) return res.status(400).send({message: "You have reached the limit number of vod items you can create for this plan. "});
         else{
             DBModel.create(req.body).then(function(result) {

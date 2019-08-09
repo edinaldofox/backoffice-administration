@@ -15,12 +15,13 @@ module.exports = function(sequelize, DataTypes) {
         company_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false,
+            unique: 'username',
             defaultValue: 1
         },
         username: {
             type: DataTypes.STRING(32),
             allowNull: false,
-            unique: true,
+            unique: 'username',
             validate: {isLowercase: true}
         },
         mac_address: {

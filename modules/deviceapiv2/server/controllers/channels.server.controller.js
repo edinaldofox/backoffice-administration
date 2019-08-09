@@ -454,7 +454,8 @@ exports.favorites = function(req, res) {
         //GETTING USER DATA
         function(callback) {
             models.login_data.findOne({
-                attributes: ['id'], where: {username: req.auth_obj.username}
+                attributes: ['id'],
+                where: {username: req.auth_obj.username, company_id: req.thisuser.company_id}
             }).then(function (user) {
                 callback(null, user.id);
                 return null;

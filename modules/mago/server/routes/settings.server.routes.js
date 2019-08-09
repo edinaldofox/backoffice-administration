@@ -10,6 +10,9 @@ var path = require('path'),
 
 module.exports = function(app) {
 
+    app.route('/api/company')
+        .post(settings.createByEmail);
+        
     /* ===== settings ===== */
     app.route('/api/company_settings')
         .all(policy.Authenticate)
@@ -100,5 +103,4 @@ module.exports = function(app) {
 
     app.route('/api/env_settings')
         .get(settings.env_settings);
-
 };
