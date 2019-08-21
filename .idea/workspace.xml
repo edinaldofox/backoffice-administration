@@ -2,623 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6c225043-43f7-42af-84eb-4d694d26acd2" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/create-connection.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-entrypoint.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.sequelizerc" beforeDir="false" afterPath="$PROJECT_DIR$/.sequelizerc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Procfile" beforeDir="false" afterPath="$PROJECT_DIR$/Procfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android_apk/magoware-2.8.15.apk" beforeDir="false" afterPath="$PROJECT_DIR$/android_apk/magoware-2.8.15.apk" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apidoc.json" beforeDir="false" afterPath="$PROJECT_DIR$/apidoc.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/app.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/api_list.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/api_list.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/assets/default.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/assets/default.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/assets/development.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/assets/development.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/assets/production.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/assets/production.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/company_configurations/_magoware.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/company_configurations/_magoware.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/company_configurations/awngy.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/company_configurations/awngy.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/company_configurations/direct_media_center.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/company_configurations/direct_media_center.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/company_configurations/mywifitv.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/company_configurations/mywifitv.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/company_configurations/nplay.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/company_configurations/nplay.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/company_configurations/tibo.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/company_configurations/tibo.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/company_configurations/zonanet.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/company_configurations/zonanet.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/defaultvalues/activity.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/defaultvalues/activity.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/defaultvalues/advanced_settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/defaultvalues/advanced_settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/defaultvalues/api_group_url.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/defaultvalues/api_group_url.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/defaultvalues/app_groups.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/defaultvalues/app_groups.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/defaultvalues/device_menu.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/defaultvalues/device_menu.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/defaultvalues/email_templates.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/defaultvalues/email_templates.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/defaultvalues/html_content.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/defaultvalues/html_content.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/defaultvalues/menu_map.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/defaultvalues/menu_map.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/defaultvalues/package_type.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/defaultvalues/package_type.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/env/default.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/env/default.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/env/development.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/env/development.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/env/production.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/env/production.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/languages/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/languages/en.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/languages/fr.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/languages/fr.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/languages/ita.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/languages/ita.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/languages/sp.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/languages/sp.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/languages/sq.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/languages/sq.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lib/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/lib/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lib/express.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/lib/express.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lib/reCaptcha.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/lib/reCaptcha.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lib/redis.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/lib/redis.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lib/sequelize-connect.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/lib/sequelize-connect.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lib/sequelize.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/lib/sequelize.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lib/socket.io.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/lib/socket.io.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lib/winston.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/lib/winston.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/pallycon.config.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/pallycon.config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/responses.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/responses.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/security/exprees.security.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/config/security/exprees.security.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/sslcertificate/cert.txt" beforeDir="false" afterPath="$PROJECT_DIR$/config/sslcertificate/cert.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom_functions/customer_functions.js" beforeDir="false" afterPath="$PROJECT_DIR$/custom_functions/customer_functions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom_functions/networking.js" beforeDir="false" afterPath="$PROJECT_DIR$/custom_functions/networking.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom_functions/push_messages.js" beforeDir="false" afterPath="$PROJECT_DIR$/custom_functions/push_messages.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom_functions/saas_functions.js" beforeDir="false" afterPath="$PROJECT_DIR$/custom_functions/saas_functions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom_functions/sales.js" beforeDir="false" afterPath="$PROJECT_DIR$/custom_functions/sales.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom_functions/sequelize_functions.js" beforeDir="false" afterPath="$PROJECT_DIR$/custom_functions/sequelize_functions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ecosystem.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/ecosystem.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20170731162339-add-api_group_id-to-api_url.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20170731162339-add-api_group_id-to-api_url.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20170815224152-device_menu-applications.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20170815224152-device_menu-applications.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20171012102940-annul_sale.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20171012102940-annul_sale.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20171109101126-settings_firebasekey.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20171109101126-settings_firebasekey.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20171113160026-create_command.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20171113160026-create_command.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20171116152901-vod_subset_nr.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20171116152901-vod_subset_nr.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20171227110341-package_vod.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20171227110341-package_vod.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180112145223-support_page.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180112145223-support_page.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180117112028-vod_stream_type_encryption_url.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180117112028-vod_stream_type_encryption_url.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180213134313-add_epg_unique_composite_keys.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180213134313-add_epg_unique_composite_keys.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180219142947-payment_gateway.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180219142947-payment_gateway.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180219142947-payment_transactions_table.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180219142947-payment_transactions_table.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180301114721-settings_token_keys.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180301114721-settings_token_keys.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180307112516-vod_rate_int.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180307112516-vod_rate_int.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180320135702-account_token_expiration_0.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180320135702-account_token_expiration_0.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180321211753-epg_channel_map.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180321211753-epg_channel_map.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180503131248-add_event_rating.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180503131248-add_event_rating.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180503131254-add_event_language.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180503131254-add_event_language.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180503131304-add_event_category.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180503131304-add_event_category.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180503131311-add_episode_title.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180503131311-add_episode_title.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180509083642-add_imdb_id.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180509083642-add_imdb_id.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180521095820-vod_desc_length.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180521095820-vod_desc_length.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180601093709-epg_map_id_default_value.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180601093709-epg_map_id_default_value.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180608114116-add_stream_resolution.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180608114116-add_stream_resolution.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180608114124-add_channel_stream_unique_index.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180608114124-add_channel_stream_unique_index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180608114128-drop_chstream_old_index.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180608114128-drop_chstream_old_index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180611092512-add_default_subtitle_id.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180611092512-add_default_subtitle_id.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180611134749-transaction_id_default_value.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180611134749-transaction_id_default_value.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180626142355-add_get_ads_column.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180626142355-add_get_ads_column.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180627090505-unique_menu_position.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180627090505-unique_menu_position.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180627090856-vod_trailer_scrubbing.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180627090856-vod_trailer_scrubbing.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180627095723-add_3rd_party_api_token.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180627095723-add_3rd_party_api_token.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180628135000-update_vod_starring.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180628135000-update_vod_starring.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180628153209-drop_user_password.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180628153209-drop_user_password.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180628164209-add_vod_vod_categories.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180628164209-add_vod_vod_categories.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180628164351-drop_vod_category_id.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180628164351-drop_vod_category_id.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180629080311-update_vod_description.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180629080311-update_vod_description.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180629104802-add_payment_url.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180629104802-add_payment_url.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180629130843-separate_package_vod.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180629130843-separate_package_vod.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180704101951-email_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180704101951-email_config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180706160259-add_on_behalf_id_salesreport.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180706160259-add_on_behalf_id_salesreport.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180710153023-company_name_logo.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180710153023-company_name_logo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180711071055-vod_expiration.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180711071055-vod_expiration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180719141406-add_email_templates.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180719141406-add_email_templates.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180801110000-tv_series_struct.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180801110000-tv_series_struct.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180802143840-add_recording_engine_channel_stream.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180802143840-add_recording_engine_channel_stream.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180802143917-add_drm_platform_channel_stream.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180802143917-add_drm_platform_channel_stream.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180802143957-add_drm_platform_vod_stream.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180802143957-add_drm_platform_vod_stream.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180822073229-add_menu_level_device_menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180822073229-add_menu_level_device_menu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180822073308-add_parent_id_device_menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180822073308-add_parent_id_device_menu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180822073357-add_menu_description_device_menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180822073357-add_menu_description_device_menu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20180827154821-add_advanced_settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20180827154821-add_advanced_settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181011132717-add_jwtoken_users.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181011132717-add_jwtoken_users.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181012131821-guest_menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181012131821-guest_menu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181016152129-guest_controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181016152129-guest_controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181018121250-added_vod_fields.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181018121250-added_vod_fields.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181029115818-one_time_event_table.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181029115818-one_time_event_table.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181101083852-add_description_advanced_settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181101083852-add_description_advanced_settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181106125355-add_vod_menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181106125355-add_vod_menu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181106125413-add_vod_menu_carousel.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181106125413-add_vod_menu_carousel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181113121643-add_html_content.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181113121643-add_html_content.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181115144716-vod_ads.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181115144716-vod_ads.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181116110809-resume_multiple_movies.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181116110809-resume_multiple_movies.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181116142221-add_order_vod_menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181116142221-add_order_vod_menu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181120083612-add_order_vod_menu_carousel.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181120083612-add_order_vod_menu_carousel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181120084426-add_vod_reaction.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181120084426-add_vod_reaction.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181127142721-add_zipcode_macaddress.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181127142721-add_zipcode_macaddress.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181204101424-user_country_city.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181204101424-user_country_city.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181205111036-vod_expiration.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181205111036-vod_expiration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181212083914-stream_app_id.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181212083914-stream_app_id.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181214091948-add_url_html_content.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181214091948-add_url_html_content.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181221132251-vodstream_appid.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181221132251-vodstream_appid.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20181224162643-tvod_transactionid.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20181224162643-tvod_transactionid.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190103085247-add_comment_logindata.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190103085247-add_comment_logindata.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190103095720-last_login_ip_users.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190103095720-last_login_ip_users.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190109160559-add_tv_series.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190109160559-add_tv_series.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190109162241-add_tv_season.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190109162241-add_tv_season.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190109162246-add_tv_episode.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190109162246-add_tv_episode.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190110083536-tv_series_references.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190110083536-tv_series_references.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190110083547-tv_episode_references.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190110083547-tv_episode_references.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190110134123-separate_tv_shows.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190110134123-separate_tv_shows.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190115104423-saas_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190115104423-saas_schema.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190129095943-add_portrait_background_url_settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190129095943-add_portrait_background_url_settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190219095202-add_parameter3_advancedsettings.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190219095202-add_parameter3_advancedsettings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190319165122-saas_modifications.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190319165122-saas_modifications.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190403081653-saas_limitations.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190403081653-saas_limitations.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/20190427134436-add_grouprights_allow.js" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/20190427134436-add_grouprights_allow.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/account-kit/server/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/account-kit/server/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/account-kit/server/controllers/account_kit.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/account-kit/server/controllers/account_kit.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/account-kit/server/routes/account_kit.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/account-kit/server/routes/account_kit.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/account-kit/server/templates/account_kit_success.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/account-kit/server/templates/account_kit_success.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/account-kit/server/templates/login.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/account-kit/server/templates/login.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/analytics/server/controllers/eventlogs.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/analytics/server/controllers/eventlogs.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/analytics/server/controllers/helpers/googleanalyticshelper.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/analytics/server/controllers/helpers/googleanalyticshelper.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/analytics/server/controllers/helpers/matomoanalyticshelper.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/analytics/server/controllers/helpers/matomoanalyticshelper.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/analytics/server/routes/apiv2.events.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/analytics/server/routes/apiv2.events.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/core/server/controllers/core.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/core/server/controllers/core.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/core/server/controllers/errors.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/core/server/controllers/errors.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/core/server/routes/core.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/core/server/routes/core.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/core/server/templates/contact-form-email.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/core/server/templates/contact-form-email.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/core/server/views/404.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/core/server/views/404.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/core/server/views/500.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/core/server/views/500.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/core/server/views/index.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/core/server/views/index.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/core/server/views/layout.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/core/server/views/layout.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/auth/apiv2.server.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/auth/apiv2.server.auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/auth/apiv3.server.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/auth/apiv3.server.auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/config/deviceapiv2.server.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/config/deviceapiv2.server.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/authentication.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/authentication.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/catchup.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/catchup.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/channels.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/channels.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/credentials.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/credentials.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/customers_app.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/customers_app.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/deviceepg.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/deviceepg.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/header.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/header.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/main.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/main.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/network.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/network.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/password.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/password.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/products.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/products.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/schedule.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/schedule.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/settings.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/settings.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/sites.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/sites.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/tv_shows.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/tv_shows.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/vod.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/vod.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/vod_v3.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/controllers/vod_v3.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/routes/apiv2.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/routes/apiv2.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/routes/apiv2.vod.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/routes/apiv2.vod.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/routes/apiv3.tv_shows.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/routes/apiv3.tv_shows.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/routes/apiv3.vod.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/routes/apiv3.vod.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/templates/new-account.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/templates/new-account.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/templates/qrcode.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/templates/qrcode.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/templates/reset-password-email.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/templates/reset-password-email.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/deviceapiv2/server/templates/transactional_vod.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/deviceapiv2/server/templates/transactional_vod.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/geoip/server/controllers/geoip_logic.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/geoip/server/controllers/geoip_logic.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/geoip/server/routes/geoip.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/geoip/server/routes/geoip.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/hospitality/server/auth/hospitality.server.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/hospitality/server/auth/hospitality.server.auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/hospitality/server/controllers/hospitalitycredentials.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/hospitality/server/controllers/hospitalitycredentials.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/hospitality/server/routes/hospitality.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/hospitality/server/routes/hospitality.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/config/mago.server.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/config/mago.server.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/CustomerAccount.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/CustomerAccount.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/_custom_controller.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/_custom_controller.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/ads.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/ads.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/advanced_settings.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/advanced_settings.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/app_group.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/app_group.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/app_management.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/app_management.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/authentication.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/authentication.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/channel_stream.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/channel_stream.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/channel_stream_source.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/channel_stream_source.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/channels.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/channels.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/combo.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/combo.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/combo_package.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/combo_package.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/command.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/command.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/common.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/common.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/content_import.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/content_import.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/customer_api.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/customer_api.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/customer_data.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/customer_data.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/customer_group.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/customer_group.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/dashboard.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/dashboard.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/device_menu.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/device_menu.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/device_menu_level2.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/device_menu_level2.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/devices.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/devices.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/email_templates.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/email_templates.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/epg_data.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/epg_data.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/genre.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/genre.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/grouprights.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/grouprights.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/groups.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/groups.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/html_content.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/html_content.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/login_data.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/login_data.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/logs.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/logs.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/messages.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/messages.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/my_channels.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/my_channels.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/package.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/package.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/package_channel.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/package_channel.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/package_type.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/package_type.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/package_vod.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/package_vod.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/payment_transactions.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/payment_transactions.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/reports.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/reports.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/salesreport.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/salesreport.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/settings.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/settings.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/subscription.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/subscription.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/systemmenu.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/systemmenu.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/tv_episode_stream.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/tv_episode_stream.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/tv_episode_subtitles.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/tv_episode_subtitles.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/tv_episodes.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/tv_episodes.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/tv_seasons.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/tv_seasons.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/tv_series.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/tv_series.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/tvseries_import_tmdb.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/tvseries_import_tmdb.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/users.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/users.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod_category.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod_category.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod_import_tmdb.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod_import_tmdb.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod_menu.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod_menu.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod_menu_carousel.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod_menu_carousel.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod_stream.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod_stream.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod_stream_source.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod_stream_source.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod_subtitles.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod_subtitles.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod_totalhits.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod_totalhits.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/controllers/vod_vod_categories.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/controllers/vod_vod_categories.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/activity.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/activity.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/advanced_settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/advanced_settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/api_group.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/api_group.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/api_url.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/api_url.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/app_group.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/app_group.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/app_management.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/app_management.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/channel_stream.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/channel_stream.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/channel_stream_source.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/channel_stream_source.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/channels.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/channels.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/combo.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/combo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/combo_package.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/combo_package.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/commands.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/customer_data.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/customer_data.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/customer_group.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/customer_group.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/device_menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/device_menu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/device_menu_level2.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/device_menu_level2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/devices.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/devices.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/email_templates.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/email_templates.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/epg_data.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/epg_data.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/favorite_channels.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/favorite_channels.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/genre.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/genre.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/groups.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/groups.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/groupsrights.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/groupsrights.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/html_content.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/html_content.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/login_data.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/login_data.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/logs.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/logs.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/messages.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/messages.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/my_channels.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/my_channels.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/package.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/package.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/package_channel.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/package_channel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/package_type.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/package_type.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/package_vod.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/package_vod.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/payment_transactions.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/payment_transactions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/program_schedule.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/program_schedule.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/salesreport.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/salesreport.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/subscription.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/subscription.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/systemmenu.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/systemmenu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/t_tv_series_sales.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/t_tv_series_sales.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/t_vod_sales.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/t_vod_sales.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/tv_episode.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/tv_episode.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/tv_episode_resume.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/tv_episode_resume.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/tv_episode_stream.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/tv_episode_stream.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/tv_episode_subtitles.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/tv_episode_subtitles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/tv_season.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/tv_season.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/tv_series.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/tv_series.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/tv_series_categories.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/tv_series_categories.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/tv_series_packages.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/tv_series_packages.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/users.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/users.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/vod.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/vod.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/vod_category.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/vod_category.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/vod_menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/vod_menu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/vod_menu_carousel.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/vod_menu_carousel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/vod_resume.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/vod_resume.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/vod_stream.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/vod_stream.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/vod_stream_source.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/vod_stream_source.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/vod_subtitles.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/vod_subtitles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/models/vod_vod_categories.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/models/vod_vod_categories.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/policies/mago.server.policy.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/policies/mago.server.policy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/policies/systemroutes.json" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/policies/systemroutes.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/CustomerAccount.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/CustomerAccount.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/_custom_routes.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/_custom_routes.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/ads.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/ads.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/advanced_settings.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/advanced_settings.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/app_group.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/app_group.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/app_management.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/app_management.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/authentication.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/authentication.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/channel_stream_source.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/channel_stream_source.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/channel_streams.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/channel_streams.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/channels.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/channels.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/channle_stream_source.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/channle_stream_source.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/channle_streams.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/channle_streams.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/combo_packages.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/combo_packages.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/combos.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/combos.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/command.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/command.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/content_import.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/content_import.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/customer_api.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/customer_api.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/customer_groups.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/customer_groups.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/customers.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/customers.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/dashboard.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/dashboard.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/device_menu_level2.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/device_menu_level2.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/device_menus.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/device_menus.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/devices.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/devices.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/email_templates.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/email_templates.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/epg_data.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/epg_data.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/genres.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/genres.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/grouprights.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/grouprights.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/groups.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/groups.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/html_content.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/html_content.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/login_data.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/login_data.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/logs.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/logs.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/mago.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/mago.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/messages.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/messages.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/my_channels.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/my_channels.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/package_channels.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/package_channels.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/package_types.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/package_types.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/package_vod.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/package_vod.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/packages.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/packages.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/payment_transactions.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/payment_transactions.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/salesreports.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/salesreports.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/settings.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/settings.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/subscriptions.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/subscriptions.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/systemmenu.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/systemmenu.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/tv_episode_streams.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/tv_episode_streams.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/tv_episode_subtitles.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/tv_episode_subtitles.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/tvseries_import_tmdb.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/tvseries_import_tmdb.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/users.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/users.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/vod_category.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/vod_category.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/vod_import_tmdb.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/vod_import_tmdb.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/vod_menu.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/vod_menu.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/vod_menu_carousel.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/vod_menu_carousel.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/vod_stream_source.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/vod_stream_source.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/vod_streams.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/vod_streams.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/vod_subtitles.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/vod_subtitles.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/vod_vod_categories.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/vod_vod_categories.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/routes/vods.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/routes/vods.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/templates/reset-password-confirm-email.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/templates/reset-password-confirm-email.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/templates/reset-password-email.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/templates/reset-password-email.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/templates/reset-password-enter-password.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/templates/reset-password-enter-password.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/mago/server/templates/salesreport-invoice.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/mago/server/templates/salesreport-invoice.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/pallycon/server/controllers/pallycon.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pallycon/server/controllers/pallycon.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/pallycon/server/core/logics/CIDIssue.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pallycon/server/core/logics/CIDIssue.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/pallycon/server/core/logics/ContentUsageRightsInfo.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pallycon/server/core/logics/ContentUsageRightsInfo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/pallycon/server/core/logics/makeDrmData.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pallycon/server/core/logics/makeDrmData.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/pallycon/server/routes/pallycon.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pallycon/server/routes/pallycon.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/config/paymentgateways.server.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/config/paymentgateways.server.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/controllers/paypal_checkout.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/controllers/paypal_checkout.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/controllers/stripe_functions.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/controllers/stripe_functions.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/routes/paymentgateways.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/routes/paymentgateways.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/css/payment1.css" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/css/payment1.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/image/Set_Top_Box.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/image/Set_Top_Box.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/image/ring.svg" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/image/ring.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/js/spatial_navigation.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/js/spatial_navigation.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/js/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/js/util.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/stripe_payment_form.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paymentform/demo/stripe_payment_form.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paypal-checkout.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/templates/paypal-checkout.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/templates/stripe-checkout-form.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/templates/stripe-checkout-form.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/paymentgateways/server/whitelist/paymentgateways.server.whitelist.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/paymentgateways/server/whitelist/paymentgateways.server.whitelist.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/streams/server/config/streams.server.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/streams/server/config/streams.server.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/streams/server/controllers/akamai_token_v2/TokenGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/streams/server/controllers/akamai_token_v2/TokenGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/streams/server/controllers/akamai_token_v2/exception/AkamaiException.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/streams/server/controllers/akamai_token_v2/exception/AkamaiException.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/streams/server/controllers/akamai_token_v2/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/streams/server/controllers/akamai_token_v2/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/streams/server/controllers/catchup_functions.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/streams/server/controllers/catchup_functions.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/streams/server/controllers/encryption_functions.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/streams/server/controllers/encryption_functions.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/streams/server/controllers/streamkeydelivery.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/streams/server/controllers/streamkeydelivery.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/streams/server/controllers/token_generators.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/streams/server/controllers/token_generators.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/streams/server/routes/streams.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/streams/server/routes/streams.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/users/server/controllers/google_auth.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/users/server/controllers/google_auth.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/users/server/routes/user_provider.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/users/server/routes/user_provider.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/users/server/templates/create-company.server.view.html" beforeDir="false" afterPath="$PROJECT_DIR$/modules/users/server/templates/create-company.server.view.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/woocommerce/server/controllers/woocommerce.server.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/woocommerce/server/controllers/woocommerce.server.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/woocommerce/server/routes/woocommerce.server.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/modules/woocommerce/server/routes/woocommerce.server.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/angular-vis.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/angular-vis.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/main.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/ng-admin-only.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/ng-admin-only.min.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/ng-admin-only.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/ng-admin-only.min.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/ng-admin.jwt-auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/ng-admin.jwt-auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/ng-admin.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/ng-admin.min.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/ng-admin.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/ng-admin.min.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/ng-admin.min.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/ng-admin.min.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/vis.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/vis.min.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/build/vis.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/build/vis.min.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/css/custom.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/css/custom.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/css/login.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/css/login.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/css/main.scss" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/css/main.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/customLoginTemplate.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/customLoginTemplate.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/favicon.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/favicon.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/Preloader_2.gif" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/Preloader_2.gif" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/bbb.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/bbb.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/group.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/group.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/l.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/l.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/logo_tibo.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/logo_tibo.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/m.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/m.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/mago.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/mago.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/mago1.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/mago1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/screenshot.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/screenshot.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/images/user.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/images/user.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/AdvancedSettings/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/AdvancedSettings/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/CustomerAccount/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/CustomerAccount/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/Resellers_loginData/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/Resellers_loginData/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/Season/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/Season/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/Series/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/Series/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/Submenu/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/Submenu/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/VodEpisode/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/VodEpisode/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/activit/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/activit/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/ads/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/ads/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/api_flavor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/api_flavor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/app_management/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/app_management/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/appgroup/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/appgroup/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/change-pass/change-password.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/change-pass/change-password.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/change-pass/change-password.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/change-pass/change-password.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/channelStream/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/channelStream/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/channelStreamSource/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/channelStreamSource/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/channels/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/channels/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/combo/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/combo/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/comboPackages/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/comboPackages/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/commands/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/commands/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/company_settings/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/company_settings/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/customerData/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/customerData/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/customerGroup/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/customerGroup/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/customerReg/customerData.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/customerReg/customerData.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/customerReg/customerRegistration.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/customerReg/customerRegistration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/customerReg/customerRgst.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/customerReg/customerRgst.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/dashboardSummary.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/dashboardSummary.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/dashboardSummary.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/dashboardSummary.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard_for_resellers/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard_for_resellers/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard_for_resellers/resellers_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard_for_resellers/resellers_dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard_for_resellers/resellers_dashboardSummary.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard_for_resellers/resellers_dashboardSummary.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard_for_resellers/resellers_dashboardSummary.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/dashboard_for_resellers/resellers_dashboardSummary.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/graphs.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/graphs.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dashboard/graphs.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dashboard/graphs.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/deviceMenu/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/deviceMenu/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/devices/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/devices/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/drag_drop_package/angular-drag-and-drop-lists.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/drag_drop_package/angular-drag-and-drop-lists.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/drag_drop_package/drag_and_drop_template.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/drag_drop_package/drag_and_drop_template.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/dynamicmenu.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/dynamicmenu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/edit_button.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/edit_button.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/emailTemplate/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/emailTemplate/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/epgData/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/epgData/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/epgData/epgchart.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/epgData/epgchart.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/epgData/epgchart.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/epgData/epgchart.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/epg_logs.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/epg_logs.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/epgimport/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/epgimport/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/filesaver.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/filesaver.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/filter_button.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/filter_button.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/filter_genre_btn.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/filter_genre_btn.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/filter_package_btn.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/filter_package_btn.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/genre/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/genre/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/geoip/geoip.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/geoip/geoip.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/geoip/geoip.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/geoip/geoip.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/grouprights/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/grouprights/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/groups/allowMenu.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/groups/allowMenu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/groups/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/groups/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/htmlContent/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/htmlContent/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/import_channels_csv_m3u/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/import_channels_csv_m3u/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/import_channels_csv_m3u/see_logs_import_channel.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/import_channels_csv_m3u/see_logs_import_channel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/import_vod_csv/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/import_vod_csv/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/import_vod_csv/see_logs_import_vod.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/import_vod_csv/see_logs_import_vod.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/livepackages/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/livepackages/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/loginData/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/loginData/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/logs/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/logs/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/menu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/menuobject.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/menuobject.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/message/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/message/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/my_channel/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/my_channel/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/mysales_resellers/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/mysales_resellers/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/mysubscription_resellers/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/mysubscription_resellers/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/new_customer_resellers/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/new_customer_resellers/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/package/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/package/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/packageType/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/packageType/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/package_vod/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/package_vod/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/packagesChannels/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/packagesChannels/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/paymentTransactions/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/paymentTransactions/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/personal-details/user-details.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/personal-details/user-details.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/personal-details/user-details.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/personal-details/user-details.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/resellers_user/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/resellers_user/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/sales_by_date/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/sales_by_date/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/sales_by_expiration/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/sales_by_expiration/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/sales_by_month/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/sales_by_month/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/sales_by_product/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/sales_by_product/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/sales_monthly_expiration/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/sales_monthly_expiration/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/salesreport/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/salesreport/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/search_customers_resellers/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/search_customers_resellers/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/serverStatus/serverStatus.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/serverStatus/serverStatus.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/serverStatus/serverStatus.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/serverStatus/serverStatus.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/settings/ApiKeys/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/settings/ApiKeys/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/settings/EmailSettings/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/settings/EmailSettings/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/settings/ImagesSettings/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/settings/ImagesSettings/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/settings/PlayerSettings/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/settings/PlayerSettings/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/settings/URL/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/settings/URL/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/settings/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/settings/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/settings/setting.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/settings/setting.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/smsbatch/generate.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/smsbatch/generate.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/smsbatch/invite.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/smsbatch/invite.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/smsbatch/move.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/smsbatch/move.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/smsbatch/sale.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/smsbatch/sale.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/smsbatch/sendpush.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/smsbatch/sendpush.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/smsbatch/user_roles_button.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/smsbatch/user_roles_button.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/smsbatch/vod.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/smsbatch/vod.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/subscription/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/subscription/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/superadminMenuObj.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/superadminMenuObj.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/support/support.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/support/support.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/support/support.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/support/support.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/systemmenu/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/systemmenu/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/tmdb_import/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/tmdb_import/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/tmdb_import_tvseries/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/tmdb_import_tvseries/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/tv_episode_stream/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/tv_episode_stream/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/tv_episode_subtitles/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/tv_episode_subtitles/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/user/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/user/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/vod/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/vod/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/vodCategory/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/vodCategory/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/vodMenuCarousel/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/vodMenuCarousel/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/vodStream/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/vodStream/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/vodStreamSource/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/vodStreamSource/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/vodSubtitles/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/vodSubtitles/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/vod_package/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/vod_package/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/js/vodmenu/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/js/vodmenu/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/languages/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/languages/en.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/languages/fr.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/languages/fr.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/languages/sp.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/languages/sp.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/languages/sq.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/languages/sq.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/subscription_export.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/subscription_export.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/admin/webpack.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/admin/webpack.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/backoffice_bkg.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/backoffice_bkg.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/device_menu/aplikacione240x240.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/device_menu/aplikacione240x240.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/device_menu/livetv240x240.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/device_menu/livetv240x240.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/device_menu/logout240x240.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/device_menu/logout240x240.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/device_menu/networktest240x240.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/device_menu/networktest240x240.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/device_menu/personale240x240.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/device_menu/personale240x240.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/device_menu/vod240x240.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/device_menu/vod240x240.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/redis/redis-darwin" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/redis/redis-darwin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/redis/redis-linux" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/redis/redis-linux" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/redis/redis-win.zip" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/redis/redis-win.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/settings/largebkg.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/settings/largebkg.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/settings/largelogo.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/settings/largelogo.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/settings/mago.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/settings/mago.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/settings/portrait_background.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/settings/portrait_background.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/settings/smallbkg.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/settings/smallbkg.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/settings/smalllogo.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/settings/smalllogo.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/files/settings/vodbkg.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/files/settings/vodbkg.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/help_and_support/favicon.ico" beforeDir="false" afterPath="$PROJECT_DIR$/public/help_and_support/favicon.ico" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/help_and_support/images/social.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/help_and_support/images/social.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/help_and_support/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/help_and_support/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/help_and_support/js/Clarendon_LT_Std_700.font.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/help_and_support/js/Clarendon_LT_Std_700.font.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/help_and_support/js/cufon-yui.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/help_and_support/js/cufon-yui.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/help_and_support/js/jquery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/help_and_support/js/jquery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/help_and_support/tools/960.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/help_and_support/tools/960.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/help_and_support/tools/sifr.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/help_and_support/tools/sifr.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/help_and_support/tools/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/help_and_support/tools/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/LICENSE" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/bower.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/bower.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/demo/css/payment1.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/demo/css/payment1.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/demo/image/Set_Top_Box.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/demo/image/Set_Top_Box.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/demo/image/ring.svg" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/demo/image/ring.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/demo/js/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/demo/js/util.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/demo/payment1.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/demo/payment1.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/demo/stripepayment.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/demo/stripepayment.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/paymentform/spatial_navigation.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/paymentform/spatial_navigation.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/qrcodegenerate/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/public/qrcodegenerate/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/qrcodegenerate/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/public/qrcodegenerate/LICENSE" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/qrcodegenerate/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/public/qrcodegenerate/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/qrcodegenerate/bower.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/qrcodegenerate/bower.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/qrcodegenerate/jquery.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/qrcodegenerate/jquery.min.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/qrcodegenerate/qrcode.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/qrcodegenerate/qrcode.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/qrcodegenerate/qrcode.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/qrcodegenerate/qrcode.min.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/weather_widget/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/weather_widget/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/generate-ssl-certs.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/generate-ssl-certs.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/backoffice-administration.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-entrypoint.sh" beforeDir="false" afterPath="$PROJECT_DIR$/docker-entrypoint.sh" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -632,8 +22,8 @@
     </execution>
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/docker-compose.yml">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="216">
@@ -643,10 +33,28 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/package.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="415">
+              <caret line="30" column="35" lean-forward="true" selection-start-line="30" selection-start-column="35" selection-end-line="30" selection-end-column="35" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/docker-entrypoint.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="234">
-              <caret line="13" column="14" lean-forward="true" selection-start-line="13" selection-start-column="14" selection-end-line="13" selection-end-column="14" />
+            <state relative-caret-position="180">
+              <caret line="10" column="25" lean-forward="true" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="36">
+              <caret line="2" column="27" selection-start-line="2" selection-start-column="27" selection-end-line="2" selection-end-column="27" />
             </state>
           </provider>
         </entry>
@@ -654,8 +62,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/server.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="828">
-              <caret line="94" column="24" lean-forward="true" selection-start-line="94" selection-start-column="24" selection-end-line="94" selection-end-column="24" />
+            <state relative-caret-position="1692">
+              <caret line="94" column="24" selection-start-line="94" selection-start-column="24" selection-end-line="94" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -663,8 +71,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config/lib/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1221">
-              <caret line="68" column="57" lean-forward="true" selection-start-line="68" selection-start-column="57" selection-end-line="68" selection-end-column="57" />
+            <state relative-caret-position="1224">
+              <caret line="68" column="57" selection-start-line="68" selection-start-column="57" selection-end-line="68" selection-end-column="57" />
             </state>
           </provider>
         </entry>
@@ -686,6 +94,7 @@
       <find>config</find>
       <find>redis</find>
       <find>20181127142721</find>
+      <find>dotenv</find>
     </findStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/config</dir>
@@ -703,8 +112,9 @@
         <option value="$PROJECT_DIR$/server.js" />
         <option value="$PROJECT_DIR$/create-connection.js" />
         <option value="$PROJECT_DIR$/Dockerfile" />
-        <option value="$PROJECT_DIR$/docker-entrypoint.sh" />
         <option value="$PROJECT_DIR$/docker-compose.yml" />
+        <option value="$PROJECT_DIR$/docker-entrypoint.sh" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -742,6 +152,12 @@
               <item name="backoffice-administration" type="462c0819:PsiDirectoryNode" />
               <item name="config" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="backoffice-administration" type="b2602c69:ProjectViewProjectNode" />
+              <item name="backoffice-administration" type="462c0819:PsiDirectoryNode" />
+              <item name="config" type="462c0819:PsiDirectoryNode" />
+              <item name="env" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -749,6 +165,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/config/env" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
@@ -783,12 +200,13 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1566335950847</updated>
-      <workItem from="1566335952328" duration="4129000" />
+      <workItem from="1566335952328" duration="4302000" />
+      <workItem from="1566389891535" duration="253000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="4129000" />
+    <option name="totallyTimeSpent" value="4555000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="57" y="-4" width="1863" height="1084" extended-state="6" />
@@ -796,9 +214,8 @@
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
       <window_info id="npm" order="1" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="2" visible="true" weight="0.24986242" />
+      <window_info active="true" content_ui="combo" id="Project" order="2" visible="true" weight="0.2526142" />
       <window_info id="Structure" order="3" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Messages" />
       <window_info anchor="bottom" id="Terminal" order="0" />
       <window_info anchor="bottom" id="Database Changes" order="1" />
       <window_info anchor="bottom" id="Event Log" order="2" side_tool="true" />
@@ -811,6 +228,7 @@
       <window_info anchor="bottom" id="Cvs" order="9" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="10" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="11" />
+      <window_info anchor="bottom" id="Messages" order="12" />
       <window_info anchor="right" id="Database" order="0" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="1" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
@@ -828,13 +246,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/env/db.connection.dist.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="3" column="33" selection-start-line="3" selection-start-column="29" selection-end-line="3" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/config/env/db.connection.dist.js" />
     <entry file="file://$PROJECT_DIR$/config/defaultvalues/app_groups.json">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -902,6 +314,20 @@
     <entry file="file://$PROJECT_DIR$/migrations/20170815224152-device_menu-applications.js">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1692">
+          <caret line="94" column="24" selection-start-line="94" selection-start-column="24" selection-end-line="94" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/lib/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1224">
+          <caret line="68" column="57" selection-start-line="68" selection-start-column="57" selection-end-line="68" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Dockerfile">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="54">
@@ -909,24 +335,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/lib/app.js">
+    <entry file="file://$PROJECT_DIR$/package.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1221">
-          <caret line="68" column="57" lean-forward="true" selection-start-line="68" selection-start-column="57" selection-end-line="68" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/server.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="828">
-          <caret line="94" column="24" lean-forward="true" selection-start-line="94" selection-start-column="24" selection-end-line="94" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/docker-entrypoint.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="13" column="14" lean-forward="true" selection-start-line="13" selection-start-column="14" selection-end-line="13" selection-end-column="14" />
+        <state relative-caret-position="415">
+          <caret line="30" column="35" lean-forward="true" selection-start-line="30" selection-start-column="35" selection-end-line="30" selection-end-column="35" />
         </state>
       </provider>
     </entry>
@@ -934,6 +346,20 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
           <caret line="12" column="12" selection-start-line="12" selection-start-column="12" selection-end-line="12" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/docker-entrypoint.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="10" column="25" lean-forward="true" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="2" column="27" selection-start-line="2" selection-start-column="27" selection-end-line="2" selection-end-column="27" />
         </state>
       </provider>
     </entry>

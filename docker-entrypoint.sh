@@ -6,9 +6,8 @@ then
 	rm config/env/db.connection.js
 fi
 
-node create-connection.js
-
 npm install
 npm install -g sequelize-cli
+node create-connection.js
 
 node server.js
